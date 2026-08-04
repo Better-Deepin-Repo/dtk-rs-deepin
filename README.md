@@ -16,6 +16,12 @@ TODO.md      known gaps and follow-ups
 
 ## Usage
 
+Not on crates.io yet; add from git:
+
+```sh
+cargo add dtk --git https://github.com/st0nie/dtk-rs.git
+```
+
 ```rust
 use dtk::*;
 
