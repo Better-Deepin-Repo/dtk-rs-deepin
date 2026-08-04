@@ -241,7 +241,9 @@ void table_set_delegate_for_column(QTableWidget *t, int32_t col, QStyledItemDele
 
 // ---- QTableWidgetItem ----
 void item_set_icon(QTableWidgetItem *it, QIcon *icon) { it->setIcon(*icon); }
-void item_set_text_alignment(QTableWidgetItem *it, int32_t alignment) { it->setTextAlignment(alignment); }
+void item_set_text_alignment(QTableWidgetItem *it, int32_t alignment) {
+    it->setTextAlignment(Qt::Alignment::fromInt(alignment));
+}
 void item_set_foreground(QTableWidgetItem *it, QColor *color) { it->setForeground(*color); }
 void item_set_data_string(QTableWidgetItem *it, int32_t role, rust::Str value) {
     it->setData(role, from_rust_str(value));
