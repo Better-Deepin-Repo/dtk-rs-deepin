@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.svg" width="240" alt="dtk-rs logo: Ferris holding the deepin logo with pliers"></p>
+
 # dtk-rs
 
 Rust bindings for DTK6 (dtkwidget). Goal: write deepin apps with DTK UIs in pure Rust.
