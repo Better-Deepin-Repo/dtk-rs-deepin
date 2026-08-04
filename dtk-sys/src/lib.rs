@@ -16,8 +16,20 @@ pub mod ffi {
         type QVBoxLayout;
         type QHBoxLayout;
         type QTableWidget;
+        type QTableWidgetItem;
         type QTimer;
         type QIcon;
+        type QColor;
+        type QFont;
+        type QPalette;
+        type QPixmap;
+        type QPoint;
+        type QRect;
+        type QSize;
+        type QPainter;
+        type QModelIndex;
+        type QSocketNotifier;
+        type QStyledItemDelegate;
 
         type DApplication;
         type DMainWindow;
@@ -28,19 +40,36 @@ pub mod ffi {
 
         // DApplication
         unsafe fn application_new(name: &str) -> *mut DApplication;
+        unsafe fn application_new_ex(name: &str, quit_guard_id: usize) -> *mut DApplication;
         unsafe fn application_exec(app: *mut DApplication) -> i32;
         unsafe fn application_quit();
+        unsafe fn application_set_quit_on_last_window_closed(quit: bool);
+        unsafe fn application_set_application_display_name(name: &str);
+        unsafe fn application_load_translator(app: *mut DApplication) -> bool;
+        unsafe fn application_has_arg(arg: &str) -> bool;
 
         // QWidget 通用
         unsafe fn widget_show(w: *mut QWidget);
         unsafe fn widget_resize(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_set_enabled(w: *mut QWidget, on: bool);
         unsafe fn widget_set_window_title(w: *mut QWidget, title: &str);
+        unsafe fn widget_set_fixed_size(w: *mut QWidget, w_px: i32, h_px: i32);
+        unsafe fn widget_raise(w: *mut QWidget);
+        unsafe fn widget_activate_window(w: *mut QWidget);
+        unsafe fn widget_close(w: *mut QWidget);
+        unsafe fn widget_is_visible(w: *mut QWidget) -> bool;
+        unsafe fn widget_set_focus_policy(w: *mut QWidget, policy: i32);
+        unsafe fn widget_set_font(w: *mut QWidget, font: *mut QFont);
+        unsafe fn widget_palette(w: *mut QWidget) -> *mut QPalette;
+        unsafe fn widget_set_palette(w: *mut QWidget, pal: *mut QPalette);
+        unsafe fn object_delete_later(o: *mut QObject);
 
         // DMainWindow
         unsafe fn mainwindow_new() -> *mut DMainWindow;
+        unsafe fn mainwindow_new_ex(show_cb_id: usize, close_cb_id: usize) -> *mut DMainWindow;
         unsafe fn mainwindow_titlebar(w: *mut DMainWindow) -> *mut DTitlebar;
         unsafe fn mainwindow_set_central_widget(w: *mut DMainWindow, central: *mut QWidget);
+        unsafe fn mainwindow_take_central_widget(w: *mut DMainWindow) -> *mut QWidget;
         unsafe fn mainwindow_set_window_radius(w: *mut DMainWindow, radius: i32);
         unsafe fn mainwindow_set_enable_blur(w: *mut DMainWindow, enable: bool);
 
@@ -55,6 +84,9 @@ pub mod ffi {
         // DLabel
         unsafe fn label_new(text: &str) -> *mut DLabel;
         unsafe fn label_set_text(l: *mut DLabel, text: &str);
+        unsafe fn label_set_word_wrap(l: *mut DLabel, wrap: bool);
+        unsafe fn label_set_alignment(l: *mut DLabel, alignment: i32);
+        unsafe fn label_set_pixmap(l: *mut DLabel, pm: *mut QPixmap);
 
         // 按钮
         unsafe fn suggest_button_new(text: &str) -> *mut DSuggestButton;
@@ -86,6 +118,60 @@ pub mod ffi {
         unsafe fn table_header_stretch_last(t: *mut QTableWidget, stretch: bool);
         unsafe fn table_set_column_width(t: *mut QTableWidget, col: i32, width: i32);
 
+        // QTableWidget 扩展
+        unsafe fn table_item(t: *mut QTableWidget, row: i32, col: i32) -> *mut QTableWidgetItem;
+        unsafe fn table_select_row(t: *mut QTableWidget, row: i32);
+        unsafe fn table_hide_headers(t: *mut QTableWidget, horizontal: bool, vertical: bool);
+        unsafe fn table_set_section_resize_mode(t: *mut QTableWidget, col: i32, mode: i32);
+        unsafe fn table_set_vertical_header_default_section_size(t: *mut QTableWidget, size: i32);
+        unsafe fn table_set_show_grid(t: *mut QTableWidget, show: bool);
+        unsafe fn table_set_frame_shape(t: *mut QTableWidget, shape: i32);
+        unsafe fn table_set_icon_size(t: *mut QTableWidget, w: i32, h: i32);
+        unsafe fn table_set_delegate_for_column(t: *mut QTableWidget, col: i32, delegate: *mut QStyledItemDelegate);
+
+        // QTableWidgetItem
+        unsafe fn item_set_icon(it: *mut QTableWidgetItem, icon: *mut QIcon);
+        unsafe fn item_set_text_alignment(it: *mut QTableWidgetItem, alignment: i32);
+        unsafe fn item_set_foreground(it: *mut QTableWidgetItem, color: *mut QColor);
+        unsafe fn item_set_data_string(it: *mut QTableWidgetItem, role: i32, value: &str);
+        unsafe fn item_data_string(it: *mut QTableWidgetItem, role: i32) -> String;
+        unsafe fn item_set_data_bool(it: *mut QTableWidgetItem, role: i32, value: bool);
+        unsafe fn item_data_bool(it: *mut QTableWidgetItem, role: i32) -> bool;
+
+        // 值类型
+        unsafe fn color_new_rgb(r: i32, g: i32, b: i32, a: i32) -> *mut QColor;
+        unsafe fn font_new() -> *mut QFont;
+        unsafe fn font_set_point_size(f: *mut QFont, size: i32);
+        unsafe fn font_set_bold(f: *mut QFont, bold: bool);
+        unsafe fn palette_new() -> *mut QPalette;
+        unsafe fn palette_set_color(pal: *mut QPalette, group: i32, role: i32, color: *mut QColor);
+        unsafe fn pixmap_new(path: &str) -> *mut QPixmap;
+        unsafe fn standard_icon_pixmap(w: *mut QWidget, icon: i32, size: i32) -> *mut QPixmap;
+        unsafe fn size_new(w: i32, h: i32) -> *mut QSize;
+        unsafe fn point_new(x: i32, y: i32) -> *mut QPoint;
+        unsafe fn rect_new(x: i32, y: i32, w: i32, h: i32) -> *mut QRect;
+
+        // QSocketNotifier
+        unsafe fn socket_notifier_new(fd: i32) -> *mut QSocketNotifier;
+
+        // 通用 paint delegate
+        unsafe fn rust_delegate_new(paint_cb_id: usize, parent: *mut QObject) -> *mut QStyledItemDelegate;
+
+        // QPainter 原语
+        unsafe fn painter_save(p: *mut QPainter);
+        unsafe fn painter_restore(p: *mut QPainter);
+        unsafe fn painter_set_pen_color(p: *mut QPainter, color: *mut QColor);
+        unsafe fn painter_set_font(p: *mut QPainter, font: *mut QFont);
+        unsafe fn painter_draw_text(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, flags: i32, text: &str);
+        unsafe fn painter_draw_pixmap(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, pm: *mut QPixmap);
+        unsafe fn painter_draw_icon(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, icon: *mut QIcon);
+        unsafe fn painter_fill_rect(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, color: *mut QColor);
+
+        // QModelIndex 数据访问
+        unsafe fn index_data_string(idx: *mut QModelIndex, role: i32) -> String;
+        unsafe fn index_data_bool(idx: *mut QModelIndex, role: i32) -> bool;
+        unsafe fn index_data_i64(idx: *mut QModelIndex, role: i32) -> i64;
+
         // QTimer
         unsafe fn timer_new(parent: *mut QObject) -> *mut QTimer;
         unsafe fn timer_start(t: *mut QTimer, msec: i32);
@@ -100,6 +186,9 @@ pub mod ffi {
     extern "Rust" {
         fn dtk_cb0(id: usize);
         fn dtk_cb_i32(id: usize, v: i32);
+        fn dtk_cb_guard(id: usize) -> bool;
+        unsafe fn dtk_cb_paint(id: usize, painter: *mut QPainter, index: *mut QModelIndex,
+                               x: i32, y: i32, w: i32, h: i32, state: i32);
     }
 }
 
@@ -108,6 +197,8 @@ pub mod ffi {
 enum Cb {
     C0(Box<dyn FnMut()>),
     I32(Box<dyn FnMut(i32)>),
+    Guard(Box<dyn FnMut() -> bool>),
+    Paint(Box<dyn FnMut(*mut ffi::QPainter, *mut ffi::QModelIndex, i32, i32, i32, i32, i32)>),
 }
 
 thread_local! {
@@ -132,6 +223,20 @@ pub fn register_cb_i32(f: impl FnMut(i32) + 'static) -> usize {
     id
 }
 
+pub fn register_cb_guard(f: impl FnMut() -> bool + 'static) -> usize {
+    let id = next_id();
+    CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Guard(Box::new(f))));
+    id
+}
+
+pub fn register_cb_paint(
+    f: impl FnMut(*mut ffi::QPainter, *mut ffi::QModelIndex, i32, i32, i32, i32, i32) + 'static,
+) -> usize {
+    let id = next_id();
+    CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Paint(Box::new(f))));
+    id
+}
+
 // 取出再调用，回调里可以安全地再注册新回调；调用完放回
 fn dtk_cb0(id: usize) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
@@ -145,6 +250,25 @@ fn dtk_cb_i32(id: usize, v: i32) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
     if let Some(Cb::I32(f)) = &mut cb {
         f(v);
+        CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));
+    }
+}
+
+fn dtk_cb_guard(id: usize) -> bool {
+    let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
+    let mut result = true; // 找不到回调默认放行
+    if let Some(Cb::Guard(f)) = &mut cb {
+        result = f();
+        CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));
+    }
+    result
+}
+
+unsafe fn dtk_cb_paint(id: usize, painter: *mut ffi::QPainter, index: *mut ffi::QModelIndex,
+                       x: i32, y: i32, w: i32, h: i32, state: i32) {
+    let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
+    if let Some(Cb::Paint(f)) = &mut cb {
+        f(painter, index, x, y, w, h, state);
         CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));
     }
 }

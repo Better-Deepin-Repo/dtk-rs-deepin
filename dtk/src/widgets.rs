@@ -1,6 +1,7 @@
 // 自动生成 by tools/gen.py，勿手改
 #![allow(clippy::all, non_snake_case, unused_imports)]
 use crate::{Signal0, SignalI32, QWidget};
+use crate::{QColor, QFont, QIcon, QPalette, QPixmap, QPoint, QRect, QSize};
 use dtk_sys::ffi;
 use dtk_sys::gen_ffi::genffi;
 use std::marker::PhantomData;
@@ -9,11 +10,29 @@ impl DAbstractDialog {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_abstract_dialog_new() })
     }
+    pub fn display_position(&self) -> i32 {
+        unsafe { genffi::gen_d_abstract_dialog_display_position(self.ptr) }
+    }
+    pub fn move_(&self, pos: &QPoint) {
+        unsafe { genffi::gen_d_abstract_dialog_move_(self.ptr, pos.ptr as _) }
+    }
+    pub fn set_geometry(&self, rect: &QRect) {
+        unsafe { genffi::gen_d_abstract_dialog_set_geometry(self.ptr, rect.ptr as _) }
+    }
     pub fn move_to_center(&self) {
         unsafe { genffi::gen_d_abstract_dialog_move_to_center(self.ptr) }
     }
     pub fn move_to_top_right(&self) {
         unsafe { genffi::gen_d_abstract_dialog_move_to_top_right(self.ptr) }
+    }
+    pub fn move_to_center_by_rect(&self, rect: &QRect) {
+        unsafe { genffi::gen_d_abstract_dialog_move_to_center_by_rect(self.ptr, rect.ptr as _) }
+    }
+    pub fn move_to_top_right_by_rect(&self, rect: &QRect) {
+        unsafe { genffi::gen_d_abstract_dialog_move_to_top_right_by_rect(self.ptr, rect.ptr as _) }
+    }
+    pub fn set_display_position(&self, displayPosition: i32) {
+        unsafe { genffi::gen_d_abstract_dialog_set_display_position(self.ptr, displayPosition) }
     }
 }
 
@@ -25,6 +44,12 @@ widget_wrapper!(DAccessibilityChecker, genffi::DAccessibilityChecker);
 impl DAccessibilityChecker {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_accessibility_checker_new() })
+    }
+    pub fn set_output_format(&self, format: i32) {
+        unsafe { genffi::gen_d_accessibility_checker_set_output_format(self.ptr, format) }
+    }
+    pub fn output_format(&self) -> i32 {
+        unsafe { genffi::gen_d_accessibility_checker_output_format(self.ptr) }
     }
     pub fn check(&self) -> bool {
         unsafe { genffi::gen_d_accessibility_checker_check(self.ptr) }
@@ -46,6 +71,21 @@ impl DAlertControl {
     pub fn is_alert(&self) -> bool {
         unsafe { genffi::gen_d_alert_control_is_alert(self.ptr) }
     }
+    pub fn set_alert_color(&self, c: &QColor) {
+        unsafe { genffi::gen_d_alert_control_set_alert_color(self.ptr, c.ptr as _) }
+    }
+    pub fn alert_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_alert_control_alert_color(self.ptr) } as _)
+    }
+    pub fn default_alert_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_alert_control_default_alert_color(self.ptr) } as _)
+    }
+    pub fn set_message_alignment(&self, alignment: i32) {
+        unsafe { genffi::gen_d_alert_control_set_message_alignment(self.ptr, alignment) }
+    }
+    pub fn message_alignment(&self) -> i32 {
+        unsafe { genffi::gen_d_alert_control_message_alignment(self.ptr) }
+    }
     pub fn show_alert_message(&self, text: &str, duration: i32) {
         unsafe { genffi::gen_d_alert_control_show_alert_message(self.ptr, text, duration) }
     }
@@ -58,6 +98,9 @@ widget_wrapper!(DArrowButton, genffi::DArrowButton);
 impl DArrowButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_arrow_button_new() })
+    }
+    pub fn set_arrow_direction(&self, direction: i32) {
+        unsafe { genffi::gen_d_arrow_button_set_arrow_direction(self.ptr, direction) }
     }
     pub fn arrow_direction(&self) -> i32 {
         unsafe { genffi::gen_d_arrow_button_arrow_direction(self.ptr) }
@@ -114,6 +157,15 @@ impl DArrowRectangle {
     pub fn border_width(&self) -> i32 {
         unsafe { genffi::gen_d_arrow_rectangle_border_width(self.ptr) }
     }
+    pub fn border_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_arrow_rectangle_border_color(self.ptr) } as _)
+    }
+    pub fn background_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_arrow_rectangle_background_color(self.ptr) } as _)
+    }
+    pub fn arrow_direction(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_arrow_direction(self.ptr) }
+    }
     pub fn set_radius(&self, value: i32) {
         unsafe { genffi::gen_d_arrow_rectangle_set_radius(self.ptr, value) }
     }
@@ -138,6 +190,18 @@ impl DArrowRectangle {
     pub fn set_border_width(&self, borderWidth: i32) {
         unsafe { genffi::gen_d_arrow_rectangle_set_border_width(self.ptr, borderWidth) }
     }
+    pub fn set_border_color(&self, borderColor: &QColor) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_border_color(self.ptr, borderColor.ptr as _) }
+    }
+    pub fn set_background_color(&self, backgroundColor: &QColor) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_background_color(self.ptr, backgroundColor.ptr as _) }
+    }
+    pub fn set_background_color_2(&self, type_: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_background_color_2(self.ptr, type_) }
+    }
+    pub fn set_arrow_direction(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_arrow_direction(self.ptr, value) }
+    }
     pub fn set_width(&self, value: i32) {
         unsafe { genffi::gen_d_arrow_rectangle_set_width(self.ptr, value) }
     }
@@ -152,6 +216,9 @@ impl DArrowRectangle {
     }
     pub fn move_(&self, x: i32, y: i32) {
         unsafe { genffi::gen_d_arrow_rectangle_move_(self.ptr, x, y) }
+    }
+    pub fn get_fixed_size(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_arrow_rectangle_get_fixed_size(self.ptr) } as _)
     }
     pub fn shadow_x_offset(&self) -> f64 {
         unsafe { genffi::gen_d_arrow_rectangle_shadow_x_offset(self.ptr) }
@@ -230,6 +297,12 @@ impl DBlurEffectWidget {
     pub fn radius(&self) -> i32 {
         unsafe { genffi::gen_d_blur_effect_widget_radius(self.ptr) }
     }
+    pub fn mode(&self) -> i32 {
+        unsafe { genffi::gen_d_blur_effect_widget_mode(self.ptr) }
+    }
+    pub fn blend_mode(&self) -> i32 {
+        unsafe { genffi::gen_d_blur_effect_widget_blend_mode(self.ptr) }
+    }
     pub fn blur_rect_x_radius(&self) -> i32 {
         unsafe { genffi::gen_d_blur_effect_widget_blur_rect_x_radius(self.ptr) }
     }
@@ -242,11 +315,20 @@ impl DBlurEffectWidget {
     pub fn blur_enabled(&self) -> bool {
         unsafe { genffi::gen_d_blur_effect_widget_blur_enabled(self.ptr) }
     }
+    pub fn mask_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_blur_effect_widget_mask_color(self.ptr) } as _)
+    }
     pub fn mask_alpha(&self) -> u8 {
         unsafe { genffi::gen_d_blur_effect_widget_mask_alpha(self.ptr) }
     }
     pub fn set_radius(&self, radius: i32) {
         unsafe { genffi::gen_d_blur_effect_widget_set_radius(self.ptr, radius) }
+    }
+    pub fn set_mode(&self, mode: i32) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_mode(self.ptr, mode) }
+    }
+    pub fn set_blend_mode(&self, blendMode: i32) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_blend_mode(self.ptr, blendMode) }
     }
     pub fn set_blur_rect_x_radius(&self, blurRectXRadius: i32) {
         unsafe { genffi::gen_d_blur_effect_widget_set_blur_rect_x_radius(self.ptr, blurRectXRadius) }
@@ -256,6 +338,12 @@ impl DBlurEffectWidget {
     }
     pub fn set_mask_alpha(&self, alpha: u8) {
         unsafe { genffi::gen_d_blur_effect_widget_set_mask_alpha(self.ptr, alpha) }
+    }
+    pub fn set_mask_color(&self, maskColor: &QColor) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_mask_color(self.ptr, maskColor.ptr as _) }
+    }
+    pub fn set_mask_color_2(&self, type_: i32) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_mask_color_2(self.ptr, type_) }
     }
     pub fn set_full(&self, full: bool) {
         unsafe { genffi::gen_d_blur_effect_widget_set_full(self.ptr, full) }
@@ -285,6 +373,18 @@ impl DCircleProgress {
     }
     pub fn set_text(&self, text: &str) {
         unsafe { genffi::gen_d_circle_progress_set_text(self.ptr, text) }
+    }
+    pub fn background_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_circle_progress_background_color(self.ptr) } as _)
+    }
+    pub fn set_background_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_circle_progress_set_background_color(self.ptr, color.ptr as _) }
+    }
+    pub fn chunk_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_circle_progress_chunk_color(self.ptr) } as _)
+    }
+    pub fn set_chunk_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_circle_progress_set_chunk_color(self.ptr, color.ptr as _) }
     }
     pub fn line_width(&self) -> i32 {
         unsafe { genffi::gen_d_circle_progress_line_width(self.ptr) }
@@ -331,11 +431,23 @@ impl DCrumbTextFormat {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_crumb_text_format_new() })
     }
+    pub fn tag_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_crumb_text_format_tag_color(self.ptr) } as _)
+    }
+    pub fn set_tag_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_crumb_text_format_set_tag_color(self.ptr, color.ptr as _) }
+    }
     pub fn text(&self) -> String {
         unsafe { genffi::gen_d_crumb_text_format_text(self.ptr) }
     }
     pub fn set_text(&self, text: &str) {
         unsafe { genffi::gen_d_crumb_text_format_set_text(self.ptr, text) }
+    }
+    pub fn text_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_crumb_text_format_text_color(self.ptr) } as _)
+    }
+    pub fn set_text_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_crumb_text_format_set_text_color(self.ptr, color.ptr as _) }
     }
     pub fn background_radius(&self) -> i32 {
         unsafe { genffi::gen_d_crumb_text_format_background_radius(self.ptr) }
@@ -450,6 +562,12 @@ impl DFileChooserEdit {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_file_chooser_edit_new() })
     }
+    pub fn set_dialog_display_position(&self, dialogDisplayPosition: i32) {
+        unsafe { genffi::gen_d_file_chooser_edit_set_dialog_display_position(self.ptr, dialogDisplayPosition) }
+    }
+    pub fn dialog_display_position(&self) -> i32 {
+        unsafe { genffi::gen_d_file_chooser_edit_dialog_display_position(self.ptr) }
+    }
     pub fn init_dialog(&self) {
         unsafe { genffi::gen_d_file_chooser_edit_init_dialog(self.ptr) }
     }
@@ -482,6 +600,15 @@ widget_wrapper!(DFontComboBox, genffi::DFontComboBox);
 impl DFontComboBox {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_font_combo_box_new() })
+    }
+    pub fn current_font(&self) -> QFont {
+        QFont::from_raw(unsafe { genffi::gen_d_font_combo_box_current_font(self.ptr) } as _)
+    }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_font_combo_box_size_hint(self.ptr) } as _)
+    }
+    pub fn set_current_font(&self, f: &QFont) {
+        unsafe { genffi::gen_d_font_combo_box_set_current_font(self.ptr, f.ptr as _) }
     }
 }
 
@@ -564,6 +691,9 @@ impl DImageViewer {
     pub fn center_on(&self, x: f64, y: f64) {
         unsafe { genffi::gen_d_image_viewer_center_on(self.ptr, x, y) }
     }
+    pub fn visible_image_rect(&self) -> QRect {
+        QRect::from_raw(unsafe { genffi::gen_d_image_viewer_visible_image_rect(self.ptr) } as _)
+    }
     pub fn begin_crop_image(&self) {
         unsafe { genffi::gen_d_image_viewer_begin_crop_image(self.ptr) }
     }
@@ -575,6 +705,9 @@ impl DImageViewer {
     }
     pub fn set_crop_aspect_ratio(&self, w: f64, h: f64) {
         unsafe { genffi::gen_d_image_viewer_set_crop_aspect_ratio(self.ptr, w, h) }
+    }
+    pub fn crop_image_rect(&self) -> QRect {
+        QRect::from_raw(unsafe { genffi::gen_d_image_viewer_crop_image_rect(self.ptr) } as _)
     }
 }
 
@@ -592,6 +725,9 @@ impl DIpv4LineEdit {
     }
     pub fn cursor_position(&self) -> i32 {
         unsafe { genffi::gen_d_ipv4_line_edit_cursor_position(self.ptr) }
+    }
+    pub fn alignment(&self) -> i32 {
+        unsafe { genffi::gen_d_ipv4_line_edit_alignment(self.ptr) }
     }
     pub fn has_acceptable_input(&self) -> bool {
         unsafe { genffi::gen_d_ipv4_line_edit_has_acceptable_input(self.ptr) }
@@ -625,6 +761,9 @@ impl DKeySequenceEdit {
     pub fn clear(&self) {
         unsafe { genffi::gen_d_key_sequence_edit_clear(self.ptr) }
     }
+    pub fn shortcut_direction(&self, alig: i32) {
+        unsafe { genffi::gen_d_key_sequence_edit_shortcut_direction(self.ptr, alig) }
+    }
 }
 
 impl Default for DKeySequenceEdit {
@@ -647,6 +786,12 @@ impl DLineEdit {
     }
     pub fn show_alert_message(&self, text: &str, duration: i32) {
         unsafe { genffi::gen_d_line_edit_show_alert_message(self.ptr, text, duration) }
+    }
+    pub fn set_alert_message_alignment(&self, alignment: i32) {
+        unsafe { genffi::gen_d_line_edit_set_alert_message_alignment(self.ptr, alignment) }
+    }
+    pub fn alert_message_alignment(&self) -> i32 {
+        unsafe { genffi::gen_d_line_edit_alert_message_alignment(self.ptr) }
     }
     pub fn hide_alert_message(&self) {
         unsafe { genffi::gen_d_line_edit_hide_alert_message(self.ptr) }
@@ -671,6 +816,9 @@ impl DLineEdit {
     }
     pub fn clear(&self) {
         unsafe { genffi::gen_d_line_edit_clear(self.ptr) }
+    }
+    pub fn set_context_menu_policy(&self, policy: i32) {
+        unsafe { genffi::gen_d_line_edit_set_context_menu_policy(self.ptr, policy) }
     }
     pub fn speech_to_text_is_enabled(&self) -> bool {
         unsafe { genffi::gen_d_line_edit_speech_to_text_is_enabled(self.ptr) }
@@ -725,8 +873,23 @@ impl DListView {
     pub fn get_footer_widget(&self, index: i32) -> QWidget {
         QWidget::from_raw(unsafe { genffi::gen_d_list_view_get_footer_widget(self.ptr, index) } as _)
     }
+    pub fn is_active_rect(&self, rect: &QRect) -> bool {
+        unsafe { genffi::gen_d_list_view_is_active_rect(self.ptr, rect.ptr as _) }
+    }
+    pub fn is_visual_rect(&self, rect: &QRect) -> bool {
+        unsafe { genffi::gen_d_list_view_is_visual_rect(self.ptr, rect.ptr as _) }
+    }
     pub fn count(&self) -> i32 {
         unsafe { genffi::gen_d_list_view_count(self.ptr) }
+    }
+    pub fn orientation(&self) -> i32 {
+        unsafe { genffi::gen_d_list_view_orientation(self.ptr) }
+    }
+    pub fn minimum_size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_list_view_minimum_size_hint(self.ptr) } as _)
+    }
+    pub fn item_size(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_list_view_item_size(self.ptr) } as _)
     }
     pub fn remove_item(&self, index: i32) -> bool {
         unsafe { genffi::gen_d_list_view_remove_item(self.ptr, index) }
@@ -746,6 +909,9 @@ impl DListView {
     pub fn take_footer_widget(&self, index: i32) -> QWidget {
         QWidget::from_raw(unsafe { genffi::gen_d_list_view_take_footer_widget(self.ptr, index) } as _)
     }
+    pub fn set_item_size(&self, itemSize: &QSize) {
+        unsafe { genffi::gen_d_list_view_set_item_size(self.ptr, itemSize.ptr as _) }
+    }
     pub fn set_item_spacing(&self, spacing: i32) {
         unsafe { genffi::gen_d_list_view_set_item_spacing(self.ptr, spacing) }
     }
@@ -763,17 +929,29 @@ impl DLoadingIndicator {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_loading_indicator_new() })
     }
+    pub fn background_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_loading_indicator_background_color(self.ptr) } as _)
+    }
     pub fn loading(&self) -> bool {
         unsafe { genffi::gen_d_loading_indicator_loading(self.ptr) }
     }
     pub fn widget_source(&self) -> QWidget {
         QWidget::from_raw(unsafe { genffi::gen_d_loading_indicator_widget_source(self.ptr) } as _)
     }
+    pub fn image_source(&self) -> QPixmap {
+        QPixmap::from_raw(unsafe { genffi::gen_d_loading_indicator_image_source(self.ptr) } as _)
+    }
     pub fn ani_duration(&self) -> i32 {
         unsafe { genffi::gen_d_loading_indicator_ani_duration(self.ptr) }
     }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_loading_indicator_size_hint(self.ptr) } as _)
+    }
     pub fn smooth(&self) -> bool {
         unsafe { genffi::gen_d_loading_indicator_smooth(self.ptr) }
+    }
+    pub fn direction(&self) -> i32 {
+        unsafe { genffi::gen_d_loading_indicator_direction(self.ptr) }
     }
     pub fn rotate(&self) -> f64 {
         unsafe { genffi::gen_d_loading_indicator_rotate(self.ptr) }
@@ -790,11 +968,20 @@ impl DLoadingIndicator {
     pub fn set_ani_duration(&self, msecs: i32) {
         unsafe { genffi::gen_d_loading_indicator_set_ani_duration(self.ptr, msecs) }
     }
+    pub fn set_background_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_loading_indicator_set_background_color(self.ptr, color.ptr as _) }
+    }
     pub fn set_widget_source(&self, widgetSource: &QWidget) {
         unsafe { genffi::gen_d_loading_indicator_set_widget_source(self.ptr, widgetSource.ptr as _) }
     }
+    pub fn set_image_source(&self, imageSource: &QPixmap) {
+        unsafe { genffi::gen_d_loading_indicator_set_image_source(self.ptr, imageSource.ptr as _) }
+    }
     pub fn set_smooth(&self, smooth: bool) {
         unsafe { genffi::gen_d_loading_indicator_set_smooth(self.ptr, smooth) }
+    }
+    pub fn set_direction(&self, direction: i32) {
+        unsafe { genffi::gen_d_loading_indicator_set_direction(self.ptr, direction) }
     }
 }
 
@@ -812,6 +999,9 @@ impl DMPRISControl {
     }
     pub fn set_picture_visible(&self, visible: bool) {
         unsafe { genffi::gen_d_m_p_r_i_s_control_set_picture_visible(self.ptr, visible) }
+    }
+    pub fn set_picture_size(&self, size: &QSize) {
+        unsafe { genffi::gen_d_m_p_r_i_s_control_set_picture_size(self.ptr, size.ptr as _) }
     }
 }
 
@@ -841,6 +1031,18 @@ impl DPageIndicator {
     }
     pub fn current_page_index(&self) -> i32 {
         unsafe { genffi::gen_d_page_indicator_current_page_index(self.ptr) }
+    }
+    pub fn point_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_page_indicator_point_color(self.ptr) } as _)
+    }
+    pub fn set_point_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_page_indicator_set_point_color(self.ptr, color.ptr as _) }
+    }
+    pub fn secondary_point_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_page_indicator_secondary_point_color(self.ptr) } as _)
+    }
+    pub fn set_secondary_point_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_page_indicator_set_secondary_point_color(self.ptr, color.ptr as _) }
     }
     pub fn point_radius(&self) -> i32 {
         unsafe { genffi::gen_d_page_indicator_point_radius(self.ptr) }
@@ -929,6 +1131,12 @@ impl DPrintPreviewWidget {
     pub fn set_page_range_a_l_l(&self) {
         unsafe { genffi::gen_d_print_preview_widget_set_page_range_a_l_l(self.ptr) }
     }
+    pub fn set_page_range_mode(&self, mode: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_page_range_mode(self.ptr, mode) }
+    }
+    pub fn page_range_mode(&self) -> i32 {
+        unsafe { genffi::gen_d_print_preview_widget_page_range_mode(self.ptr) }
+    }
     pub fn pages_count(&self) -> i32 {
         unsafe { genffi::gen_d_print_preview_widget_pages_count(self.ptr) }
     }
@@ -983,14 +1191,38 @@ impl DPrintPreviewWidget {
     pub fn set_text_water_mark(&self, text: &str) {
         unsafe { genffi::gen_d_print_preview_widget_set_text_water_mark(self.ptr, text) }
     }
+    pub fn set_water_mark_font(&self, font: &QFont) {
+        unsafe { genffi::gen_d_print_preview_widget_set_water_mark_font(self.ptr, font.ptr as _) }
+    }
+    pub fn water_mark_color(&self) -> QColor {
+        QColor::from_raw(unsafe { genffi::gen_d_print_preview_widget_water_mark_color(self.ptr) } as _)
+    }
+    pub fn set_water_mark_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_print_preview_widget_set_water_mark_color(self.ptr, color.ptr as _) }
+    }
     pub fn set_water_mark_layout(&self, layout: i32) {
         unsafe { genffi::gen_d_print_preview_widget_set_water_mark_layout(self.ptr, layout) }
+    }
+    pub fn set_imposition(&self, im: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_imposition(self.ptr, im) }
+    }
+    pub fn imposition(&self) -> i32 {
+        unsafe { genffi::gen_d_print_preview_widget_imposition(self.ptr) }
+    }
+    pub fn set_order(&self, order: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_order(self.ptr, order) }
+    }
+    pub fn order(&self) -> i32 {
+        unsafe { genffi::gen_d_print_preview_widget_order(self.ptr) }
     }
     pub fn set_print_from_path(&self, path: &str) {
         unsafe { genffi::gen_d_print_preview_widget_set_print_from_path(self.ptr, path) }
     }
     pub fn print_from_path(&self) -> String {
         unsafe { genffi::gen_d_print_preview_widget_print_from_path(self.ptr) }
+    }
+    pub fn set_print_mode(&self, pt: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_print_mode(self.ptr, pt) }
     }
     pub fn set_asyn_preview(&self, totalPage: i32) {
         unsafe { genffi::gen_d_print_preview_widget_set_asyn_preview(self.ptr, totalPage) }
@@ -1096,6 +1328,9 @@ impl DSettingsDialog {
     pub fn scroll_to_group(&self, groupKey: &str) {
         unsafe { genffi::gen_d_settings_dialog_scroll_to_group(self.ptr, groupKey) }
     }
+    pub fn set_icon(&self, icon: &QIcon) {
+        unsafe { genffi::gen_d_settings_dialog_set_icon(self.ptr, icon.ptr as _) }
+    }
     pub fn set_group_visible(&self, groupKey: &str, visible: bool) {
         unsafe { genffi::gen_d_settings_dialog_set_group_visible(self.ptr, groupKey, visible) }
     }
@@ -1120,6 +1355,9 @@ widget_wrapper!(DShadowLine, genffi::DShadowLine);
 impl DShadowLine {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_shadow_line_new() })
+    }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_shadow_line_size_hint(self.ptr) } as _)
     }
 }
 
@@ -1226,6 +1464,18 @@ impl DSlider {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_slider_new() })
     }
+    pub fn orientation(&self) -> i32 {
+        unsafe { genffi::gen_d_slider_orientation(self.ptr) }
+    }
+    pub fn set_left_icon(&self, left: &QIcon) {
+        unsafe { genffi::gen_d_slider_set_left_icon(self.ptr, left.ptr as _) }
+    }
+    pub fn set_right_icon(&self, right: &QIcon) {
+        unsafe { genffi::gen_d_slider_set_right_icon(self.ptr, right.ptr as _) }
+    }
+    pub fn set_icon_size(&self, size: &QSize) {
+        unsafe { genffi::gen_d_slider_set_icon_size(self.ptr, size.ptr as _) }
+    }
     pub fn set_minimum(&self, min: i32) {
         unsafe { genffi::gen_d_slider_set_minimum(self.ptr, min) }
     }
@@ -1255,6 +1505,9 @@ impl DSlider {
     }
     pub fn set_tip_value(&self, value: &str) {
         unsafe { genffi::gen_d_slider_set_tip_value(self.ptr, value) }
+    }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_slider_size_hint(self.ptr) } as _)
     }
     pub fn set_handle_visible(&self, b: bool) {
         unsafe { genffi::gen_d_slider_set_handle_visible(self.ptr, b) }
@@ -1331,6 +1584,9 @@ impl DSpinner {
     pub fn stop(&self) {
         unsafe { genffi::gen_d_spinner_stop(self.ptr) }
     }
+    pub fn set_background_color(&self, color: &QColor) {
+        unsafe { genffi::gen_d_spinner_set_background_color(self.ptr, color.ptr as _) }
+    }
 }
 
 impl Default for DSpinner {
@@ -1341,6 +1597,9 @@ widget_wrapper!(DSwitchButton, genffi::DSwitchButton);
 impl DSwitchButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_switch_button_new() })
+    }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_switch_button_size_hint(self.ptr) } as _)
     }
 }
 
@@ -1373,6 +1632,9 @@ impl DTabletWindowOptionButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_tablet_window_option_button_new() })
     }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_tablet_window_option_button_size_hint(self.ptr) } as _)
+    }
 }
 
 impl Default for DTabletWindowOptionButton {
@@ -1392,6 +1654,9 @@ impl DTickEffect {
     }
     pub fn resume(&self) {
         unsafe { genffi::gen_d_tick_effect_resume(self.ptr) }
+    }
+    pub fn set_direction(&self, direction: i32) {
+        unsafe { genffi::gen_d_tick_effect_set_direction(self.ptr, direction) }
     }
     pub fn set_fixed_pixel_move(&self, pixel: i32) {
         unsafe { genffi::gen_d_tick_effect_set_fixed_pixel_move(self.ptr, pixel) }
@@ -1451,6 +1716,12 @@ impl DToolButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_tool_button_new() })
     }
+    pub fn set_alignment(&self, flag: i32) {
+        unsafe { genffi::gen_d_tool_button_set_alignment(self.ptr, flag) }
+    }
+    pub fn alignment(&self) -> i32 {
+        unsafe { genffi::gen_d_tool_button_alignment(self.ptr) }
+    }
 }
 
 impl Default for DToolButton {
@@ -1488,6 +1759,9 @@ impl DWindowCloseButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_window_close_button_new() })
     }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_window_close_button_size_hint(self.ptr) } as _)
+    }
 }
 
 impl Default for DWindowCloseButton {
@@ -1501,6 +1775,9 @@ impl DWindowMaxButton {
     }
     pub fn is_maximized(&self) -> bool {
         unsafe { genffi::gen_d_window_max_button_is_maximized(self.ptr) }
+    }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_window_max_button_size_hint(self.ptr) } as _)
     }
     pub fn set_maximized(&self, isMaximized: bool) {
         unsafe { genffi::gen_d_window_max_button_set_maximized(self.ptr, isMaximized) }
@@ -1516,6 +1793,9 @@ impl DWindowMinButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_window_min_button_new() })
     }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_window_min_button_size_hint(self.ptr) } as _)
+    }
 }
 
 impl Default for DWindowMinButton {
@@ -1527,6 +1807,9 @@ impl DWindowOptionButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_window_option_button_new() })
     }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_window_option_button_size_hint(self.ptr) } as _)
+    }
 }
 
 impl Default for DWindowOptionButton {
@@ -1537,6 +1820,9 @@ widget_wrapper!(DWindowQuitFullButton, genffi::DWindowQuitFullButton);
 impl DWindowQuitFullButton {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_window_quit_full_button_new() })
+    }
+    pub fn size_hint(&self) -> QSize {
+        QSize::from_raw(unsafe { genffi::gen_d_window_quit_full_button_size_hint(self.ptr) } as _)
     }
 }
 

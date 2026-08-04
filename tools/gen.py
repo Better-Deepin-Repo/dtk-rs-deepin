@@ -36,6 +36,12 @@ QT_WIDGET_BASES = {
     "QButtonGroup", "QListWidget", "QTableWidget", "QTreeWidget", "QColumnView",
 }
 
+VALUE_TYPES = {"QColor", "QSize", "QPoint", "QRect", "QFont", "QPixmap", "QIcon", "QPalette"}
+# Qt 里是 QFlags 的类型（fromInt/toInt 转换）
+QT_QFLAGS = {"Qt::Alignment", "Qt::WindowFlags", "Qt::MouseButtons", "Qt::KeyboardModifiers",
+             "Qt::Orientations", "Qt::ItemFlags", "Qt::MatchFlags", "Qt::ApplicationStates",
+             "Qt::InputMethodHints", "Qt::DockWidgetAreas", "Qt::ToolBarAreas"}
+
 PRIM = {
     "void": "()", "bool": "bool", "int": "i32", "qint32": "i32", "short": "i16",
     "qint64": "i64", "qlonglong": "i64", "long": "i64",
@@ -83,14 +89,24 @@ def split_params(s: str):
 
 
 class Ctx:
-    """类型映射上下文：知道全部 DTK 类名"""
+    """类型映射上下文：知道全部 DTK 类名和枚举"""
 
     def __init__(self, classes):
         self.classes = classes  # set of DTK class names
+        self.qenums = {}  # "Scope::Enum" → True（含非导出嵌套类）
+        self.enums = {}  # 非限定 enum 名 → scope 或 "?"（多义禁用）
 
-    def map_type(self, cpp: str, is_return: bool):
-        """返回 (rust_type, cpp_shim_type, kind, target_class|None) 或 None(不支持)。
-        kind: prim | str | ptr"""
+    def register_enum(self, scope: str, name: str):
+        self.qenums[f"{scope}::{name}"] = True
+        prev = self.enums.get(name)
+        if prev is None:
+            self.enums[name] = scope
+        elif prev != scope:
+            self.enums[name] = "?"  # 多义，非限定名禁用
+
+    def map_type(self, cpp: str, is_return: bool, scope: str | None = None):
+        """返回 (rust_type, cpp_shim_type, kind, info) 或 None(不支持)。
+        kind: prim | str | ptr | qtptr | val | enum | qtenum | qflags"""
         t = cpp.strip()
         t = re.sub(r"\s+", " ", t)
         t = re.sub(r"\bconst\s+", "", t).replace("&", "").strip()
@@ -98,7 +114,24 @@ class Ctx:
             return None
         ptr = t.endswith("*")
         base = t.rstrip("*").strip()
-        base = base.replace("DTK_CORE_NAMESPACE::", "").replace("DTK_GUI_NAMESPACE::", "").replace("::", "_")
+        base = base.replace("DTK_CORE_NAMESPACE::", "").replace("DTK_GUI_NAMESPACE::", "")
+        # Qt 枚举 / QFlags
+        if base.startswith("Qt::"):
+            kind = "qflags" if base in QT_QFLAGS else "qtenum"
+            return ("i32", "int32_t", kind, base)
+        # DTK 枚举：本类优先 → 限定名查表 → 非限定全局
+        if scope and f"{scope}::{base}" in self.qenums:
+            return ("i32", "int32_t", "enum", f"{scope}::{base}")
+        if "::" in base:
+            qual = base.replace("DTK_WIDGET_NAMESPACE::", "")
+            if qual in self.qenums and qual.split("::")[0] in self.classes:
+                return ("i32", "int32_t", "enum", qual)
+            return None  # 非导出嵌套类枚举等，跳过
+        if base in self.enums and self.enums[base] != "?":
+            sc = self.enums[base]
+            if sc in self.classes or sc == "Dtk::Widget":
+                return ("i32", "int32_t", "enum", f"{sc}::{base}")
+            return None
         if ptr:
             if base in self.classes:
                 return (f"*mut {base}", f"{base} *", "ptr", base)
@@ -106,6 +139,9 @@ class Ctx:
             if base == "QWidget":
                 return ("*mut QWidget", "QWidget *", "qtptr", base)
             return None
+        # 值类型：堆分配 opaque 指针
+        if base in VALUE_TYPES:
+            return (f"*mut {base}", f"{base} *", "val", base)
         if base in PRIM:
             r = PRIM[base]
             if r == "()" and not is_return:
@@ -116,29 +152,51 @@ class Ctx:
         return None
 
 
+ENUM_RE = re.compile(r"^\s*enum\s+(?:class\s+)?(\w+)")
+
+
 def parse_header(path, ctx):
     """解析单个头文件 → [(class, bases, [method...], report_skip...)]"""
     classes = []
     cur = None
+    nested = None  # 非导出嵌套类名（其方法不生成，枚举仅登记）
     section = None  # None | 'pub' | 'other'
     with open(path, encoding="utf-8", errors="replace") as f:
         for line in f:
             line = line.rstrip("\n")
             m = CLASS_RE.match(line)
-            if m and cur is None:
+            if m and cur is None and nested is None:
                 bases = []
                 if m.group(2):
                     bases = [b.strip().split("::")[-1] for b in re.findall(r"public\s+([\w:]+)", m.group(2))]
                 cur = {"name": m.group(1), "bases": bases, "methods": [], "skipped": []}
                 section = None
                 continue
+            # 非导出（嵌套/文件级）类定义：跟踪 scope，方法不生成
+            nm = re.match(r"^\s*(?:class|struct)\s+(\w+)\b[^;{]*$", line)
+            if nm and not m and nested is None:
+                nested = nm.group(1)
+                continue
+            if nested is not None:
+                if re.match(r"^\s*enum\s+(?:class\s+)?(\w+)", line):
+                    ctx.register_enum(nested, re.match(r"^\s*enum\s+(?:class\s+)?(\w+)", line).group(1))
+                if line.startswith("};"):
+                    nested = None
+                continue
             if cur is None:
+                em = ENUM_RE.match(line)
+                if em:
+                    ctx.register_enum("Dtk::Widget", em.group(1))
                 continue
             if line.startswith("};"):
                 classes.append(cur)
                 cur = None
                 continue
             s = line.strip()
+            em = ENUM_RE.match(s)
+            if em and "(" not in s:
+                ctx.register_enum(cur["name"], em.group(1))
+                continue
             if re.match(r"^(public|protected|private)\s*(Q_SLOTS|slots)?:", s):
                 section = "pub" if s.startswith("public") else "other"
                 continue
@@ -185,7 +243,7 @@ def parse_header(path, ctx):
 
 def gen_method(ctx, cls, is_static, ret, name, params):
     """映射一个方法 → 生成三处代码。失败返回原因字符串"""
-    r = ctx.map_type(ret, is_return=True)
+    r = ctx.map_type(ret, is_return=True, scope=cls)
     if r is None:
         return None, f"返回类型不支持: {ret}"
     ret_rs, ret_cpp, ret_kind, ret_cls = r
@@ -200,7 +258,7 @@ def gen_method(ctx, cls, is_static, ret, name, params):
         pname = pname.replace("&", "").replace("*", "").strip() or f"arg{i}"
         if pname in RUST_KEYWORDS:
             pname += "_"
-        q = ctx.map_type(ptype, is_return=False)
+        q = ctx.map_type(ptype, is_return=False, scope=cls)
         if q is None:
             return None, f"参数类型不支持: {ptype}"
         prs, pcpp, pkind, pcls = q
@@ -208,6 +266,12 @@ def gen_method(ctx, cls, is_static, ret, name, params):
             args.append((f"{pname}: &str", f"rust::Str {pname}", f"from_rust_str({pname})", "str", None))
         elif pkind in ("ptr", "qtptr"):
             args.append((f"{pname}: *mut {pcls}", f"{pcpp} {pname}", pname, pkind, pcls))
+        elif pkind == "val":
+            args.append((f"{pname}: *mut {pcls}", f"{pcpp} {pname}", f"*{pname}", "val", pcls))
+        elif pkind == "qflags":
+            args.append((f"{pname}: i32", f"int32_t {pname}", f"{q[3]}::fromInt({pname})", "qflags", None))
+        elif pkind in ("enum", "qtenum"):
+            args.append((f"{pname}: i32", f"int32_t {pname}", f"static_cast<{q[3]}>({pname})", pkind, None))
         else:
             args.append((f"{pname}: {prs}", f"{pcpp} {pname}", pname, "prim", None))
     return (ret_rs, ret_cpp, ret_kind, ret_cls, is_static, name, args), None
@@ -228,12 +292,17 @@ def main():
                     all_classes.add(m.group(1))
     ctx = Ctx(all_classes - HAND_BOUND)
 
-    classes_out = []  # (name, is_widget, ctor_new, [gen'd methods], skipped)
+    # 两遍扫描：先全量解析（收集类间枚举引用），再生成
+    parsed = []
     for h in headers:
         for c in parse_header(h, ctx):
             if c["name"] in HAND_BOUND:
                 continue
             c["header"] = os.path.basename(h)
+            parsed.append(c)
+
+    classes_out = []
+    for c in parsed:
             is_widget = any(b in QT_WIDGET_BASES or (b in all_classes and b != "DObject") for b in c["bases"])
             if not is_widget and c["bases"]:
                 # 基类是另一个 DTK 类时跟随基类（DTK 控件居多）
@@ -259,7 +328,9 @@ def emit(classes):
     shim_h.append("// 自动生成 by tools/gen.py，勿手改\n#pragma once\n#include \"dtk_shim.h\"\n")
     shim_cpp.append('// 自动生成 by tools/gen.py，勿手改\n#include "dtk_gen_shim.h"\n\nnamespace dtkrs {\n')
     bridge.append("// 自动生成 by tools/gen.py，勿手改\n#[cxx::bridge(namespace = \"dtkrs\")]\npub mod genffi {\n    extern \"C++\" {\n        include!(\"dtk_gen_shim.h\");\n        type QWidget;\n")
-    wrapper.append("// 自动生成 by tools/gen.py，勿手改\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{Signal0, SignalI32, QWidget};\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
+    for vt in sorted(VALUE_TYPES):
+        bridge.append(f"        type {vt};\n")
+    wrapper.append("// 自动生成 by tools/gen.py，勿手改\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{Signal0, SignalI32, QWidget};\nuse crate::{QColor, QFont, QIcon, QPalette, QPixmap, QPoint, QRect, QSize};\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
     report.append("# DTK6 widget binding 覆盖报告\n")
 
     total_ok, total_skip = 0, 0
@@ -267,6 +338,8 @@ def emit(classes):
     for h in used_headers:
         shim_h.append(f"#include <{h}>\n")
     shim_h.append("\nnamespace dtkrs {\n")
+    for vt in sorted(VALUE_TYPES):
+        shim_h.append(f"using ::{vt};\n")
     for c in classes:
         name = c["name"]
         shim_h.append(f"using {name} = Dtk::Widget::{name};\n")
@@ -296,6 +369,12 @@ def emit(classes):
             call = f"{name}::{meth}({call_args})" if is_static else f"self->{meth}({call_args})"
             if ret_kind == "str":
                 call = f"to_rust_string({call})"
+            elif ret_kind == "val":
+                call = f"new {ret_cls}({call})"
+            elif ret_kind in ("enum", "qtenum"):
+                call = f"static_cast<int32_t>({call})"
+            elif ret_kind == "qflags":
+                call = f"({call}).toInt()"
             body = f"return {call};" if ret_rs != "()" else f"{call};"
             shim_h.append(f"{ret_cpp} {fn}({cpp_sig});\n")
             shim_cpp.append(f"{ret_cpp} {fn}({cpp_sig}) {{ {body} }}\n")
@@ -339,6 +418,9 @@ def emit(classes):
                 elif pkind == "qtptr":
                     wr_args.append(f"{pname}: &{pcls}")
                     call_args.append(f"{pname}.ptr as _")
+                elif pkind == "val":
+                    wr_args.append(f"{pname}: &{pcls}")
+                    call_args.append(f"{pname}.ptr as _")  # 跨 cxx bridge 的同名 opaque 类型，指针强转
                 else:
                     wr_args.append(rs)
                     call_args.append(pname)
@@ -353,6 +435,9 @@ def emit(classes):
             elif ret_kind == "qtptr":
                 ret_decl = " -> QWidget"
                 expr = f"QWidget::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"
+            elif ret_kind == "val":
+                ret_decl = f" -> {ret_cls}"
+                expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"
             else:
                 ret_decl = "" if ret_rs == "()" else f" -> {ret_rs}"
                 expr = f"unsafe {{ genffi::{fn_name}({calls}) }}"

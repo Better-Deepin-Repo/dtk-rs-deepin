@@ -47,11 +47,14 @@ python3 tools/gen.py && cargo build
 
 - **生命周期**：Qt parent-child 管理，Rust wrapper 只是非拥有裸指针（!Send，GUI 单线程）。
 - **信号**：`DtkRelay`（Q_OBJECT + SLOT）字符串式 connect 任意信号 → Rust 回调 id → thread_local 注册表里的闭包。
-- **类型映射**：QString↔&str/String、数值类型直映、QWidget* 与 DTK 类指针↔wrapper。其余（QColor、QRect、枚举、模板容器……）暂不支持，见 GEN_REPORT.md，按需扩 `tools/gen.py` 的类型表。
-- **生成器**：正则解析 DTK 头文件（风格规整），所有参数/返回类型都可映射的方法才会生成，其余进报告，不生成编译不过的代码。
+- **事件重写**：`DtkAppEx`（QEvent::Quit 守卫）/ `DtkMainWindowEx`（showEvent/closeEvent）shim 子类 → Rust 回调。入口：`DApplication::new_with_quit_guard`、`DMainWindow::new_with_events`。
+- **自定义绘制**：`PaintDelegate`（QStyledItemDelegate 子类）paint 全转 Rust，配 `Painter` 原语 + `ModelIndex::data_*`。
+- **类型映射**：QString↔&str/String、数值直映、枚举/QFlags→i32（`dtk::qt` 常量模块）、QColor/QFont/QPalette/QPixmap/QSize/QPoint/QRect 值类型→堆分配 wrapper、QWidget* 与 DTK 类指针↔wrapper。
+- **QSocketNotifier**：`QSocketNotifier::new(fd)` + `on_activated`，配 signalfd/pipe/eventfd 用。
+- **生成器**：正则解析 DTK 头文件（风格规整），所有参数/返回类型都可映射的方法才会生成，其余进 GEN_REPORT.md。
 
 ## 跳过项（需要时再加）
 
-- 值类型 QColor/QPoint/QRect/QIcon 参数（shim 转 POD struct 即可扩）
-- 枚举参数/返回（映射 i32 + 常量）
+- Qt 容器类型（QList/QMap/QVariant 通用化）
+- 非导出嵌套类（DPrinter 等）
 - DGui/DCore 两个库（同套路再扫两个目录）

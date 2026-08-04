@@ -1,44 +1,22 @@
 # DTK6 widget binding 覆盖报告
 
-类: 60, 已生成方法: 320, 跳过: 252
+类: 60, 已生成方法: 416, 跳过: 156
 
-## DAbstractDialog — 2 方法已生成, 8 跳过
-- `DisplayPosition displayPosition() const;` ← 返回类型不支持: DisplayPosition
-- `void move(const QPoint &pos);` ← 参数类型不支持: const QPoint
+## DAbstractDialog — 8 方法已生成, 2 跳过
 - `inline void move(int x, int y)` ← 返回类型不支持: inline void
-- `void setGeometry(const QRect &rect);` ← 参数类型不支持: const QRect
 - `inline void setGeometry(int x, int y, int width, int height)` ← 返回类型不支持: inline void
-- `void moveToCenterByRect(const QRect &rect);` ← 参数类型不支持: const QRect
-- `void moveToTopRightByRect(const QRect &rect);` ← 参数类型不支持: const QRect
-- `void setDisplayPosition(DisplayPosition displayPosition);` ← 参数类型不支持: DisplayPosition
 
-## DAccessibilityChecker — 2 方法已生成, 2 跳过
-- `void setOutputFormat(OutputFormat format);` ← 参数类型不支持: OutputFormat
-- `OutputFormat outputFormat() const;` ← 返回类型不支持: OutputFormat
+## DAccessibilityChecker — 4 方法已生成, 0 跳过
 
-## DAlertControl — 4 方法已生成, 6 跳过
-- `void setAlertColor(QColor c);` ← 参数类型不支持: QColor
-- `QColor alertColor() const;` ← 返回类型不支持: QColor
-- `QColor defaultAlertColor() const;` ← 返回类型不支持: QColor
-- `void setMessageAlignment(Qt::Alignment alignment);` ← 参数类型不支持: Qt::Alignment
-- `Qt::Alignment messageAlignment() const;` ← 返回类型不支持: Qt::Alignment
+## DAlertControl — 9 方法已生成, 1 跳过
 - `void showAlertMessage(const QString &text, QWidget *follower, int duration = 300` ← 参数类型不支持: QWidget
 
-## DArrowButton — 2 方法已生成, 1 跳过
-- `void setArrowDirection(ArrowDirection direction);` ← 参数类型不支持: ArrowDirection
+## DArrowButton — 3 方法已生成, 0 跳过
 
 ## DArrowLineDrawer — 2 方法已生成, 0 跳过
 
-## DArrowRectangle — 30 方法已生成, 9 跳过
-- `QColor borderColor() const;` ← 返回类型不支持: QColor
-- `QColor backgroundColor() const;` ← 返回类型不支持: QColor
-- `ArrowDirection arrowDirection() const;` ← 返回类型不支持: ArrowDirection
-- `void setBorderColor(const QColor &borderColor);` ← 参数类型不支持: const QColor
-- `void setBackgroundColor(const QColor &backgroundColor);` ← 参数类型不支持: const QColor
-- `void setBackgroundColor(DBlurEffectWidget::MaskColorType type);` ← 参数类型不支持: DBlurEffectWidget::MaskColorType
-- `void setArrowDirection(ArrowDirection value);` ← 参数类型不支持: ArrowDirection
+## DArrowRectangle — 38 方法已生成, 1 跳过
 - `void setContent(QWidget *content);` ← 参数类型不支持: QWidget
-- `QSize getFixedSize();` ← 返回类型不支持: QSize
 
 ## DBackgroundGroup — 3 方法已生成, 5 跳过
 - `QMargins itemMargins() const;` ← 返回类型不支持: QMargins
@@ -53,23 +31,12 @@
 - `QBoxLayout *leftLayout();` ← 返回类型不支持: QBoxLayout *
 - `QBoxLayout *rightLayout();` ← 返回类型不支持: QBoxLayout *
 
-## DBlurEffectWidget — 12 方法已生成, 10 跳过
-- `BlurMode mode() const;` ← 返回类型不支持: BlurMode
-- `BlendMode blendMode() const;` ← 返回类型不支持: BlendMode
-- `QColor maskColor() const;` ← 返回类型不支持: QColor
+## DBlurEffectWidget — 19 方法已生成, 3 跳过
 - `void setMaskPath(const QPainterPath &path);` ← 参数类型不支持: const QPainterPath
 - `void setSourceImage(const QImage &image, bool autoScale = true);` ← 参数类型不支持: const QImage
-- `void setMode(BlurMode mode);` ← 参数类型不支持: BlurMode
-- `void setBlendMode(BlendMode blendMode);` ← 参数类型不支持: BlendMode
-- `void setMaskColor(QColor maskColor);` ← 参数类型不支持: QColor
-- `void setMaskColor(MaskColorType type);` ← 参数类型不支持: MaskColorType
 - `void updateBlurSourceImage(const QRegion &ren);` ← 参数类型不支持: const QRegion
 
-## DCircleProgress — 6 方法已生成, 6 跳过
-- `const QColor backgroundColor() const;` ← 返回类型不支持: const QColor
-- `void setBackgroundColor(const QColor &color);` ← 参数类型不支持: const QColor
-- `const QColor chunkColor() const;` ← 返回类型不支持: const QColor
-- `void setChunkColor(const QColor &color);` ← 参数类型不支持: const QColor
+## DCircleProgress — 10 方法已生成, 2 跳过
 - `QLabel *topLabel();` ← 返回类型不支持: QLabel *
 - `QLabel *bottomLabel();` ← 返回类型不支持: QLabel *
 
@@ -80,11 +47,7 @@
 ## DComboBox — 1 方法已生成, 1 跳过
 - `virtual bool eventFilter(QObject *watched, QEvent *event) override;` ← 参数类型不支持: QObject
 
-## DCrumbTextFormat — 4 方法已生成, 6 跳过
-- `QColor tagColor() const;` ← 返回类型不支持: QColor
-- `void setTagColor(const QColor &color);` ← 参数类型不支持: const QColor
-- `QColor textColor() const;` ← 返回类型不支持: QColor
-- `void setTextColor(const QColor &color);` ← 参数类型不支持: const QColor
+## DCrumbTextFormat — 8 方法已生成, 2 跳过
 - `QBrush background() const;` ← 返回类型不支持: QBrush
 - `void setBackground(const QBrush &background);` ← 参数类型不支持: const QBrush
 
@@ -108,15 +71,13 @@
 - `void removeExpand(DDrawer *expand);` ← 参数类型不支持: DDrawer
 - `int id(DDrawer *expand) const;` ← 参数类型不支持: DDrawer
 
-## DFileChooserEdit — 1 方法已生成, 10 跳过
+## DFileChooserEdit — 3 方法已生成, 8 跳过
 - `void setFileMode(QFileDialog::FileMode mode);` ← 参数类型不支持: QFileDialog::FileMode
 - `QFileDialog::FileMode fileMode() const;` ← 返回类型不支持: QFileDialog::FileMode
 - `void setNameFilters(const QStringList &filters);` ← 参数类型不支持: const QStringList
 - `QStringList nameFilters() const;` ← 返回类型不支持: QStringList
 - `void setDirectoryUrl(const QUrl &directory);` ← 参数类型不支持: const QUrl
 - `QUrl directoryUrl();` ← 返回类型不支持: QUrl
-- `void setDialogDisplayPosition(DialogDisplayPosition dialogDisplayPosition);` ← 参数类型不支持: DialogDisplayPosition
-- `DFileChooserEdit::DialogDisplayPosition dialogDisplayPosition() const;` ← 返回类型不支持: DFileChooserEdit::DialogDisplayPosition
 - `void setFileDialog(QFileDialog *fileDialog);` ← 参数类型不支持: QFileDialog
 - `QFileDialog *fileDialog() const;` ← 返回类型不支持: QFileDialog *
 
@@ -129,14 +90,11 @@
 - `void addComboBox(const QString &text, const DComboBoxOptions &options);` ← 参数类型不支持: const DComboBoxOptions
 - `void addLineEdit(const QString &text, const DLineEditOptions &options);` ← 参数类型不支持: const DLineEditOptions
 
-## DFontComboBox — 0 方法已生成, 7 跳过
+## DFontComboBox — 3 方法已生成, 4 跳过
 - `void setWritingSystem(QFontDatabase::WritingSystem);` ← 参数类型不支持: QFontDatabase::WritingSystem
 - `QFontDatabase::WritingSystem writingSystem() const;` ← 返回类型不支持: QFontDatabase::WritingSystem
 - `void setFontFilters(QFontComboBox::FontFilters filters);` ← 参数类型不支持: QFontComboBox::FontFilters
 - `QFontComboBox::FontFilters fontFilters() const;` ← 返回类型不支持: QFontComboBox::FontFilters
-- `QFont currentFont() const;` ← 返回类型不支持: QFont
-- `virtual QSize sizeHint() const override;` ← 返回类型不支持: QSize
-- `void setCurrentFont(const QFont &f);` ← 参数类型不支持: const QFont
 
 ## DGraphicsGlowEffect — 0 方法已生成, 15 跳过
 - `inline void setOffset(qreal dx, qreal dy) {m_xOffset = dx; m_yOffset = dy;}` ← 签名解析失败
@@ -158,44 +116,32 @@
 ## DHeaderLine — 2 方法已生成, 1 跳过
 - `void setContent(QWidget *content);` ← 参数类型不支持: QWidget
 
-## DImageViewer — 18 方法已生成, 5 跳过
+## DImageViewer — 20 方法已生成, 3 跳过
 - `QImage image() const;` ← 返回类型不支持: QImage
 - `void setImage(const QImage &image);` ← 参数类型不支持: const QImage
-- `QRect visibleImageRect() const;` ← 返回类型不支持: QRect
 - `Q_SLOT void scaleAtPoint(QPoint pos, qreal factor);` ← 返回类型不支持: Q_SLOT void
-- `QRect cropImageRect() const;` ← 返回类型不支持: QRect
 
-## DIpv4LineEdit — 8 方法已生成, 1 跳过
-- `Qt::Alignment alignment() const;` ← 返回类型不支持: Qt::Alignment
+## DIpv4LineEdit — 9 方法已生成, 0 跳过
 
-## DKeySequenceEdit — 1 方法已生成, 4 跳过
+## DKeySequenceEdit — 2 方法已生成, 3 跳过
 - `bool setKeySequence(const QKeySequence &keySequence);` ← 参数类型不支持: const QKeySequence
 - `QKeySequence keySequence();` ← 返回类型不支持: QKeySequence
-- `void ShortcutDirection(Qt::AlignmentFlag alig);` ← 参数类型不支持: Qt::AlignmentFlag
 - `QString getKeySequence(QKeySequence sequence);` ← 参数类型不支持: QKeySequence
 
-## DLineEdit — 24 方法已生成, 9 跳过
+## DLineEdit — 27 方法已生成, 6 跳过
 - `QLineEdit *lineEdit() const;` ← 返回类型不支持: QLineEdit *
 - `void showAlertMessage(const QString &text, QWidget *follower, int duration = 300` ← 参数类型不支持: QWidget
-- `void setAlertMessageAlignment(Qt::Alignment alignment);` ← 参数类型不支持: Qt::Alignment
-- `Qt::Alignment alertMessageAlignment() const;` ← 返回类型不支持: Qt::Alignment
 - `void setLeftWidgets(const QList<QWidget *> &list);` ← 参数类型不支持: const QList<QWidget *>
 - `void setRightWidgets(const QList<QWidget *> &list);` ← 参数类型不支持: const QList<QWidget *>
 - `QLineEdit::EchoMode echoMode() const;` ← 返回类型不支持: QLineEdit::EchoMode
 - `void setEchoMode(QLineEdit::EchoMode mode);` ← 参数类型不支持: QLineEdit::EchoMode
-- `void setContextMenuPolicy(Qt::ContextMenuPolicy policy);` ← 参数类型不支持: Qt::ContextMenuPolicy
 
-## DListView — 11 方法已生成, 21 跳过
+## DListView — 17 方法已生成, 15 跳过
 - `/// return true if rect intersects contentsVisualRect+qMax(cacheBuffer,cacheCoun` ← 签名解析失败
 - `State state() const;` ← 返回类型不支持: State
-- `bool isActiveRect(const QRect &rect) const;` ← 参数类型不支持: const QRect
-- `bool isVisualRect(const QRect &rect) const;` ← 参数类型不支持: const QRect
-- `Qt::Orientation orientation() const;` ← 返回类型不支持: Qt::Orientation
 - `void setModel(QAbstractItemModel *model);` ← 参数类型不支持: QAbstractItemModel
-- `QSize minimumSizeHint() const;` ← 返回类型不支持: QSize
 - `DStyledItemDelegate::BackgroundType backgroundType() const;` ← 返回类型不支持: DStyledItemDelegate::BackgroundType
 - `QMargins itemMargins() const;` ← 返回类型不支持: QMargins
-- `QSize itemSize() const;` ← 返回类型不支持: QSize
 - `bool addItem(const QVariant &data);` ← 参数类型不支持: const QVariant
 - `bool addItems(const QVariantList &datas);` ← 参数类型不支持: const QVariantList
 - `bool insertItem(int index, const QVariant &data);` ← 参数类型不支持: const QVariant
@@ -206,29 +152,16 @@
 - `void edit(const QModelIndex &index);` ← 参数类型不支持: const QModelIndex
 - `void setBackgroundType(DStyledItemDelegate::BackgroundType backgroundType);` ← 参数类型不支持: DStyledItemDelegate::BackgroundType
 - `void setItemMargins(const QMargins &itemMargins);` ← 参数类型不支持: const QMargins
-- `void setItemSize(QSize itemSize);` ← 参数类型不支持: QSize
 
-## DLoadingIndicator — 11 方法已生成, 11 跳过
-- `QColor backgroundColor() const;` ← 返回类型不支持: QColor
-- `QPixmap imageSource() const;` ← 返回类型不支持: QPixmap
+## DLoadingIndicator — 18 方法已生成, 4 跳过
 - `QEasingCurve::Type aniEasingType() const;` ← 返回类型不支持: QEasingCurve::Type
-- `QSize sizeHint() const;` ← 返回类型不支持: QSize
-- `RotationDirection direction() const;` ← 返回类型不支持: RotationDirection
 - `void setAniEasingCurve(const QEasingCurve & easing);` ← 参数类型不支持: const QEasingCurve &
-- `void setBackgroundColor(const QColor &color);` ← 参数类型不支持: const QColor
 - `void setRotate(QVariant angle);` ← 参数类型不支持: QVariant
-- `void setImageSource(const QPixmap &imageSource);` ← 参数类型不支持: const QPixmap
 - `void setAniEasingType(QEasingCurve::Type aniEasingType);` ← 参数类型不支持: QEasingCurve::Type
-- `void setDirection(RotationDirection direction);` ← 参数类型不支持: RotationDirection
 
-## DMPRISControl — 2 方法已生成, 1 跳过
-- `void setPictureSize(const QSize &size);` ← 参数类型不支持: const QSize
+## DMPRISControl — 3 方法已生成, 0 跳过
 
-## DPageIndicator — 12 方法已生成, 4 跳过
-- `QColor pointColor() const;` ← 返回类型不支持: QColor
-- `void setPointColor(QColor color);` ← 参数类型不支持: QColor
-- `QColor secondaryPointColor() const;` ← 返回类型不支持: QColor
-- `void setSecondaryPointColor(QColor color);` ← 参数类型不支持: QColor
+## DPageIndicator — 16 方法已生成, 0 跳过
 
 ## DPasswordEdit — 3 方法已生成, 1 跳过
 - `void setEchoMode(QLineEdit::EchoMode mode);` ← 参数类型不支持: QLineEdit::EchoMode
@@ -238,30 +171,19 @@
 - `void setPictureSequence(const QStringList &sequence, const bool autoScale = fals` ← 参数类型不支持: const QStringList
 - `void setPictureSequence(const QList<QPixmap> &sequence, const bool autoScale = f` ← 参数类型不支持: const QList<QPixmap>
 
-## DPrintPreviewWidget — 37 方法已生成, 16 跳过
+## DPrintPreviewWidget — 47 方法已生成, 6 跳过
 - `void setPageRange(const QVector<int> &rangePages);` ← 参数类型不支持: const QVector<int>
-- `void setPageRangeMode(PageRange mode);` ← 参数类型不支持: PageRange
-- `PageRange pageRangeMode();` ← 返回类型不支持: PageRange
 - `void setColorMode(const DPrinter::ColorMode &colorMode);` ← 参数类型不支持: const DPrinter::ColorMode
 - `void setOrientation(const DPrinter::Orientation &pageOrientation);` ← 参数类型不支持: const DPrinter::Orientation
 - `DPrinter::ColorMode getColorMode();` ← 返回类型不支持: DPrinter::ColorMode
 - `void setWaterMargImage(const QImage &image);` ← 参数类型不支持: const QImage
-- `void setWaterMarkFont(const QFont &font);` ← 参数类型不支持: const QFont
-- `QColor waterMarkColor() const;` ← 返回类型不支持: QColor
-- `void setWaterMarkColor(const QColor &color);` ← 参数类型不支持: const QColor
-- `void setImposition(Imposition im);` ← 参数类型不支持: Imposition
-- `Imposition imposition() const;` ← 返回类型不支持: Imposition
-- `void setOrder(Order order);` ← 参数类型不支持: Order
-- `DPrintPreviewWidget::Order order() const;` ← 返回类型不支持: DPrintPreviewWidget::Order
-- `void setPrintMode(PrintMode pt);` ← 参数类型不支持: PrintMode
 - `void themeTypeChanged(DGuiApplicationHelper::ColorType themeType);` ← 参数类型不支持: DGuiApplicationHelper::ColorType
 
 ## DSearchComboBox — 1 方法已生成, 0 跳过
 
 ## DSearchEdit — 7 方法已生成, 0 跳过
 
-## DSettingsDialog — 5 方法已生成, 3 跳过
-- `void setIcon(const QIcon &icon);` ← 参数类型不支持: const QIcon
+## DSettingsDialog — 6 方法已生成, 2 跳过
 - `void updateSettings(DTK_CORE_NAMESPACE::DSettings *settings);` ← 参数类型不支持: DTK_CORE_NAMESPACE::DSettings
 - `void updateSettings(const QByteArray &translateContext, DTK_CORE_NAMESPACE::DSet` ← 参数类型不支持: DTK_CORE_NAMESPACE::DSettings
 
@@ -274,13 +196,12 @@
 - `QWidget *createWidget(QPointer<DTK_CORE_NAMESPACE::DSettingsOption> option);` ← 参数类型不支持: QPointer<DTK_CORE_NAMESPACE::DSettingsOption>
 - `QWidget *createWidget(const QByteArray &translateContext, QPointer<DTK_CORE_NAME` ← 参数类型不支持: QPointer<DTK_CORE_NAMESPACE::DSettingsOption>
 
-## DShadowLine — 0 方法已生成, 1 跳过
-- `QSize sizeHint() const;` ← 返回类型不支持: QSize
+## DShadowLine — 1 方法已生成, 0 跳过
 
 ## DSimpleListItem — 0 方法已生成, 3 跳过
 - `virtual bool sameAs(DSimpleListItem *item)=0;` ← 参数类型不支持: DSimpleListItem
-- `virtual void drawBackground(QRect rect, QPainter *painter, int index, bool isSel` ← 参数类型不支持: QRect
-- `virtual void drawForeground(QRect rect, QPainter *painter, int column, int index` ← 参数类型不支持: QRect
+- `virtual void drawBackground(QRect rect, QPainter *painter, int index, bool isSel` ← 参数类型不支持: QPainter
+- `virtual void drawForeground(QRect rect, QPainter *painter, int column, int index` ← 参数类型不支持: QPainter
 
 ## DSimpleListView — 25 方法已生成, 10 跳过
 - `* \algorithms a list of SortAlgorithm, SortAlgorithm is function pointer, it's t` ← 签名解析失败
@@ -298,19 +219,14 @@
 - `return DGUI_NAMESPACE::DGuiApplicationHelper::isCompactMode() ? t1 : t2;` ← 签名解析失败
 - `static inline T element(const T &t1, const T &t2)` ← 返回类型不支持: inline T
 
-## DSlider — 13 方法已生成, 12 跳过
-- `Qt::Orientation orientation() const;` ← 返回类型不支持: Qt::Orientation
+## DSlider — 18 方法已生成, 7 跳过
 - `QSlider *slider();` ← 返回类型不支持: QSlider *
-- `void setLeftIcon(const QIcon &left);` ← 参数类型不支持: const QIcon
-- `void setRightIcon(const QIcon &right);` ← 参数类型不支持: const QIcon
-- `void setIconSize(const QSize &size);` ← 参数类型不支持: const QSize
 - `void setLeftTicks(const QStringList &info);` ← 参数类型不支持: const QStringList
 - `void setRightTicks(const QStringList &info);` ← 参数类型不支持: const QStringList
 - `void setAboveTicks(const QStringList &info);` ← 参数类型不支持: const QStringList
 - `void setBelowTicks(const QStringList &info);` ← 参数类型不支持: const QStringList
 - `void setMarkPositions(QList<int> list);` ← 参数类型不支持: QList<int>
 - `QSlider::TickPosition tickPosition() const;` ← 返回类型不支持: QSlider::TickPosition
-- `QSize sizeHint() const override;` ← 返回类型不支持: QSize
 
 ## DSpinBox — 4 方法已生成, 2 跳过
 - `QLineEdit *lineEdit() const;` ← 返回类型不支持: QLineEdit *
@@ -320,22 +236,17 @@
 - `void showAlertMessage(const QString &text, QWidget *follower, int duration = 300` ← 参数类型不支持: QWidget
 - `QLineEdit *lineEdit() const;` ← 返回类型不支持: QLineEdit *
 
-## DSpinner — 3 方法已生成, 1 跳过
-- `void setBackgroundColor(QColor color);` ← 参数类型不支持: QColor
+## DSpinner — 4 方法已生成, 0 跳过
 
-## DSwitchButton — 0 方法已生成, 1 跳过
-- `QSize sizeHint() const;` ← 返回类型不支持: QSize
+## DSwitchButton — 1 方法已生成, 0 跳过
 
 ## DSwitchLineExpand — 3 方法已生成, 0 跳过
 
-## DTabletWindowOptionButton — 0 方法已生成, 1 跳过
-- `QSize sizeHint() const override;` ← 返回类型不支持: QSize
+## DTabletWindowOptionButton — 1 方法已生成, 0 跳过
 
-## DTickEffect — 5 方法已生成, 1 跳过
-- `void setDirection(Direction direction);` ← 参数类型不支持: Direction
+## DTickEffect — 6 方法已生成, 0 跳过
 
-## DTipLabel — 0 方法已生成, 2 跳过
-- `void show(const QPoint &pos);` ← 参数类型不支持: const QPoint
+## DTipLabel — 1 方法已生成, 1 跳过
 - `void setForegroundRole(DPalette::ColorType color);` ← 参数类型不支持: DPalette::ColorType
 
 ## DTitlebarToolBaseInterface — 3 方法已生成, 2 跳过
@@ -353,23 +264,16 @@
 ## DTitlebarSettings — 1 方法已生成, 1 跳过
 - `bool initilize(QList<DTitlebarToolBaseInterface *> &tools, const QString &path);` ← 参数类型不支持: QList<DTitlebarToolBaseInterface *>
 
-## DToolButton — 0 方法已生成, 2 跳过
-- `void setAlignment(Qt::Alignment flag);` ← 参数类型不支持: Qt::Alignment
-- `Qt::Alignment alignment() const;` ← 返回类型不支持: Qt::Alignment
+## DToolButton — 2 方法已生成, 0 跳过
 
 ## DWaterProgress — 5 方法已生成, 0 跳过
 
-## DWindowCloseButton — 0 方法已生成, 1 跳过
-- `QSize sizeHint() const override;` ← 返回类型不支持: QSize
+## DWindowCloseButton — 1 方法已生成, 0 跳过
 
-## DWindowMaxButton — 2 方法已生成, 1 跳过
-- `QSize sizeHint() const override;` ← 返回类型不支持: QSize
+## DWindowMaxButton — 3 方法已生成, 0 跳过
 
-## DWindowMinButton — 0 方法已生成, 1 跳过
-- `QSize sizeHint() const override;` ← 返回类型不支持: QSize
+## DWindowMinButton — 1 方法已生成, 0 跳过
 
-## DWindowOptionButton — 0 方法已生成, 1 跳过
-- `QSize sizeHint() const override;` ← 返回类型不支持: QSize
+## DWindowOptionButton — 1 方法已生成, 0 跳过
 
-## DWindowQuitFullButton — 0 方法已生成, 1 跳过
-- `QSize sizeHint() const override;` ← 返回类型不支持: QSize
+## DWindowQuitFullButton — 1 方法已生成, 0 跳过

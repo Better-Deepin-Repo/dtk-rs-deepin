@@ -3,12 +3,67 @@
 #include "dtk-sys/src/lib.rs.h" // Rust 回调 dtk_cb0/dtk_cb_i32 声明
 
 #include <QCoreApplication>
+#include <QGuiApplication>
 #include <QHeaderView>
+#include <QStyle>
 #include <QTableWidgetItem>
 #include <cstdio>
 #include <string>
 
 namespace dtkrs {
+
+// DApplication 子类：event() 拦 QEvent::Quit，问 Rust guard
+class DtkAppEx : public DApplication {
+public:
+    DtkAppEx(int &argc, char **argv, size_t guard_id)
+        : DApplication(argc, argv), m_guard_id(guard_id) {}
+
+    bool event(QEvent *e) override {
+        if (e->type() == QEvent::Quit && m_guard_id && !dtk_cb_guard(m_guard_id))
+            return true; // guard 拒绝 → 吞掉，Rust 侧自己安排重试
+        return DApplication::event(e);
+    }
+
+private:
+    size_t m_guard_id;
+};
+
+// DMainWindow 子类：showEvent/closeEvent 转 Rust
+class DtkMainWindowEx : public DMainWindow {
+public:
+    DtkMainWindowEx(size_t show_id, size_t close_id) : m_show_id(show_id), m_close_id(close_id) {}
+
+protected:
+    void showEvent(QShowEvent *e) override {
+        if (m_show_id)
+            dtk_cb0(m_show_id);
+        DMainWindow::showEvent(e);
+    }
+    void closeEvent(QCloseEvent *e) override {
+        if (m_close_id && !dtk_cb_guard(m_close_id)) {
+            e->ignore();
+            return;
+        }
+        DMainWindow::closeEvent(e);
+    }
+
+private:
+    size_t m_show_id, m_close_id;
+};
+
+// 通用 paint delegate：paint 全转 Rust
+class RustDelegate : public QStyledItemDelegate {
+public:
+    RustDelegate(size_t cb_id, QObject *parent) : QStyledItemDelegate(parent), m_cb_id(cb_id) {}
+
+    void paint(QPainter *p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const override {
+        dtk_cb_paint(m_cb_id, p, const_cast<QModelIndex *>(&idx), opt.rect.x(), opt.rect.y(),
+                     opt.rect.width(), opt.rect.height(), static_cast<int32_t>(opt.state));
+    }
+
+private:
+    size_t m_cb_id;
+};
 
 rust::String to_rust_string(const QString &s) {
     QByteArray utf8 = s.toUtf8();
@@ -34,16 +89,53 @@ DApplication *application_new(rust::Str name) {
 int32_t application_exec(DApplication *app) { return app->exec(); }
 void application_quit() { QCoreApplication::quit(); }
 
+DApplication *application_new_ex(rust::Str name, size_t quit_guard_id) {
+    static int argc = 1;
+    static char arg0[256];
+    std::snprintf(arg0, sizeof(arg0), "%.*s", static_cast<int>(name.size()), name.data());
+    static char *argv[] = {arg0, nullptr};
+    auto *app = new DtkAppEx(argc, argv, quit_guard_id);
+    app->setApplicationName(QString::fromUtf8(arg0));
+    return app;
+}
+
+void application_set_quit_on_last_window_closed(bool quit) {
+    QGuiApplication::setQuitOnLastWindowClosed(quit);
+}
+void application_set_application_display_name(rust::Str name) {
+    QGuiApplication::setApplicationDisplayName(from_rust_str(name));
+}
+bool application_load_translator(DApplication *app) { return app->loadTranslator(); }
+bool application_has_arg(rust::Str arg) {
+    return QCoreApplication::arguments().contains(from_rust_str(arg));
+}
+
 // ---- QWidget 通用 ----
 void widget_show(QWidget *w) { w->show(); }
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px) { w->resize(w_px, h_px); }
 void widget_set_enabled(QWidget *w, bool on) { w->setEnabled(on); }
 void widget_set_window_title(QWidget *w, rust::Str title) { w->setWindowTitle(from_rust_str(title)); }
+void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixedSize(w_px, h_px); }
+void widget_raise(QWidget *w) { w->raise(); }
+void widget_activate_window(QWidget *w) { w->activateWindow(); }
+void widget_close(QWidget *w) { w->close(); }
+bool widget_is_visible(QWidget *w) { return w->isVisible(); }
+void widget_set_focus_policy(QWidget *w, int32_t policy) {
+    w->setFocusPolicy(static_cast<Qt::FocusPolicy>(policy));
+}
+void widget_set_font(QWidget *w, QFont *font) { w->setFont(*font); }
+QPalette *widget_palette(QWidget *w) { return new QPalette(w->palette()); }
+void widget_set_palette(QWidget *w, QPalette *pal) { w->setPalette(*pal); }
+void object_delete_later(QObject *o) { o->deleteLater(); }
 
 // ---- DMainWindow ----
 DMainWindow *mainwindow_new() { return new DMainWindow; }
+DMainWindow *mainwindow_new_ex(size_t show_cb_id, size_t close_cb_id) {
+    return new DtkMainWindowEx(show_cb_id, close_cb_id);
+}
 DTitlebar *mainwindow_titlebar(DMainWindow *w) { return w->titlebar(); }
 void mainwindow_set_central_widget(DMainWindow *w, QWidget *central) { w->setCentralWidget(central); }
+QWidget *mainwindow_take_central_widget(DMainWindow *w) { return w->takeCentralWidget(); }
 void mainwindow_set_window_radius(DMainWindow *w, int32_t radius) { w->setWindowRadius(radius); }
 void mainwindow_set_enable_blur(DMainWindow *w, bool enable) { w->setEnableBlurWindow(enable); }
 
@@ -58,6 +150,11 @@ QIcon *icon_from_file(rust::Str path) { return new QIcon(from_rust_str(path)); }
 // ---- DLabel ----
 DLabel *label_new(rust::Str text) { return new DLabel(from_rust_str(text)); }
 void label_set_text(DLabel *l, rust::Str text) { l->setText(from_rust_str(text)); }
+void label_set_word_wrap(DLabel *l, bool wrap) { l->setWordWrap(wrap); }
+void label_set_alignment(DLabel *l, int32_t alignment) {
+    l->setAlignment(Qt::Alignment::fromInt(alignment));
+}
+void label_set_pixmap(DLabel *l, QPixmap *pm) { l->setPixmap(*pm); }
 
 // ---- 按钮 ----
 DSuggestButton *suggest_button_new(rust::Str text) {
@@ -116,6 +213,98 @@ void table_header_stretch_last(QTableWidget *t, bool stretch) {
 }
 void table_set_column_width(QTableWidget *t, int32_t col, int32_t width) {
     t->setColumnWidth(col, width);
+}
+
+// ---- QTableWidget 扩展 ----
+QTableWidgetItem *table_item(QTableWidget *t, int32_t row, int32_t col) { return t->item(row, col); }
+void table_select_row(QTableWidget *t, int32_t row) { t->selectRow(row); }
+void table_hide_headers(QTableWidget *t, bool horizontal, bool vertical) {
+    if (horizontal)
+        t->horizontalHeader()->hide();
+    if (vertical)
+        t->verticalHeader()->hide();
+}
+void table_set_section_resize_mode(QTableWidget *t, int32_t col, int32_t mode) {
+    t->horizontalHeader()->setSectionResizeMode(col, static_cast<QHeaderView::ResizeMode>(mode));
+}
+void table_set_vertical_header_default_section_size(QTableWidget *t, int32_t size) {
+    t->verticalHeader()->setDefaultSectionSize(size);
+}
+void table_set_show_grid(QTableWidget *t, bool show) { t->setShowGrid(show); }
+void table_set_frame_shape(QTableWidget *t, int32_t shape) {
+    t->setFrameShape(static_cast<QFrame::Shape>(shape));
+}
+void table_set_icon_size(QTableWidget *t, int32_t w, int32_t h) { t->setIconSize(QSize(w, h)); }
+void table_set_delegate_for_column(QTableWidget *t, int32_t col, QStyledItemDelegate *delegate) {
+    t->setItemDelegateForColumn(col, delegate);
+}
+
+// ---- QTableWidgetItem ----
+void item_set_icon(QTableWidgetItem *it, QIcon *icon) { it->setIcon(*icon); }
+void item_set_text_alignment(QTableWidgetItem *it, int32_t alignment) { it->setTextAlignment(alignment); }
+void item_set_foreground(QTableWidgetItem *it, QColor *color) { it->setForeground(*color); }
+void item_set_data_string(QTableWidgetItem *it, int32_t role, rust::Str value) {
+    it->setData(role, from_rust_str(value));
+}
+rust::String item_data_string(QTableWidgetItem *it, int32_t role) {
+    return to_rust_string(it->data(role).toString());
+}
+void item_set_data_bool(QTableWidgetItem *it, int32_t role, bool value) { it->setData(role, value); }
+bool item_data_bool(QTableWidgetItem *it, int32_t role) { return it->data(role).toBool(); }
+
+// ---- 值类型 ----
+QColor *color_new_rgb(int32_t r, int32_t g, int32_t b, int32_t a) { return new QColor(r, g, b, a); }
+QFont *font_new() { return new QFont; }
+void font_set_point_size(QFont *f, int32_t size) { f->setPointSize(size); }
+void font_set_bold(QFont *f, bool bold) { f->setBold(bold); }
+QPalette *palette_new() { return new QPalette; }
+void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color) {
+    pal->setColor(static_cast<QPalette::ColorGroup>(group), static_cast<QPalette::ColorRole>(role), *color);
+}
+QPixmap *pixmap_new(rust::Str path) { return new QPixmap(from_rust_str(path)); }
+QPixmap *standard_icon_pixmap(QWidget *w, int32_t icon, int32_t size) {
+    return new QPixmap(w->style()->standardIcon(static_cast<QStyle::StandardPixmap>(icon)).pixmap(size, size));
+}
+QSize *size_new(int32_t w, int32_t h) { return new QSize(w, h); }
+QPoint *point_new(int32_t x, int32_t y) { return new QPoint(x, y); }
+QRect *rect_new(int32_t x, int32_t y, int32_t w, int32_t h) { return new QRect(x, y, w, h); }
+
+// ---- QSocketNotifier ----
+QSocketNotifier *socket_notifier_new(int32_t fd) {
+    return new QSocketNotifier(fd, QSocketNotifier::Read);
+}
+
+// ---- 通用 paint delegate ----
+QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent) {
+    return new RustDelegate(paint_cb_id, parent);
+}
+
+// ---- QPainter 原语 ----
+void painter_save(QPainter *p) { p->save(); }
+void painter_restore(QPainter *p) { p->restore(); }
+void painter_set_pen_color(QPainter *p, QColor *color) { p->setPen(*color); }
+void painter_set_font(QPainter *p, QFont *font) { p->setFont(*font); }
+void painter_draw_text(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, int32_t flags,
+                       rust::Str text) {
+    p->drawText(QRect(x, y, w, h), flags, from_rust_str(text));
+}
+void painter_draw_pixmap(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QPixmap *pm) {
+    p->drawPixmap(QRect(x, y, w, h), *pm);
+}
+void painter_draw_icon(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QIcon *icon) {
+    icon->paint(p, QRect(x, y, w, h));
+}
+void painter_fill_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QColor *color) {
+    p->fillRect(QRect(x, y, w, h), *color);
+}
+
+// ---- QModelIndex 数据访问 ----
+rust::String index_data_string(QModelIndex *idx, int32_t role) {
+    return to_rust_string(idx->data(role).toString());
+}
+bool index_data_bool(QModelIndex *idx, int32_t role) { return idx->data(role).toBool(); }
+int64_t index_data_i64(QModelIndex *idx, int32_t role) {
+    return idx->data(role).toLongLong();
 }
 
 // ---- QTimer ----
