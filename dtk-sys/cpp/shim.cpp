@@ -1,6 +1,6 @@
 #include "dtk_shim.h"
 #include "relay.h"
-#include "dtk-sys/src/lib.rs.h" // Rust 回调 dtk_cb0/dtk_cb_i32 声明
+#include "dtk-sys/src/lib.rs.h" // Rust callback declarations (dtk_cb0/dtk_cb_i32)
 
 #include <QCoreApplication>
 #include <QGuiApplication>
@@ -12,7 +12,7 @@
 
 namespace dtkrs {
 
-// DApplication 子类：event() 拦 QEvent::Quit，问 Rust guard
+// DApplication subclass: event() intercepts QEvent::Quit and asks the Rust guard
 class DtkAppEx : public DApplication {
 public:
     DtkAppEx(int &argc, char **argv, size_t guard_id)
@@ -20,7 +20,7 @@ public:
 
     bool event(QEvent *e) override {
         if (e->type() == QEvent::Quit && m_guard_id && !dtk_cb_guard(m_guard_id))
-            return true; // guard 拒绝 → 吞掉，Rust 侧自己安排重试
+            return true; // guard refused -> swallow; the Rust side schedules its own retry
         return DApplication::event(e);
     }
 
@@ -28,7 +28,7 @@ private:
     size_t m_guard_id;
 };
 
-// DMainWindow 子类：showEvent/closeEvent 转 Rust
+// DMainWindow subclass: forwards showEvent/closeEvent to Rust
 class DtkMainWindowEx : public DMainWindow {
 public:
     DtkMainWindowEx(size_t show_id, size_t close_id) : m_show_id(show_id), m_close_id(close_id) {}
@@ -51,7 +51,7 @@ private:
     size_t m_show_id, m_close_id;
 };
 
-// 通用 paint delegate：paint 全转 Rust
+// generic paint delegate: forwards paint entirely to Rust
 class RustDelegate : public QStyledItemDelegate {
 public:
     RustDelegate(size_t cb_id, QObject *parent) : QStyledItemDelegate(parent), m_cb_id(cb_id) {}
@@ -76,7 +76,7 @@ QString from_rust_str(rust::Str s) {
 
 // ---- DApplication ----
 DApplication *application_new(rust::Str name) {
-    // QApplication 要求 argv 生命周期覆盖 app，用 static 顶上
+    // QApplication requires argv to outlive the app; static storage does that
     static int argc = 1;
     static char arg0[256];
     std::snprintf(arg0, sizeof(arg0), "%.*s", static_cast<int>(name.size()), name.data());
@@ -110,7 +110,7 @@ bool application_has_arg(rust::Str arg) {
     return QCoreApplication::arguments().contains(from_rust_str(arg));
 }
 
-// ---- QWidget 通用 ----
+// ---- QWidget common ----
 void widget_show(QWidget *w) { w->show(); }
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px) { w->resize(w_px, h_px); }
 void widget_set_enabled(QWidget *w, bool on) { w->setEnabled(on); }
@@ -156,7 +156,7 @@ void label_set_alignment(DLabel *l, int32_t alignment) {
 }
 void label_set_pixmap(DLabel *l, QPixmap *pm) { l->setPixmap(*pm); }
 
-// ---- 按钮 ----
+// ---- buttons ----
 DSuggestButton *suggest_button_new(rust::Str text) {
     auto *b = new DSuggestButton;
     b->setText(from_rust_str(text));
@@ -166,7 +166,7 @@ DPushButton *push_button_new(rust::Str text) { return new DPushButton(from_rust_
 void button_set_text(DPushButton *b, rust::Str text) { b->setText(from_rust_str(text)); }
 void button_click(DPushButton *b) { b->click(); }
 
-// ---- 布局 ----
+// ---- layouts ----
 QVBoxLayout *vbox_new(QWidget *parent) { return new QVBoxLayout(parent); }
 QHBoxLayout *hbox_new(QWidget *parent) { return new QHBoxLayout(parent); }
 QWidget *widget_new(QWidget *parent) { return new QWidget(parent); }
@@ -215,7 +215,7 @@ void table_set_column_width(QTableWidget *t, int32_t col, int32_t width) {
     t->setColumnWidth(col, width);
 }
 
-// ---- QTableWidget 扩展 ----
+// ---- QTableWidget extras ----
 QTableWidgetItem *table_item(QTableWidget *t, int32_t row, int32_t col) { return t->item(row, col); }
 void table_select_row(QTableWidget *t, int32_t row) { t->selectRow(row); }
 void table_hide_headers(QTableWidget *t, bool horizontal, bool vertical) {
@@ -254,7 +254,7 @@ rust::String item_data_string(QTableWidgetItem *it, int32_t role) {
 void item_set_data_bool(QTableWidgetItem *it, int32_t role, bool value) { it->setData(role, value); }
 bool item_data_bool(QTableWidgetItem *it, int32_t role) { return it->data(role).toBool(); }
 
-// ---- 值类型 ----
+// ---- value types ----
 QColor *color_new_rgb(int32_t r, int32_t g, int32_t b, int32_t a) { return new QColor(r, g, b, a); }
 QFont *font_new() { return new QFont; }
 void font_set_point_size(QFont *f, int32_t size) { f->setPointSize(size); }
@@ -276,12 +276,12 @@ QSocketNotifier *socket_notifier_new(int32_t fd) {
     return new QSocketNotifier(fd, QSocketNotifier::Read);
 }
 
-// ---- 通用 paint delegate ----
+// ---- generic paint delegate ----
 QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent) {
     return new RustDelegate(paint_cb_id, parent);
 }
 
-// ---- QPainter 原语 ----
+// ---- QPainter primitives ----
 void painter_save(QPainter *p) { p->save(); }
 void painter_restore(QPainter *p) { p->restore(); }
 void painter_set_pen_color(QPainter *p, QColor *color) { p->setPen(*color); }
@@ -300,7 +300,7 @@ void painter_fill_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, 
     p->fillRect(QRect(x, y, w, h), *color);
 }
 
-// ---- QModelIndex 数据访问 ----
+// ---- QModelIndex data access ----
 rust::String index_data_string(QModelIndex *idx, int32_t role) {
     return to_rust_string(idx->data(role).toString());
 }
@@ -317,7 +317,7 @@ void timer_single_shot(int32_t msec, size_t cb_id) {
     QTimer::singleShot(msec, QCoreApplication::instance(), [cb_id] { dtk_cb0(cb_id); });
 }
 
-// ---- 信号回调 ----
+// ---- signal callbacks ----
 void relay_connect0(QObject *sender, rust::Str signal, size_t cb_id) {
     DtkRelay::connect0(sender, std::string(signal).c_str(), cb_id);
 }

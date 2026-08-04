@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""扫描 DTK6 widget 头文件 → 生成 C++ shim、cxx::bridge、Rust wrapper。
+"""Scan DTK6 widget headers -> generate C++ shim, cxx::bridge, Rust wrappers.
 
-用法: tools/gen.py   (幂等，直接覆盖生成文件)
-产物:
-  dtk-sys/include/dtk_gen_shim.h   shim 声明
-  dtk-sys/cpp/dtk_gen_shim.cpp     shim 实现
-  dtk-sys/src/gen_ffi.rs               cxx::bridge
-  dtk/src/widgets.rs                   safe wrapper
-  GEN_REPORT.md                    覆盖报告（含跳过原因）
+Usage: tools/gen.py   (idempotent, overwrites generated files)
+Outputs:
+  dtk-sys/include/dtk_gen_shim.h   shim declarations
+  dtk-sys/cpp/dtk_gen_shim.cpp     shim implementations
+  dtk-sys/src/gen_ffi.rs           cxx::bridge
+  dtk/src/widgets.rs               safe wrappers
+  GEN_REPORT.md                    coverage report (with skip reasons)
 
-规则:
-  - 只生成所有参数/返回类型都可映射的方法，其余进报告
-  - 信号不生成（DtkRelay 按名字运行时连接，wrapper 已 impl Signal0/SignalI32）
-  - 构造：有"全部参数带默认值"的 ctor 就生成 new()
+Rules:
+  - only generate methods whose param/return types all map cleanly; the rest go to the report
+  - signals are not generated (DtkRelay connects by name at runtime; wrappers impl Signal0/SignalI32)
+  - constructors: generate new() when a ctor exists with all-default args
 """
 import os
 import re
@@ -21,11 +21,11 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HDR_DIR = "/usr/include/dtk6/DWidget"
 
-# 手写绑定过的类，生成器跳过
+# classes bound by hand; the generator skips these
 HAND_BOUND = {"DApplication", "DMainWindow", "DTitlebar", "DLabel", "DSuggestButton", "DPushButton"}
-# 已在手写 bridge 里声明的 Qt opaque 类型（gen bridge 也要用，需重新声明在自己的桥里）
+# Qt opaque types already declared in the hand-written bridge (the gen bridge must redeclare its own)
 QT_CLASSES = {"QObject", "QWidget", "QLayout", "QVBoxLayout", "QHBoxLayout", "QTableWidget", "QTimer", "QIcon"}
-# Qt widget 基类（判断生成 widget_wrapper 还是 object_wrapper）
+# Qt widget base classes (decides widget_wrapper vs object_wrapper)
 QT_WIDGET_BASES = {
     "QWidget", "QMainWindow", "QDialog", "QFrame", "QLabel", "QPushButton", "QAbstractButton",
     "QComboBox", "QLineEdit", "QTextEdit", "QAbstractScrollArea", "QScrollArea", "QListView",
@@ -37,7 +37,7 @@ QT_WIDGET_BASES = {
 }
 
 VALUE_TYPES = {"QColor", "QSize", "QPoint", "QRect", "QFont", "QPixmap", "QIcon", "QPalette"}
-# Qt 里是 QFlags 的类型（fromInt/toInt 转换）
+# types that are QFlags in Qt (fromInt/toInt conversion)
 QT_QFLAGS = {"Qt::Alignment", "Qt::WindowFlags", "Qt::MouseButtons", "Qt::KeyboardModifiers",
              "Qt::Orientations", "Qt::ItemFlags", "Qt::MatchFlags", "Qt::ApplicationStates",
              "Qt::InputMethodHints", "Qt::DockWidgetAreas", "Qt::ToolBarAreas"}
@@ -71,7 +71,7 @@ def snake(name: str) -> str:
 
 
 def split_params(s: str):
-    """按逗号切参数，考虑 <> () 嵌套"""
+    """split params on commas, respecting <> () nesting"""
     out, depth, cur = [], 0, ""
     for ch in s:
         if ch in "<(":
@@ -89,12 +89,12 @@ def split_params(s: str):
 
 
 class Ctx:
-    """类型映射上下文：知道全部 DTK 类名和枚举"""
+    """type-mapping context: knows all DTK class names and enums"""
 
     def __init__(self, classes):
         self.classes = classes  # set of DTK class names
-        self.qenums = {}  # "Scope::Enum" → True（含非导出嵌套类）
-        self.enums = {}  # 非限定 enum 名 → scope 或 "?"（多义禁用）
+        self.qenums = {}  # "Scope::Enum" -> True (includes non-exported nested classes)
+        self.enums = {}  # unqualified enum name -> scope or "?" (ambiguous, disabled)
 
     def register_enum(self, scope: str, name: str):
         self.qenums[f"{scope}::{name}"] = True
@@ -102,10 +102,10 @@ class Ctx:
         if prev is None:
             self.enums[name] = scope
         elif prev != scope:
-            self.enums[name] = "?"  # 多义，非限定名禁用
+            self.enums[name] = "?"  # ambiguous; unqualified use disabled
 
     def map_type(self, cpp: str, is_return: bool, scope: str | None = None):
-        """返回 (rust_type, cpp_shim_type, kind, info) 或 None(不支持)。
+        """returns (rust_type, cpp_shim_type, kind, info) or None (unsupported).
         kind: prim | str | ptr | qtptr | val | enum | qtenum | qflags"""
         t = cpp.strip()
         t = re.sub(r"\s+", " ", t)
@@ -115,18 +115,18 @@ class Ctx:
         ptr = t.endswith("*")
         base = t.rstrip("*").strip()
         base = base.replace("DTK_CORE_NAMESPACE::", "").replace("DTK_GUI_NAMESPACE::", "")
-        # Qt 枚举 / QFlags
+        # Qt enums / QFlags
         if base.startswith("Qt::"):
             kind = "qflags" if base in QT_QFLAGS else "qtenum"
             return ("i32", "int32_t", kind, base)
-        # DTK 枚举：本类优先 → 限定名查表 → 非限定全局
+        # DTK enums: own class first -> qualified lookup -> unqualified global
         if scope and f"{scope}::{base}" in self.qenums:
             return ("i32", "int32_t", "enum", f"{scope}::{base}")
         if "::" in base:
             qual = base.replace("DTK_WIDGET_NAMESPACE::", "")
             if qual in self.qenums and qual.split("::")[0] in self.classes:
                 return ("i32", "int32_t", "enum", qual)
-            return None  # 非导出嵌套类枚举等，跳过
+            return None  # non-exported nested-class enums etc; skip
         if base in self.enums and self.enums[base] != "?":
             sc = self.enums[base]
             if sc in self.classes or sc == "Dtk::Widget":
@@ -135,11 +135,11 @@ class Ctx:
         if ptr:
             if base in self.classes:
                 return (f"*mut {base}", f"{base} *", "ptr", base)
-            # Qt 类只放行 QWidget（其余跨 bridge 类型转换太麻烦，进报告）
+            # only QWidget allowed among Qt classes (cross-bridge casts for others are a pain; report)
             if base == "QWidget":
                 return ("*mut QWidget", "QWidget *", "qtptr", base)
             return None
-        # 值类型：堆分配 opaque 指针
+        # value types: heap-allocated opaque pointers
         if base in VALUE_TYPES:
             return (f"*mut {base}", f"{base} *", "val", base)
         if base in PRIM:
@@ -156,10 +156,10 @@ ENUM_RE = re.compile(r"^\s*enum\s+(?:class\s+)?(\w+)")
 
 
 def parse_header(path, ctx):
-    """解析单个头文件 → [(class, bases, [method...], report_skip...)]"""
+    """parse one header -> [(class, bases, [method...], report_skip...)]"""
     classes = []
     cur = None
-    nested = None  # 非导出嵌套类名（其方法不生成，枚举仅登记）
+    nested = None  # non-exported nested class name (methods not generated, enums only registered)
     section = None  # None | 'pub' | 'other'
     with open(path, encoding="utf-8", errors="replace") as f:
         for line in f:
@@ -172,7 +172,7 @@ def parse_header(path, ctx):
                 cur = {"name": m.group(1), "bases": bases, "methods": [], "skipped": []}
                 section = None
                 continue
-            # 非导出（嵌套/文件级）类定义：跟踪 scope，方法不生成
+            # non-exported (nested/file-scope) class definition: track scope, do not generate methods
             nm = re.match(r"^\s*(?:class|struct)\s+(\w+)\b[^;{]*$", line)
             if nm and not m and nested is None:
                 nested = nm.group(1)
@@ -206,7 +206,7 @@ def parse_header(path, ctx):
             if section != "pub" or not s:
                 continue
             if s.startswith(("{", "}", "~")):
-                continue  # inline 函数体 / 析构
+                continue  # inline function body / destructor
             if any(k in s for k in ("Q_PROPERTY", "Q_DECLARE", "D_DECLARE", "typedef", "using ", "enum ", "struct ",
                                     "friend", "operator", "#", "D_DECL_DEPRECATED", "Q_OBJECT", "Q_ENUM", "Q_FLAG")):
                 continue
@@ -214,8 +214,8 @@ def parse_header(path, ctx):
                 continue
             if re.search(r"=\s*0\s*;", s):
                 cur["abstract"] = True
-            s = re.sub(r"\s*Q_DECL_\w+", "", s)  # noexcept/override 宏剥掉
-            # 构造函数：无返回类型，名字 == 类名
+            s = re.sub(r"\s*Q_DECL_\w+", "", s)  # strip noexcept/override macros
+            # constructor: no return type, name == class name
             cm = re.match(rf"^\s*(?:explicit\s+)?{cur['name']}\s*\((.*)\)\s*;?\s*$", s)
             if cm:
                 ps = split_params(cm.group(1))
@@ -224,13 +224,13 @@ def parse_header(path, ctx):
                 continue
             m = METHOD_RE.match(s)
             if not m:
-                cur["skipped"].append((s[:80], "签名解析失败"))
+                cur["skipped"].append((s[:80], "signature parse failed"))
                 continue
             is_static, ret, name, params = bool(m.group(1)), m.group(2).strip(), m.group(3), m.group(4)
             if name.startswith("~") or name == cur["name"] and not ret:
-                continue  # 析构 / 误匹配
+                continue  # destructor / false match
             if name == cur["name"]:
-                # 构造函数
+                # constructor
                 ps = split_params(params)
                 all_default = all("=" in p for p in ps)
                 cur.setdefault("ctor_new", False)
@@ -242,10 +242,10 @@ def parse_header(path, ctx):
 
 
 def gen_method(ctx, cls, is_static, ret, name, params):
-    """映射一个方法 → 生成三处代码。失败返回原因字符串"""
+    """map one method -> emit code in three places. Returns failure reason string on error"""
     r = ctx.map_type(ret, is_return=True, scope=cls)
     if r is None:
-        return None, f"返回类型不支持: {ret}"
+        return None, f"unsupported return type: {ret}"
     ret_rs, ret_cpp, ret_kind, ret_cls = r
     args = []  # (rust_sig_piece, cpp_sig_piece, call_piece)
     for i, p in enumerate(params):
@@ -260,7 +260,7 @@ def gen_method(ctx, cls, is_static, ret, name, params):
             pname += "_"
         q = ctx.map_type(ptype, is_return=False, scope=cls)
         if q is None:
-            return None, f"参数类型不支持: {ptype}"
+            return None, f"unsupported param type: {ptype}"
         prs, pcpp, pkind, pcls = q
         if pkind == "str":
             args.append((f"{pname}: &str", f"rust::Str {pname}", f"from_rust_str({pname})", "str", None))
@@ -282,7 +282,7 @@ def main():
         os.path.join(HDR_DIR, f) for f in os.listdir(HDR_DIR)
         if f.endswith(".h") and not f.endswith("_p.h") and f != "dwidgetstype.h"
     )
-    # 先扫类名建上下文
+    # first pass: collect class names to build the context
     all_classes = set()
     for h in headers:
         with open(h, encoding="utf-8", errors="replace") as f:
@@ -292,7 +292,7 @@ def main():
                     all_classes.add(m.group(1))
     ctx = Ctx(all_classes - HAND_BOUND)
 
-    # 两遍扫描：先全量解析（收集类间枚举引用），再生成
+    # two passes: parse everything (collecting cross-class enum refs), then generate
     parsed = []
     for h in headers:
         for c in parse_header(h, ctx):
@@ -305,7 +305,7 @@ def main():
     for c in parsed:
             is_widget = any(b in QT_WIDGET_BASES or (b in all_classes and b != "DObject") for b in c["bases"])
             if not is_widget and c["bases"]:
-                # 基类是另一个 DTK 类时跟随基类（DTK 控件居多）
+                # if a base is another DTK class, follow it (most DTK classes are widgets)
                 is_widget = any(b.startswith(("Q", "D")) and b != "DObject" for b in c["bases"])
             gen_methods = []
             skipped = c["skipped"]
@@ -325,13 +325,13 @@ def main():
 
 def emit(classes):
     shim_h, shim_cpp, bridge, wrapper, report = [], [], [], [], []
-    shim_h.append("// 自动生成 by tools/gen.py，勿手改\n#pragma once\n#include \"dtk_shim.h\"\n")
-    shim_cpp.append('// 自动生成 by tools/gen.py，勿手改\n#include "dtk_gen_shim.h"\n\nnamespace dtkrs {\n')
-    bridge.append("// 自动生成 by tools/gen.py，勿手改\n#[cxx::bridge(namespace = \"dtkrs\")]\npub mod genffi {\n    extern \"C++\" {\n        include!(\"dtk_gen_shim.h\");\n        type QWidget;\n")
+    shim_h.append("// auto-generated by tools/gen.py, do not edit\n#pragma once\n#include \"dtk_shim.h\"\n")
+    shim_cpp.append('// auto-generated by tools/gen.py, do not edit\n#include "dtk_gen_shim.h"\n\nnamespace dtkrs {\n')
+    bridge.append("// auto-generated by tools/gen.py, do not edit\n#[cxx::bridge(namespace = \"dtkrs\")]\npub mod genffi {\n    extern \"C++\" {\n        include!(\"dtk_gen_shim.h\");\n        type QWidget;\n")
     for vt in sorted(VALUE_TYPES):
         bridge.append(f"        type {vt};\n")
-    wrapper.append("// 自动生成 by tools/gen.py，勿手改\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{Signal0, SignalI32, QWidget};\nuse crate::{QColor, QFont, QIcon, QPalette, QPixmap, QPoint, QRect, QSize};\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
-    report.append("# DTK6 widget binding 覆盖报告\n")
+    wrapper.append("// auto-generated by tools/gen.py, do not edit\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{Signal0, SignalI32, QWidget};\nuse crate::{QColor, QFont, QIcon, QPalette, QPixmap, QPoint, QRect, QSize};\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
+    report.append("# DTK6 widget binding coverage report\n")
 
     total_ok, total_skip = 0, 0
     used_headers = sorted({c["header"] for c in classes})
@@ -358,11 +358,11 @@ def emit(classes):
         for (ret_rs, ret_cpp, ret_kind, ret_cls, is_static, meth, args) in c["methods"]:
             base_fn = f"gen_{sname}_{snake(meth)}"
             if snake(meth) in RUST_KEYWORDS:
-                base_fn += "_"  # 与 wrapper 侧同规则，防 Rust 关键字
+                base_fn += "_"  # same rule as the wrapper side, avoids Rust keywords
             n = used_names.get(base_fn, 0)
             used_names[base_fn] = n + 1
             fn = base_fn if n == 0 else f"{base_fn}_{n + 1}"
-            # shim 签名
+            # shim signature
             self_arg = [] if is_static else [f"{name} *self"]
             cpp_sig = ", ".join(self_arg + [a[1] for a in args])
             call_args = ", ".join(a[2] for a in args)
@@ -397,7 +397,7 @@ def emit(classes):
         if c["ctor_new"]:
             wrapper.append(f"    pub fn new() -> Self {{\n        Self::from_raw(unsafe {{ genffi::gen_{sname}_new() }})\n    }}\n")
         used = {}
-        # widget_wrapper 宏已提供这些方法，跳过防重复定义
+        # widget_wrapper macro already provides these; skip to avoid duplicate definitions
         MACRO_METHODS = {"show", "resize", "set_enabled", "set_window_title", "as_widget", "from_raw", "as_qobject", "new", "default"}
         for (ret_rs, _, ret_kind, ret_cls, is_static, meth, args) in c["methods"]:
             mname = snake(meth)
@@ -407,8 +407,9 @@ def emit(classes):
             used[mname] = n + 1
             mname = mname if n == 0 else f"{mname}_{n + 1}"
             if mname in MACRO_METHODS:
-                continue  # 宏已提供
-            fn_name = f"gen_{sname}_{mname}"  # 与 shim/bridge 命名同序同规则            # wrapper 参数: *mut X → &X
+                continue  # already provided by the macro
+            fn_name = f"gen_{sname}_{mname}"  # same naming order/rule as shim/bridge
+            # wrapper params: *mut X -> &X
             wr_args, call_args = [], []
             for rs, _cpp, _call, pkind, pcls in args:
                 pname, ptype = rs.split(": ", 1)
@@ -420,7 +421,7 @@ def emit(classes):
                     call_args.append(f"{pname}.ptr as _")
                 elif pkind == "val":
                     wr_args.append(f"{pname}: &{pcls}")
-                    call_args.append(f"{pname}.ptr as _")  # 跨 cxx bridge 的同名 opaque 类型，指针强转
+                    call_args.append(f"{pname}.ptr as _")  # same-name opaque types across cxx bridges; raw pointer cast
                 else:
                     wr_args.append(rs)
                     call_args.append(pname)
@@ -428,7 +429,7 @@ def emit(classes):
             sig = ", ".join(self_piece + wr_args)
             self_call = [] if is_static else ["self.ptr"]
             calls = ", ".join(self_call + call_args)
-            # 返回：指针包成 wrapper，值类型原样
+            # returns: wrap pointers in wrappers, pass values through
             if ret_kind == "ptr":
                 ret_decl = f" -> {ret_cls}"
                 expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }})"
@@ -447,18 +448,18 @@ def emit(classes):
             wrapper.append(f"impl Default for {name} {{\n    fn default() -> Self {{ Self::new() }}\n}}\n\n")
         total_skip_n = len(c["skipped"])
         total_skip += total_skip_n
-        report.append(f"\n## {name} — {len(c['methods'])} 方法已生成, {total_skip_n} 跳过\n")
+        report.append(f"\n## {name} — {len(c['methods'])} methods generated, {total_skip_n} skipped\n")
         for raw, why in c["skipped"]:
             report.append(f"- `{raw}` ← {why}\n")
 
-    report.insert(1, f"\n类: {len(classes)}, 已生成方法: {total_ok}, 跳过: {total_skip}\n")
+    report.insert(1, f"\nclasses: {len(classes)}, methods generated: {total_ok}, skipped: {total_skip}\n")
 
     write(os.path.join(REPO, "dtk-sys/include/dtk_gen_shim.h"), "".join(shim_h))
     write(os.path.join(REPO, "dtk-sys/cpp/dtk_gen_shim.cpp"), "".join(shim_cpp))
     write(os.path.join(REPO, "dtk-sys/src/gen_ffi.rs"), "".join(bridge))
     write(os.path.join(REPO, "dtk/src/widgets.rs"), "".join(wrapper))
     write(os.path.join(REPO, "GEN_REPORT.md"), "".join(report))
-    print(f"类 {len(classes)}, 方法生成 {total_ok}, 跳过 {total_skip}")
+    print(f"classes {len(classes)}, methods generated {total_ok}, skipped {total_skip}")
 
 
 def write(path, content):

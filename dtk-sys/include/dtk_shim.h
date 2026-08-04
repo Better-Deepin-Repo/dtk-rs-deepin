@@ -1,5 +1,5 @@
-// dtk-rs C++ shim：把 DTK6/Qt6 C++ API 拍平成自由函数，给 cxx::bridge 用。
-// 所有对象由 Qt parent-child 机制管理生命周期，Rust 侧只拿裸指针。
+// dtk-rs C++ shim: flattens the DTK6/Qt6 C++ API into free functions for cxx::bridge.
+// All objects are lifetime-managed by Qt parent-child; the Rust side only holds raw pointers.
 #pragma once
 
 #include <cstddef>
@@ -41,7 +41,7 @@
 
 namespace dtkrs {
 
-// cxx 要求 opaque type 全在 bridge namespace 里，Qt 类也 alias 进来
+// cxx requires opaque types to live in the bridge namespace; alias the Qt classes in too
 using ::QObject;
 using ::QWidget;
 using ::QLayout;
@@ -77,7 +77,7 @@ QString from_rust_str(rust::Str s);
 
 // ---- DApplication ----
 DApplication *application_new(rust::Str name);
-DApplication *application_new_ex(rust::Str name, size_t quit_guard_id); // guard 返回 false 则吞掉 Quit 事件
+DApplication *application_new_ex(rust::Str name, size_t quit_guard_id); // guard returning false swallows the Quit event
 int32_t application_exec(DApplication *app);
 void application_quit();
 void application_set_quit_on_last_window_closed(bool quit);
@@ -85,7 +85,7 @@ void application_set_application_display_name(rust::Str name);
 bool application_load_translator(DApplication *app);
 bool application_has_arg(rust::Str arg);
 
-// ---- QWidget 通用（所有控件适用）----
+// ---- QWidget common (applies to all widgets) ----
 void widget_show(QWidget *w);
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px);
 void widget_set_enabled(QWidget *w, bool on);
@@ -97,13 +97,13 @@ void widget_close(QWidget *w);
 bool widget_is_visible(QWidget *w);
 void widget_set_focus_policy(QWidget *w, int32_t policy);
 void widget_set_font(QWidget *w, QFont *font);
-QPalette *widget_palette(QWidget *w); // 堆拷贝，调用方持有
+QPalette *widget_palette(QWidget *w); // heap copy, owned by the caller
 void widget_set_palette(QWidget *w, QPalette *pal);
 void object_delete_later(QObject *o);
 
 // ---- DMainWindow ----
 DMainWindow *mainwindow_new();
-DMainWindow *mainwindow_new_ex(size_t show_cb_id, size_t close_cb_id); // close 回调返 false → ignore
+DMainWindow *mainwindow_new_ex(size_t show_cb_id, size_t close_cb_id); // close callback returning false -> ignore
 DTitlebar *mainwindow_titlebar(DMainWindow *w);
 void mainwindow_set_central_widget(DMainWindow *w, QWidget *central);
 QWidget *mainwindow_take_central_widget(DMainWindow *w);
@@ -125,13 +125,13 @@ void label_set_word_wrap(DLabel *l, bool wrap);
 void label_set_alignment(DLabel *l, int32_t alignment); // Qt::Alignment
 void label_set_pixmap(DLabel *l, QPixmap *pm);
 
-// ---- 按钮 ----
+// ---- buttons ----
 DSuggestButton *suggest_button_new(rust::Str text);
 DPushButton *push_button_new(rust::Str text);
 void button_set_text(DPushButton *b, rust::Str text);
-void button_click(DPushButton *b); // 程序化点击，触发 clicked 信号
+void button_click(DPushButton *b); // programmatic click, emits clicked
 
-// ---- 布局 ----
+// ---- layouts ----
 QVBoxLayout *vbox_new(QWidget *parent);
 QHBoxLayout *hbox_new(QWidget *parent);
 QWidget *widget_new(QWidget *parent);
@@ -144,7 +144,7 @@ void layout_set_contents_margins(QLayout *l, int32_t l_, int32_t t, int32_t r, i
 QTableWidget *table_new(int32_t rows, int32_t cols);
 void table_set_column_count(QTableWidget *t, int32_t cols);
 void table_set_row_count(QTableWidget *t, int32_t rows);
-void table_set_horizontal_header_labels(QTableWidget *t, rust::Str joined); // '|' 分隔
+void table_set_horizontal_header_labels(QTableWidget *t, rust::Str joined); // '|'-separated
 void table_set_cell_text(QTableWidget *t, int32_t row, int32_t col, rust::Str text);
 void table_set_cell_data(QTableWidget *t, int32_t row, int32_t col, int64_t data);
 int64_t table_cell_data(QTableWidget *t, int32_t row, int32_t col);
@@ -155,7 +155,7 @@ void table_select_rows_readonly(QTableWidget *t);
 void table_header_stretch_last(QTableWidget *t, bool stretch);
 void table_set_column_width(QTableWidget *t, int32_t col, int32_t width);
 
-// ---- QTableWidget 扩展 ----
+// ---- QTableWidget extras ----
 QTableWidgetItem *table_item(QTableWidget *t, int32_t row, int32_t col);
 void table_select_row(QTableWidget *t, int32_t row);
 void table_hide_headers(QTableWidget *t, bool horizontal, bool vertical);
@@ -175,26 +175,26 @@ rust::String item_data_string(QTableWidgetItem *it, int32_t role);
 void item_set_data_bool(QTableWidgetItem *it, int32_t role, bool value);
 bool item_data_bool(QTableWidgetItem *it, int32_t role);
 
-// ---- 值类型 ----
+// ---- value types ----
 QColor *color_new_rgb(int32_t r, int32_t g, int32_t b, int32_t a);
 QFont *font_new();
 void font_set_point_size(QFont *f, int32_t size);
 void font_set_bold(QFont *f, bool bold);
 QPalette *palette_new();
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color);
-QPixmap *pixmap_new(rust::Str path); // 文件或 qrc 路径
+QPixmap *pixmap_new(rust::Str path); // file or qrc path
 QPixmap *standard_icon_pixmap(QWidget *w, int32_t icon, int32_t size); // QStyle::StandardPixmap
 QSize *size_new(int32_t w, int32_t h);
 QPoint *point_new(int32_t x, int32_t y);
 QRect *rect_new(int32_t x, int32_t y, int32_t w, int32_t h);
 
 // ---- QSocketNotifier ----
-QSocketNotifier *socket_notifier_new(int32_t fd); // Read 类型，activated 信号走 relay
+QSocketNotifier *socket_notifier_new(int32_t fd); // Read type; activated goes through the relay
 
-// ---- 通用 paint delegate ----
+// ---- generic paint delegate ----
 QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent);
 
-// ---- QPainter 原语 ----
+// ---- QPainter primitives ----
 void painter_save(QPainter *p);
 void painter_restore(QPainter *p);
 void painter_set_pen_color(QPainter *p, QColor *color);
@@ -204,7 +204,7 @@ void painter_draw_pixmap(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h
 void painter_draw_icon(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QIcon *icon);
 void painter_fill_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QColor *color);
 
-// ---- QModelIndex 数据访问 ----
+// ---- QModelIndex data access ----
 rust::String index_data_string(QModelIndex *idx, int32_t role);
 bool index_data_bool(QModelIndex *idx, int32_t role);
 int64_t index_data_i64(QModelIndex *idx, int32_t role);
@@ -215,10 +215,10 @@ void timer_start(QTimer *t, int32_t msec);
 void timer_stop(QTimer *t);
 void timer_single_shot(int32_t msec, size_t cb_id);
 
-// ---- 信号回调 ----
-// 通用：按信号名运行时 connect，忽略参数。signal 形如 "clicked()" 或 "clicked(bool)"
+// ---- signal callbacks ----
+// generic: runtime-connect by signal name, ignoring args. signal looks like "clicked()" or "clicked(bool)"
 void relay_connect0(QObject *sender, rust::Str signal, size_t cb_id);
-// 常用带参信号
+// common signals with args
 void relay_connect_i32(QObject *sender, rust::Str signal, size_t cb_id);
 
 } // namespace dtkrs

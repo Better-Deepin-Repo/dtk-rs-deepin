@@ -1,8 +1,8 @@
-//! DTK6 (dtkwidget) 安全 Rust 绑定。
+//! Safe Rust bindings for DTK6 (dtkwidget).
 //!
-//! 生命周期：所有 Qt 对象由 Qt parent-child 机制释放，Rust wrapper 只是非拥有裸指针。
-//! 顶层窗口（无 parent）退出时随 QApplication 销毁。
-//! ponytail: 线程安全不做（Qt GUI 本就单线程），wrapper 一律 !Send。
+//! Lifetime: all Qt objects are freed via the Qt parent-child mechanism; Rust wrappers
+//! are non-owning raw pointers. Top-level windows (no parent) die with QApplication.
+//! ponytail: no thread safety (Qt GUIs are single-threaded anyway); wrappers are !Send.
 
 use dtk_sys::ffi;
 use std::marker::PhantomData;
@@ -11,7 +11,7 @@ macro_rules! widget_wrapper {
     ($name:ident, $ffi:ty) => {
         object_wrapper!($name, $ffi);
         impl $name {
-            /// 当 QWidget* 用（基类操作/塞进布局）
+            /// use as QWidget* (base-class ops / adding to layouts)
             pub fn as_widget(&self) -> QWidget {
                 QWidget::from_raw(self.ptr.cast())
             }
@@ -42,25 +42,25 @@ macro_rules! widget_wrapper {
             pub fn is_visible(&self) -> bool {
                 unsafe { ffi::widget_is_visible(self.ptr.cast()) }
             }
-            /// policy 用 qt::NO_FOCUS 等常量
+            /// use qt::NO_FOCUS etc. for policy
             pub fn set_focus_policy(&self, policy: i32) {
                 unsafe { ffi::widget_set_focus_policy(self.ptr.cast(), policy) }
             }
             pub fn set_font(&self, font: &QFont) {
                 unsafe { ffi::widget_set_font(self.ptr.cast(), font.ptr) }
             }
-            /// 当前 palette 的堆拷贝
+            /// heap copy of the current palette
             pub fn palette(&self) -> QPalette {
                 QPalette::from_raw(unsafe { ffi::widget_palette(self.ptr.cast()) })
             }
             pub fn set_palette(&self, pal: &QPalette) {
                 unsafe { ffi::widget_set_palette(self.ptr.cast(), pal.ptr) }
             }
-            /// icon 用 qt::SP_* 常量
+            /// use qt::SP_* constants for icon
             pub fn standard_icon_pixmap(&self, icon: i32, size: i32) -> QPixmap {
                 QPixmap::from_raw(unsafe { ffi::standard_icon_pixmap(self.ptr.cast(), icon, size) })
             }
-            /// 延迟删除（事件循环下一轮）
+            /// deferred delete (next event-loop turn)
             pub fn delete_later(&self) {
                 unsafe { ffi::object_delete_later(self.ptr.cast()) }
             }
@@ -75,13 +75,13 @@ macro_rules! object_wrapper {
             _not_send: PhantomData<*mut ()>,
         }
         impl $name {
-            #[allow(dead_code)] // 生成器产物中并非每个类都会被构造
+            #[allow(dead_code)] // not every generated class gets constructed
             pub(crate) fn from_raw(ptr: *mut $ffi) -> Self {
                 assert!(!ptr.is_null());
                 Self { ptr, _not_send: PhantomData }
             }
-            /// 当 QObject* 用（信号）
-            #[allow(dead_code)] // 部分类没接信号，留着给生成器用
+            /// use as QObject* (signals)
+            #[allow(dead_code)] // some classes connect no signals; kept for the generator
             pub(crate) fn as_qobject(&self) -> *mut ffi::QObject {
                 self.ptr.cast()
             }
@@ -99,7 +99,7 @@ macro_rules! object_wrapper {
     };
 }
 
-/// 通用 QWidget 句柄（只用作基类视图）
+/// generic QWidget handle (base-class view only)
 pub struct QWidget {
     pub(crate) ptr: *mut ffi::QWidget,
     _not_send: PhantomData<*mut ()>,
@@ -118,17 +118,17 @@ impl QWidget {
     }
 }
 
-/// 给任意控件接一个无参信号（如 clicked、timeout）
+/// connect an arg-less signal on any widget (e.g. clicked, timeout)
 pub trait Signal0 {
     fn qobject_ptr(&self) -> *mut ffi::QObject;
-    /// signal 形如 "clicked()" / "windowRadiusChanged()"
+    /// signal looks like "clicked()" / "windowRadiusChanged()"
     fn connect_signal(&self, signal: &str, f: impl FnMut() + 'static) {
         let id = dtk_sys::register_cb0(f);
         unsafe { ffi::relay_connect0(self.qobject_ptr(), signal, id) }
     }
 }
 
-/// 带一个 i32 参数的信号（如 currentRowChanged(int)）
+/// signal with one i32 arg (e.g. currentRowChanged(int))
 pub trait SignalI32 {
     fn qobject_ptr(&self) -> *mut ffi::QObject;
     fn connect_signal_i32(&self, signal: &str, f: impl FnMut(i32) + 'static) {
@@ -149,7 +149,7 @@ impl DApplication {
         let ptr = unsafe { ffi::application_new(name) };
         Self { ptr, _not_send: PhantomData }
     }
-    /// 带退出守卫：QEvent::Quit 时问 guard，返 false 吞掉事件（Rust 侧自排重试）
+    /// with quit guard: QEvent::Quit asks the guard; false swallows the event (Rust retries itself)
     pub fn new_with_quit_guard(name: &str, guard: impl FnMut() -> bool + 'static) -> Self {
         let id = dtk_sys::register_cb_guard(guard);
         let ptr = unsafe { ffi::application_new_ex(name, id) };
@@ -167,7 +167,7 @@ impl DApplication {
     pub fn set_application_display_name(name: &str) {
         unsafe { ffi::application_set_application_display_name(name) }
     }
-    /// DTK 翻译（zh_CN 等），失败返回 false
+    /// DTK translations (zh_CN etc.); false on failure
     pub fn load_translator(&self) -> bool {
         unsafe { ffi::application_load_translator(self.ptr) }
     }
@@ -185,7 +185,7 @@ impl DMainWindow {
     pub fn new() -> Self {
         Self::from_raw(unsafe { ffi::mainwindow_new() })
     }
-    /// 带事件回调：on_close 返 false → 窗口不关闭（event ignore）
+    /// with event callbacks: on_close returning false keeps the window open (event ignore)
     pub fn new_with_events(
         on_show: impl FnMut() + 'static,
         on_close: impl FnMut() -> bool + 'static,
@@ -228,7 +228,7 @@ impl DTitlebar {
 
 // ---- QIcon ----
 
-/// 值类型 wrapper：堆分配对象，Rust 侧持有（泄漏可接受，量小）
+/// value-type wrapper: heap-allocated, owned by Rust (small leak acceptable)
 macro_rules! value_wrapper {
     ($name:ident, $ffi:ty) => {
         pub struct $name {
@@ -283,7 +283,7 @@ impl QPalette {
     pub fn new() -> Self {
         Self::from_raw(unsafe { ffi::palette_new() })
     }
-    /// group/role 用 qt 模块常量
+    /// use qt module constants for group/role
     pub fn set_color(&self, group: i32, role: i32, color: &QColor) {
         unsafe { ffi::palette_set_color(self.ptr, group, role, color.ptr) }
     }
@@ -296,7 +296,7 @@ impl Default for QPalette {
 }
 
 impl QPixmap {
-    /// 文件或 qrc 路径
+    /// file or qrc path
     pub fn new(path: &str) -> Self {
         Self::from_raw(unsafe { ffi::pixmap_new(path) })
     }
@@ -320,7 +320,7 @@ impl QSize {
     }
 }
 
-/// Qt 枚举/QFlags 常量（传给映射成 i32 的参数）
+/// Qt enum/QFlags constants (for params mapped to i32)
 pub mod qt {
     // Qt::Alignment
     pub const ALIGN_LEFT: i32 = 0x1;
@@ -393,7 +393,7 @@ impl DLabel {
     pub fn set_word_wrap(&self, wrap: bool) {
         unsafe { ffi::label_set_word_wrap(self.ptr, wrap) }
     }
-    /// alignment 用 qt::ALIGN_* 常量
+    /// use qt::ALIGN_* constants for alignment
     pub fn set_alignment(&self, alignment: i32) {
         unsafe { ffi::label_set_alignment(self.ptr, alignment) }
     }
@@ -402,7 +402,7 @@ impl DLabel {
     }
 }
 
-// ---- 按钮 ----
+// ---- buttons ----
 
 widget_wrapper!(DSuggestButton, ffi::DSuggestButton);
 widget_wrapper!(DPushButton, ffi::DPushButton);
@@ -414,7 +414,7 @@ impl DSuggestButton {
     pub fn on_clicked(&self, f: impl FnMut() + 'static) {
         self.connect_signal("clicked(bool)", f);
     }
-    /// 程序化点击（触发 clicked 信号，可用来测试）
+    /// programmatic click (emits clicked; useful for tests)
     pub fn click(&self) {
         unsafe { ffi::button_click(self.ptr.cast()) }
     }
@@ -435,7 +435,7 @@ impl DPushButton {
     }
 }
 
-// ---- 布局 ----
+// ---- layouts ----
 
 macro_rules! layout_wrapper {
     ($name:ident, $ffi:ty, $new:ident) => {
@@ -444,7 +444,7 @@ macro_rules! layout_wrapper {
             _not_send: PhantomData<*mut ()>,
         }
         impl $name {
-            /// parent 为 Some 时布局直接装到 parent widget 上
+            /// when parent is Some, the layout installs directly on the parent widget
             pub fn new(parent: Option<&QWidget>) -> Self {
                 let p = parent.map_or(std::ptr::null_mut(), |p| p.ptr);
                 Self { ptr: unsafe { ffi::$new(p) }, _not_send: PhantomData }
@@ -497,14 +497,14 @@ impl QTableWidget {
     pub fn set_row_count(&self, rows: i32) {
         unsafe { ffi::table_set_row_count(self.ptr, rows) }
     }
-    /// labels 用 '|' 分隔，如 "应用|内存"
+    /// labels are '|'-separated, e.g. "App|Memory"
     pub fn set_horizontal_header_labels(&self, joined: &str) {
         unsafe { ffi::table_set_horizontal_header_labels(self.ptr, joined) }
     }
     pub fn set_cell_text(&self, row: i32, col: i32, text: &str) {
         unsafe { ffi::table_set_cell_text(self.ptr, row, col, text) }
     }
-    /// 给单元格存 i64 用户数据（如 pid）
+    /// store i64 user data (e.g. a pid) on a cell
     pub fn set_cell_data(&self, row: i32, col: i32, data: i64) {
         unsafe { ffi::table_set_cell_data(self.ptr, row, col, data) }
     }
@@ -520,7 +520,7 @@ impl QTableWidget {
     pub fn row_count(&self) -> i32 {
         unsafe { ffi::table_row_count(self.ptr) }
     }
-    /// 整行选择、只读、单选
+    /// row selection, read-only, single-select
     pub fn select_rows_readonly(&self) {
         unsafe { ffi::table_select_rows_readonly(self.ptr) }
     }
@@ -530,7 +530,7 @@ impl QTableWidget {
     pub fn set_column_width(&self, col: i32, width: i32) {
         unsafe { ffi::table_set_column_width(self.ptr, col, width) }
     }
-    /// 取单元格 item（不存在返 None）
+    /// get cell item (None if absent)
     pub fn item(&self, row: i32, col: i32) -> Option<QTableWidgetItem> {
         let p = unsafe { ffi::table_item(self.ptr, row, col) };
         if p.is_null() {
@@ -545,7 +545,7 @@ impl QTableWidget {
     pub fn hide_headers(&self, horizontal: bool, vertical: bool) {
         unsafe { ffi::table_hide_headers(self.ptr, horizontal, vertical) }
     }
-    /// mode 用 qt::HEADER_* 常量
+    /// use qt::HEADER_* constants for mode
     pub fn set_section_resize_mode(&self, col: i32, mode: i32) {
         unsafe { ffi::table_set_section_resize_mode(self.ptr, col, mode) }
     }
@@ -555,7 +555,7 @@ impl QTableWidget {
     pub fn set_show_grid(&self, show: bool) {
         unsafe { ffi::table_set_show_grid(self.ptr, show) }
     }
-    /// shape 用 qt::FRAME_* 常量
+    /// use qt::FRAME_* constants for shape
     pub fn set_frame_shape(&self, shape: i32) {
         unsafe { ffi::table_set_frame_shape(self.ptr, shape) }
     }
@@ -594,7 +594,7 @@ impl QTimer {
         let id = dtk_sys::register_cb0(f);
         unsafe { ffi::relay_connect0(self.ptr.cast(), "timeout()", id) }
     }
-    /// 一次性定时器
+    /// one-shot timer
     pub fn single_shot(msec: i32, f: impl FnMut() + 'static) {
         let id = dtk_sys::register_cb0(f);
         unsafe { ffi::timer_single_shot(msec, id) }
@@ -618,14 +618,14 @@ impl QTableWidgetItem {
     pub fn set_icon(&self, icon: &QIcon) {
         unsafe { ffi::item_set_icon(self.ptr, icon.ptr) }
     }
-    /// alignment 用 qt::ALIGN_* 常量
+    /// use qt::ALIGN_* constants for alignment
     pub fn set_text_alignment(&self, alignment: i32) {
         unsafe { ffi::item_set_text_alignment(self.ptr, alignment) }
     }
     pub fn set_foreground(&self, color: &QColor) {
         unsafe { ffi::item_set_foreground(self.ptr, color.ptr) }
     }
-    /// role 用 qt::USER_ROLE + n
+    /// use qt::USER_ROLE + n for role
     pub fn set_data_string(&self, role: i32, value: &str) {
         unsafe { ffi::item_set_data_string(self.ptr, role, value) }
     }
@@ -640,14 +640,14 @@ impl QTableWidgetItem {
     }
 }
 
-// ---- PaintDelegate：表格单元格自定义绘制 ----
+// ---- PaintDelegate: custom cell painting ----
 
 pub struct PaintDelegate {
     pub(crate) ptr: *mut ffi::QStyledItemDelegate,
     _not_send: PhantomData<*mut ()>,
 }
 
-/// paint 回调拿到的画家（只在回调内有效）
+/// painter handed to the paint callback (valid only inside it)
 pub struct Painter {
     ptr: *mut ffi::QPainter,
 }
@@ -665,7 +665,7 @@ impl Painter {
     pub fn set_font(&self, font: &QFont) {
         unsafe { ffi::painter_set_font(self.ptr, font.ptr) }
     }
-    /// flags 用 qt::ALIGN_* 组合
+    /// combine qt::ALIGN_* for flags
     pub fn draw_text(&self, x: i32, y: i32, w: i32, h: i32, flags: i32, text: &str) {
         unsafe { ffi::painter_draw_text(self.ptr, x, y, w, h, flags, text) }
     }
@@ -680,7 +680,7 @@ impl Painter {
     }
 }
 
-/// paint 回调拿到的模型索引（只在回调内有效）
+/// model index handed to the paint callback (valid only inside it)
 pub struct ModelIndex {
     ptr: *mut ffi::QModelIndex,
 }
@@ -698,7 +698,7 @@ impl ModelIndex {
 }
 
 impl PaintDelegate {
-    /// f: (painter, index, x, y, w, h, state)。state 用 qt::STATE_* 判断
+    /// f: (painter, index, x, y, w, h, state). test state against qt::STATE_*
     pub fn new(f: impl FnMut(&Painter, &ModelIndex, i32, i32, i32, i32, i32) + 'static) -> Self {
         let mut f = f;
         let id = dtk_sys::register_cb_paint(move |p, idx, x, y, w, h, state| {
@@ -719,7 +719,7 @@ pub struct QSocketNotifier {
 }
 
 impl QSocketNotifier {
-    /// 监听 fd 可读（Read 类型），如 signalfd
+    /// watch an fd for readability (Read type), e.g. signalfd
     pub fn new(fd: i32) -> Self {
         Self { ptr: unsafe { ffi::socket_notifier_new(fd) }, _not_send: PhantomData }
     }
@@ -729,5 +729,5 @@ impl QSocketNotifier {
     }
 }
 
-// 生成器产物：dtkwidget 其余类的绑定
+// generator output: bindings for the rest of dtkwidget
 pub mod widgets;

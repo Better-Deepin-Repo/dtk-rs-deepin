@@ -1,2 +1,2 @@
-// DTK6 缺失的别名头，dcircleprogress.h 还在引用
+// alias header missing from DTK6, still referenced by dcircleprogress.h
 #include <dthememanager.h>

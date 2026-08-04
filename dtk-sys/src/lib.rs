@@ -1,4 +1,4 @@
-//! DTK6 (dtkwidget) FFI 层。C++ shim 见 cpp/shim.cpp。
+//! DTK6 (dtkwidget) FFI layer. See cpp/shim.cpp for the C++ shim.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -48,7 +48,7 @@ pub mod ffi {
         unsafe fn application_load_translator(app: *mut DApplication) -> bool;
         unsafe fn application_has_arg(arg: &str) -> bool;
 
-        // QWidget 通用
+        // QWidget common
         unsafe fn widget_show(w: *mut QWidget);
         unsafe fn widget_resize(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_set_enabled(w: *mut QWidget, on: bool);
@@ -88,13 +88,13 @@ pub mod ffi {
         unsafe fn label_set_alignment(l: *mut DLabel, alignment: i32);
         unsafe fn label_set_pixmap(l: *mut DLabel, pm: *mut QPixmap);
 
-        // 按钮
+        // buttons
         unsafe fn suggest_button_new(text: &str) -> *mut DSuggestButton;
         unsafe fn push_button_new(text: &str) -> *mut DPushButton;
         unsafe fn button_set_text(b: *mut DPushButton, text: &str);
         unsafe fn button_click(b: *mut DPushButton);
 
-        // 布局
+        // layouts
         unsafe fn vbox_new(parent: *mut QWidget) -> *mut QVBoxLayout;
         unsafe fn hbox_new(parent: *mut QWidget) -> *mut QHBoxLayout;
         unsafe fn widget_new(parent: *mut QWidget) -> *mut QWidget;
@@ -118,7 +118,7 @@ pub mod ffi {
         unsafe fn table_header_stretch_last(t: *mut QTableWidget, stretch: bool);
         unsafe fn table_set_column_width(t: *mut QTableWidget, col: i32, width: i32);
 
-        // QTableWidget 扩展
+        // QTableWidget extras
         unsafe fn table_item(t: *mut QTableWidget, row: i32, col: i32) -> *mut QTableWidgetItem;
         unsafe fn table_select_row(t: *mut QTableWidget, row: i32);
         unsafe fn table_hide_headers(t: *mut QTableWidget, horizontal: bool, vertical: bool);
@@ -138,7 +138,7 @@ pub mod ffi {
         unsafe fn item_set_data_bool(it: *mut QTableWidgetItem, role: i32, value: bool);
         unsafe fn item_data_bool(it: *mut QTableWidgetItem, role: i32) -> bool;
 
-        // 值类型
+        // value types
         unsafe fn color_new_rgb(r: i32, g: i32, b: i32, a: i32) -> *mut QColor;
         unsafe fn font_new() -> *mut QFont;
         unsafe fn font_set_point_size(f: *mut QFont, size: i32);
@@ -154,10 +154,10 @@ pub mod ffi {
         // QSocketNotifier
         unsafe fn socket_notifier_new(fd: i32) -> *mut QSocketNotifier;
 
-        // 通用 paint delegate
+        // generic paint delegate
         unsafe fn rust_delegate_new(paint_cb_id: usize, parent: *mut QObject) -> *mut QStyledItemDelegate;
 
-        // QPainter 原语
+        // QPainter primitives
         unsafe fn painter_save(p: *mut QPainter);
         unsafe fn painter_restore(p: *mut QPainter);
         unsafe fn painter_set_pen_color(p: *mut QPainter, color: *mut QColor);
@@ -167,7 +167,7 @@ pub mod ffi {
         unsafe fn painter_draw_icon(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, icon: *mut QIcon);
         unsafe fn painter_fill_rect(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, color: *mut QColor);
 
-        // QModelIndex 数据访问
+        // QModelIndex data access
         unsafe fn index_data_string(idx: *mut QModelIndex, role: i32) -> String;
         unsafe fn index_data_bool(idx: *mut QModelIndex, role: i32) -> bool;
         unsafe fn index_data_i64(idx: *mut QModelIndex, role: i32) -> i64;
@@ -178,7 +178,7 @@ pub mod ffi {
         unsafe fn timer_stop(t: *mut QTimer);
         unsafe fn timer_single_shot(msec: i32, cb_id: usize);
 
-        // 信号
+        // signals
         unsafe fn relay_connect0(sender: *mut QObject, signal: &str, cb_id: usize);
         unsafe fn relay_connect_i32(sender: *mut QObject, signal: &str, cb_id: usize);
     }
@@ -192,8 +192,8 @@ pub mod ffi {
     }
 }
 
-// ---- 回调注册表：Qt 信号 → Rust 闭包 ----
-// ponytail: 回调只会被 Qt 主线程触发，thread_local 够用，不搞锁
+// ---- callback registry: Qt signals -> Rust closures ----
+// ponytail: callbacks only fire on the Qt main thread; thread_local is enough, no locks
 enum Cb {
     C0(Box<dyn FnMut()>),
     I32(Box<dyn FnMut(i32)>),
@@ -237,7 +237,7 @@ pub fn register_cb_paint(
     id
 }
 
-// 取出再调用，回调里可以安全地再注册新回调；调用完放回
+// remove-then-call so callbacks can safely register new callbacks; put back after
 fn dtk_cb0(id: usize) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
     if let Some(Cb::C0(f)) = &mut cb {
@@ -256,7 +256,7 @@ fn dtk_cb_i32(id: usize, v: i32) {
 
 fn dtk_cb_guard(id: usize) -> bool {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
-    let mut result = true; // 找不到回调默认放行
+    let mut result = true; // default to allow when callback is missing
     if let Some(Cb::Guard(f)) = &mut cb {
         result = f();
         CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));

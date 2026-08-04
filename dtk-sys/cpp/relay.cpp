@@ -8,8 +8,8 @@ namespace dtkrs {
 DtkRelay::DtkRelay(size_t cb_id, QObject *parent) : QObject(parent), m_cb_id(cb_id) {}
 
 void DtkRelay::connect0(QObject *sender, const char *signal, size_t cb_id) {
-    auto *relay = new DtkRelay(cb_id, sender); // parent 到 sender，随其销毁
-    QByteArray sig = "2" + QMetaObject::normalizedSignature(signal); // '2' = 信号前缀
+    auto *relay = new DtkRelay(cb_id, sender); // parented to sender, destroyed with it
+    QByteArray sig = "2" + QMetaObject::normalizedSignature(signal); // '2' = signal prefix
     if (!QObject::connect(sender, sig.constData(), relay, SLOT(fire0()))) {
         qWarning("dtkrs: connect signal %s on %s failed", signal, sender->metaObject()->className());
         delete relay;

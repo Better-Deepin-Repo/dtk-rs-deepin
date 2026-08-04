@@ -16,45 +16,45 @@ fn main() {
     vbox.set_contents_margins(20, 20, 20, 20);
     vbox.set_spacing(12);
 
-    let label = DLabel::new("DTK6 Rust binding 跑通了。");
+    let label = DLabel::new("DTK6 Rust binding is up.");
     vbox.add_widget(&label.as_widget());
 
-    let btn = DSuggestButton::new("点我");
+    let btn = DSuggestButton::new("Click me");
     let clicked = Rc::new(Cell::new(false));
     {
         let clicked = clicked.clone();
         btn.on_clicked(move || {
-            label.set_text("按钮点过了 ✓");
+            label.set_text("Button was clicked ✓");
             clicked.set(true);
             println!("clicked");
         });
     }
     vbox.add_widget(&btn.as_widget());
 
-    // --smoke 专用：PaintDelegate + QSocketNotifier + 事件窗口 链路验证
+    // --smoke only: verify PaintDelegate + QSocketNotifier chains
     let smoke = std::env::args().any(|a| a == "--smoke");
     let painted = Rc::new(Cell::new(false));
     let notified = Rc::new(Cell::new(false));
     let mut pipe_w = 0i32;
     if smoke {
         let table = QTableWidget::new(1, 2);
-        table.set_cell_text(0, 0, "图标列");
-        table.set_cell_text(0, 1, "内存列");
+        table.set_cell_text(0, 0, "icon cell");
+        table.set_cell_text(0, 1, "memory cell");
         {
             let painted = painted.clone();
             let delegate = PaintDelegate::new(move |p, idx, x, y, w, h, _state| {
-                assert_eq!(idx.data_string(0), "图标列"); // DisplayRole
+                assert_eq!(idx.data_string(0), "icon cell"); // DisplayRole
                 p.fill_rect(x, y, w, h, &QColor::rgb(200, 220, 255));
-                p.draw_text(x, y, w, h, qt::ALIGN_CENTER, "画过了");
+                p.draw_text(x, y, w, h, qt::ALIGN_CENTER, "painted");
                 painted.set(true);
             });
             table.set_delegate_for_column(0, &delegate);
-            std::mem::forget(delegate); // delegate 生命周期交给表（offscreen 测试进程短）
+            std::mem::forget(delegate); // lifetime handed to the table (short-lived offscreen test)
         }
         vbox.add_widget(&table.as_widget());
         std::mem::forget(table);
 
-        // pipe 自写自读测 QSocketNotifier
+        // self-pipe to test QSocketNotifier
         let mut fds = [0i32; 2];
         assert_eq!(unsafe { libc_pipe(fds.as_mut_ptr()) }, 0);
         pipe_w = fds[1];
@@ -64,7 +64,7 @@ fn main() {
             let fd_r = fds[0];
             notifier.on_activated(move || {
                 let mut buf = [0u8; 8];
-                unsafe { libc_read(fd_r, buf.as_mut_ptr(), 8) }; // 排干，否则电平触发反复报
+                unsafe { libc_read(fd_r, buf.as_mut_ptr(), 8) }; // drain, or level-trigger refires forever
                 notified.set(true);
                 println!("notified");
             });
@@ -82,9 +82,9 @@ fn main() {
             libc_write(pipe_w, b"x".as_ptr() as _, 1);
         });
         QTimer::single_shot(500, move || {
-            assert!(clicked.get(), "clicked 回调没生效（信号链路断）");
-            assert!(painted.get(), "PaintDelegate paint 回调没生效");
-            assert!(notified.get(), "QSocketNotifier activated 没生效");
+            assert!(clicked.get(), "clicked callback never fired (signal chain broken)");
+            assert!(painted.get(), "PaintDelegate paint callback never fired");
+            assert!(notified.get(), "QSocketNotifier activated never fired");
             println!("smoke ok");
             DApplication::quit();
         });
@@ -93,7 +93,7 @@ fn main() {
     std::process::exit(app.exec());
 }
 
-// 不引 libc crate，两个 syscall 直接 extern
+// no libc crate; declare the syscalls directly
 unsafe extern "C" {
     fn pipe(fds: *mut i32) -> i32;
     fn write(fd: i32, buf: *const u8, n: usize) -> isize;
