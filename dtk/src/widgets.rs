@@ -6,12 +6,19 @@ use dtk_sys::gen_ffi::genffi;
 use std::marker::PhantomData;
 widget_wrapper!(DAbstractDialog, genffi::DAbstractDialog);
 impl DAbstractDialog {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_abstract_dialog_new() })
+    }
     pub fn move_to_center(&self) {
         unsafe { genffi::gen_d_abstract_dialog_move_to_center(self.ptr) }
     }
     pub fn move_to_top_right(&self) {
         unsafe { genffi::gen_d_abstract_dialog_move_to_top_right(self.ptr) }
     }
+}
+
+impl Default for DAbstractDialog {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DAccessibilityChecker, genffi::DAccessibilityChecker);
@@ -136,6 +143,9 @@ impl DArrowRectangle {
     }
     pub fn set_height(&self, value: i32) {
         unsafe { genffi::gen_d_arrow_rectangle_set_height(self.ptr, value) }
+    }
+    pub fn get_content(&self) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_arrow_rectangle_get_content(self.ptr) } as _)
     }
     pub fn resize_with_content(&self) {
         unsafe { genffi::gen_d_arrow_rectangle_resize_with_content(self.ptr) }
@@ -318,6 +328,9 @@ impl Default for DComboBox {
 
 widget_wrapper!(DCrumbTextFormat, genffi::DCrumbTextFormat);
 impl DCrumbTextFormat {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_crumb_text_format_new() })
+    }
     pub fn text(&self) -> String {
         unsafe { genffi::gen_d_crumb_text_format_text(self.ptr) }
     }
@@ -330,6 +343,10 @@ impl DCrumbTextFormat {
     pub fn set_background_radius(&self, radius: i32) {
         unsafe { genffi::gen_d_crumb_text_format_set_background_radius(self.ptr, radius) }
     }
+}
+
+impl Default for DCrumbTextFormat {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DCrumbEdit, genffi::DCrumbEdit);
@@ -345,6 +362,9 @@ impl DCrumbEdit {
     }
     pub fn contain_crumb(&self, text: &str) -> bool {
         unsafe { genffi::gen_d_crumb_edit_contain_crumb(self.ptr, text) }
+    }
+    pub fn dual_click_make_crumb(&self) -> bool {
+        unsafe { genffi::gen_d_crumb_edit_dual_click_make_crumb(self.ptr) }
     }
     pub fn crumb_read_only(&self) -> bool {
         unsafe { genffi::gen_d_crumb_edit_crumb_read_only(self.ptr) }
@@ -364,6 +384,9 @@ impl DCrumbEdit {
     pub fn set_splitter(&self, splitter: &str) {
         unsafe { genffi::gen_d_crumb_edit_set_splitter(self.ptr, splitter) }
     }
+    pub fn set_dual_click_make_crumb(&self, flag: bool) {
+        unsafe { genffi::gen_d_crumb_edit_set_dual_click_make_crumb(self.ptr, flag) }
+    }
 }
 
 impl Default for DCrumbEdit {
@@ -374,6 +397,9 @@ widget_wrapper!(DDrawer, genffi::DDrawer);
 impl DDrawer {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_drawer_new() })
+    }
+    pub fn get_content(&self) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_drawer_get_content(self.ptr) } as _)
     }
     pub fn set_header_height(&self, height: i32) {
         unsafe { genffi::gen_d_drawer_set_header_height(self.ptr, height) }
@@ -421,9 +447,16 @@ impl Default for DDrawerGroup {
 
 widget_wrapper!(DFileChooserEdit, genffi::DFileChooserEdit);
 impl DFileChooserEdit {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_file_chooser_edit_new() })
+    }
     pub fn init_dialog(&self) {
         unsafe { genffi::gen_d_file_chooser_edit_init_dialog(self.ptr) }
     }
+}
+
+impl Default for DFileChooserEdit {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DFileDialog, genffi::DFileDialog);
@@ -600,6 +633,9 @@ impl Default for DKeySequenceEdit {
 
 widget_wrapper!(DLineEdit, genffi::DLineEdit);
 impl DLineEdit {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_line_edit_new() })
+    }
     pub fn set_placeholder_text(&self, arg0: &str) {
         unsafe { genffi::gen_d_line_edit_set_placeholder_text(self.ptr, arg0) }
     }
@@ -674,10 +710,20 @@ impl DLineEdit {
     }
 }
 
+impl Default for DLineEdit {
+    fn default() -> Self { Self::new() }
+}
+
 widget_wrapper!(DListView, genffi::DListView);
 impl DListView {
     pub fn new() -> Self {
         Self::from_raw(unsafe { genffi::gen_d_list_view_new() })
+    }
+    pub fn get_header_widget(&self, index: i32) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_list_view_get_header_widget(self.ptr, index) } as _)
+    }
+    pub fn get_footer_widget(&self, index: i32) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_list_view_get_footer_widget(self.ptr, index) } as _)
     }
     pub fn count(&self) -> i32 {
         unsafe { genffi::gen_d_list_view_count(self.ptr) }
@@ -691,8 +737,14 @@ impl DListView {
     pub fn remove_header_widget(&self, index: i32) {
         unsafe { genffi::gen_d_list_view_remove_header_widget(self.ptr, index) }
     }
+    pub fn take_header_widget(&self, index: i32) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_list_view_take_header_widget(self.ptr, index) } as _)
+    }
     pub fn remove_footer_widget(&self, index: i32) {
         unsafe { genffi::gen_d_list_view_remove_footer_widget(self.ptr, index) }
+    }
+    pub fn take_footer_widget(&self, index: i32) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_list_view_take_footer_widget(self.ptr, index) } as _)
     }
     pub fn set_item_spacing(&self, spacing: i32) {
         unsafe { genffi::gen_d_list_view_set_item_spacing(self.ptr, spacing) }
@@ -708,6 +760,9 @@ impl Default for DListView {
 
 widget_wrapper!(DLoadingIndicator, genffi::DLoadingIndicator);
 impl DLoadingIndicator {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_loading_indicator_new() })
+    }
     pub fn loading(&self) -> bool {
         unsafe { genffi::gen_d_loading_indicator_loading(self.ptr) }
     }
@@ -741,6 +796,10 @@ impl DLoadingIndicator {
     pub fn set_smooth(&self, smooth: bool) {
         unsafe { genffi::gen_d_loading_indicator_set_smooth(self.ptr, smooth) }
     }
+}
+
+impl Default for DLoadingIndicator {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DMPRISControl, genffi::DMPRISControl);
@@ -809,6 +868,9 @@ impl Default for DPageIndicator {
 
 widget_wrapper!(DPasswordEdit, genffi::DPasswordEdit);
 impl DPasswordEdit {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_password_edit_new() })
+    }
     pub fn is_echo_mode(&self) -> bool {
         unsafe { genffi::gen_d_password_edit_is_echo_mode(self.ptr) }
     }
@@ -820,8 +882,15 @@ impl DPasswordEdit {
     }
 }
 
+impl Default for DPasswordEdit {
+    fn default() -> Self { Self::new() }
+}
+
 widget_wrapper!(DPictureSequenceView, genffi::DPictureSequenceView);
 impl DPictureSequenceView {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_picture_sequence_view_new() })
+    }
     pub fn play(&self) {
         unsafe { genffi::gen_d_picture_sequence_view_play(self.ptr) }
     }
@@ -843,6 +912,10 @@ impl DPictureSequenceView {
     pub fn set_single_shot(&self, singleShot: bool) {
         unsafe { genffi::gen_d_picture_sequence_view_set_single_shot(self.ptr, singleShot) }
     }
+}
+
+impl Default for DPictureSequenceView {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DPrintPreviewWidget, genffi::DPrintPreviewWidget);
@@ -1008,6 +1081,9 @@ impl Default for DSearchEdit {
 
 widget_wrapper!(DSettingsDialog, genffi::DSettingsDialog);
 impl DSettingsDialog {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_settings_dialog_new() })
+    }
     pub fn widget_factory(&self) -> DSettingsWidgetFactory {
         DSettingsWidgetFactory::from_raw(unsafe { genffi::gen_d_settings_dialog_widget_factory(self.ptr) })
     }
@@ -1023,6 +1099,10 @@ impl DSettingsDialog {
     pub fn set_group_visible(&self, groupKey: &str, visible: bool) {
         unsafe { genffi::gen_d_settings_dialog_set_group_visible(self.ptr, groupKey, visible) }
     }
+}
+
+impl Default for DSettingsDialog {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DSettingsWidgetFactory, genffi::DSettingsWidgetFactory);
@@ -1143,6 +1223,9 @@ impl DSizeModeHelper {
 
 widget_wrapper!(DSlider, genffi::DSlider);
 impl DSlider {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_slider_new() })
+    }
     pub fn set_minimum(&self, min: i32) {
         unsafe { genffi::gen_d_slider_set_minimum(self.ptr, min) }
     }
@@ -1182,6 +1265,10 @@ impl DSlider {
     pub fn set_enabled_across_style(&self, enabled: bool) {
         unsafe { genffi::gen_d_slider_set_enabled_across_style(self.ptr, enabled) }
     }
+}
+
+impl Default for DSlider {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DSpinBox, genffi::DSpinBox);
@@ -1272,6 +1359,9 @@ impl DSwitchLineExpand {
     pub fn set_expand(&self, value: bool) {
         unsafe { genffi::gen_d_switch_line_expand_set_expand(self.ptr, value) }
     }
+    pub fn header(&self) -> DBaseLine {
+        DBaseLine::from_raw(unsafe { genffi::gen_d_switch_line_expand_header(self.ptr) })
+    }
 }
 
 impl Default for DSwitchLineExpand {
@@ -1280,6 +1370,13 @@ impl Default for DSwitchLineExpand {
 
 widget_wrapper!(DTabletWindowOptionButton, genffi::DTabletWindowOptionButton);
 impl DTabletWindowOptionButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_tablet_window_option_button_new() })
+    }
+}
+
+impl Default for DTabletWindowOptionButton {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DTickEffect, genffi::DTickEffect);
@@ -1303,6 +1400,13 @@ impl DTickEffect {
 
 widget_wrapper!(DTipLabel, genffi::DTipLabel);
 impl DTipLabel {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_tip_label_new() })
+    }
+}
+
+impl Default for DTipLabel {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DTitlebarToolBaseInterface, genffi::DTitlebarToolBaseInterface);
@@ -1320,10 +1424,16 @@ impl DTitlebarToolBaseInterface {
 
 widget_wrapper!(DTitleBarToolInterface, genffi::DTitleBarToolInterface);
 impl DTitleBarToolInterface {
+    pub fn create_view(&self) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_title_bar_tool_interface_create_view(self.ptr) } as _)
+    }
 }
 
 widget_wrapper!(DTitleBarSpacerInterface, genffi::DTitleBarSpacerInterface);
 impl DTitleBarSpacerInterface {
+    pub fn create_placeholder_view(&self) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_title_bar_spacer_interface_create_placeholder_view(self.ptr) } as _)
+    }
     pub fn size(&self) -> i32 {
         unsafe { genffi::gen_d_title_bar_spacer_interface_size(self.ptr) }
     }
@@ -1331,10 +1441,20 @@ impl DTitleBarSpacerInterface {
 
 object_wrapper!(DTitlebarSettings, genffi::DTitlebarSettings);
 impl DTitlebarSettings {
+    pub fn tools_edit_panel(&self) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_titlebar_settings_tools_edit_panel(self.ptr) } as _)
+    }
 }
 
 widget_wrapper!(DToolButton, genffi::DToolButton);
 impl DToolButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_tool_button_new() })
+    }
+}
+
+impl Default for DToolButton {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DWaterProgress, genffi::DWaterProgress);
@@ -1365,10 +1485,20 @@ impl Default for DWaterProgress {
 
 widget_wrapper!(DWindowCloseButton, genffi::DWindowCloseButton);
 impl DWindowCloseButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_window_close_button_new() })
+    }
+}
+
+impl Default for DWindowCloseButton {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DWindowMaxButton, genffi::DWindowMaxButton);
 impl DWindowMaxButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_window_max_button_new() })
+    }
     pub fn is_maximized(&self) -> bool {
         unsafe { genffi::gen_d_window_max_button_is_maximized(self.ptr) }
     }
@@ -1377,15 +1507,40 @@ impl DWindowMaxButton {
     }
 }
 
+impl Default for DWindowMaxButton {
+    fn default() -> Self { Self::new() }
+}
+
 widget_wrapper!(DWindowMinButton, genffi::DWindowMinButton);
 impl DWindowMinButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_window_min_button_new() })
+    }
+}
+
+impl Default for DWindowMinButton {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DWindowOptionButton, genffi::DWindowOptionButton);
 impl DWindowOptionButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_window_option_button_new() })
+    }
+}
+
+impl Default for DWindowOptionButton {
+    fn default() -> Self { Self::new() }
 }
 
 widget_wrapper!(DWindowQuitFullButton, genffi::DWindowQuitFullButton);
 impl DWindowQuitFullButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_window_quit_full_button_new() })
+    }
+}
+
+impl Default for DWindowQuitFullButton {
+    fn default() -> Self { Self::new() }
 }
 

@@ -49,7 +49,7 @@ CPP_OF_RUST = {"()": "void", "bool": "bool", "i32": "int32_t", "i16": "int16_t",
 CLASS_RE = re.compile(r"^class\s+LIBDTKWIDGETSHARED_EXPORT\s+(\w+)\s*(?::\s*(.+?))?\s*$")
 METHOD_RE = re.compile(
     r"^\s*(?:virtual\s+|Q_INVOKABLE\s+|D_DECL_DEPRECATED\s+|explicit\s+)*"
-    r"(static\s+)?([\w:<>&*~ ]+?)\s+(~?\w+)\s*\((.*)\)\s*(const)?\s*(?:override\s*)?(?:=\s*\w+\s*)?;?\s*(?://.*)?$"
+    r"(static\s+)?([\w:<>&*~ ]+?)\s*(~?\w+)\s*\((.*)\)\s*(const)?\s*(?:override\s*)?(?:=\s*\w+\s*)?;?\s*(?://.*)?$"
 )
 
 
@@ -147,10 +147,22 @@ def parse_header(path, ctx):
                 continue
             if section != "pub" or not s:
                 continue
+            if s.startswith(("{", "}", "~")):
+                continue  # inline 函数体 / 析构
             if any(k in s for k in ("Q_PROPERTY", "Q_DECLARE", "D_DECLARE", "typedef", "using ", "enum ", "struct ",
-                                    "friend", "operator", "#", "D_DECL_DEPRECATED", "Q_OBJECT")):
+                                    "friend", "operator", "#", "D_DECL_DEPRECATED", "Q_OBJECT", "Q_ENUM", "Q_FLAG")):
                 continue
             if "(" not in s:
+                continue
+            if re.search(r"=\s*0\s*;", s):
+                cur["abstract"] = True
+            s = re.sub(r"\s*Q_DECL_\w+", "", s)  # noexcept/override 宏剥掉
+            # 构造函数：无返回类型，名字 == 类名
+            cm = re.match(rf"^\s*(?:explicit\s+)?{cur['name']}\s*\((.*)\)\s*;?\s*$", s)
+            if cm:
+                ps = split_params(cm.group(1))
+                if not ps or all("=" in p for p in ps):
+                    cur["ctor_new"] = True
                 continue
             m = METHOD_RE.match(s)
             if not m:
@@ -236,7 +248,7 @@ def main():
                     gen_methods.append(g)
             classes_out.append({
                 "name": c["name"], "is_widget": is_widget, "header": c["header"],
-                "ctor_new": c.get("ctor_new", False), "methods": gen_methods, "skipped": skipped,
+                "ctor_new": c.get("ctor_new", False) and not c.get("abstract", False), "methods": gen_methods, "skipped": skipped,
             })
 
     emit(classes_out)

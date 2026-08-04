@@ -2,6 +2,7 @@
 #include "dtk_gen_shim.h"
 
 namespace dtkrs {
+DAbstractDialog *gen_d_abstract_dialog_new() { return new DAbstractDialog; }
 void gen_d_abstract_dialog_move_to_center(DAbstractDialog *self) { self->moveToCenter(); }
 void gen_d_abstract_dialog_move_to_top_right(DAbstractDialog *self) { self->moveToTopRight(); }
 DAccessibilityChecker *gen_d_accessibility_checker_new() { return new DAccessibilityChecker; }
@@ -36,6 +37,7 @@ void gen_d_arrow_rectangle_set_border_width(DArrowRectangle *self, int32_t borde
 void gen_d_arrow_rectangle_set_width(DArrowRectangle *self, int32_t value) { self->setWidth(value); }
 void gen_d_arrow_rectangle_set_height(DArrowRectangle *self, int32_t value) { self->setHeight(value); }
 void gen_d_arrow_rectangle_show(DArrowRectangle *self, int32_t x, int32_t y) { self->show(x, y); }
+QWidget * gen_d_arrow_rectangle_get_content(DArrowRectangle *self) { return self->getContent(); }
 void gen_d_arrow_rectangle_resize_with_content(DArrowRectangle *self) { self->resizeWithContent(); }
 void gen_d_arrow_rectangle_move_(DArrowRectangle *self, int32_t x, int32_t y) { self->move(x, y); }
 double gen_d_arrow_rectangle_shadow_x_offset(DArrowRectangle *self) { return self->shadowXOffset(); }
@@ -79,6 +81,7 @@ DColoredProgressBar *gen_d_colored_progress_bar_new() { return new DColoredProgr
 void gen_d_colored_progress_bar_remove_threshold(DColoredProgressBar *self, int32_t threshold) { self->removeThreshold(threshold); }
 DComboBox *gen_d_combo_box_new() { return new DComboBox; }
 void gen_d_combo_box_show_popup(DComboBox *self) { self->showPopup(); }
+DCrumbTextFormat *gen_d_crumb_text_format_new() { return new DCrumbTextFormat; }
 rust::String gen_d_crumb_text_format_text(DCrumbTextFormat *self) { return to_rust_string(self->text()); }
 void gen_d_crumb_text_format_set_text(DCrumbTextFormat *self, rust::Str text) { self->setText(from_rust_str(text)); }
 int32_t gen_d_crumb_text_format_background_radius(DCrumbTextFormat *self) { return self->backgroundRadius(); }
@@ -87,13 +90,16 @@ DCrumbEdit *gen_d_crumb_edit_new() { return new DCrumbEdit; }
 bool gen_d_crumb_edit_insert_crumb(DCrumbEdit *self, rust::Str text, int32_t pos) { return self->insertCrumb(from_rust_str(text), pos); }
 bool gen_d_crumb_edit_append_crumb(DCrumbEdit *self, rust::Str text) { return self->appendCrumb(from_rust_str(text)); }
 bool gen_d_crumb_edit_contain_crumb(DCrumbEdit *self, rust::Str text) { return self->containCrumb(from_rust_str(text)); }
+bool gen_d_crumb_edit_dual_click_make_crumb(DCrumbEdit *self) { return self->dualClickMakeCrumb(); }
 bool gen_d_crumb_edit_crumb_read_only(DCrumbEdit *self) { return self->crumbReadOnly(); }
 int32_t gen_d_crumb_edit_crumb_radius(DCrumbEdit *self) { return self->crumbRadius(); }
 rust::String gen_d_crumb_edit_splitter(DCrumbEdit *self) { return to_rust_string(self->splitter()); }
 void gen_d_crumb_edit_set_crumb_read_only(DCrumbEdit *self, bool crumbReadOnly) { self->setCrumbReadOnly(crumbReadOnly); }
 void gen_d_crumb_edit_set_crumb_radius(DCrumbEdit *self, int32_t crumbRadius) { self->setCrumbRadius(crumbRadius); }
 void gen_d_crumb_edit_set_splitter(DCrumbEdit *self, rust::Str splitter) { self->setSplitter(from_rust_str(splitter)); }
+void gen_d_crumb_edit_set_dual_click_make_crumb(DCrumbEdit *self, bool flag) { self->setDualClickMakeCrumb(flag); }
 DDrawer *gen_d_drawer_new() { return new DDrawer; }
+QWidget * gen_d_drawer_get_content(DDrawer *self) { return self->getContent(); }
 void gen_d_drawer_set_header_height(DDrawer *self, int32_t height) { self->setHeaderHeight(height); }
 void gen_d_drawer_set_expand(DDrawer *self, bool value) { self->setExpand(value); }
 bool gen_d_drawer_expand(DDrawer *self) { return self->expand(); }
@@ -104,6 +110,7 @@ DDrawerGroup *gen_d_drawer_group_new() { return new DDrawerGroup; }
 DDrawer * gen_d_drawer_group_checked_expand(DDrawerGroup *self) { return self->checkedExpand(); }
 DDrawer * gen_d_drawer_group_expand(DDrawerGroup *self, int32_t id) { return self->expand(id); }
 int32_t gen_d_drawer_group_checked_id(DDrawerGroup *self) { return self->checkedId(); }
+DFileChooserEdit *gen_d_file_chooser_edit_new() { return new DFileChooserEdit; }
 void gen_d_file_chooser_edit_init_dialog(DFileChooserEdit *self) { self->initDialog(); }
 void gen_d_file_dialog_add_line_edit(DFileDialog *self, rust::Str text) { self->addLineEdit(from_rust_str(text)); }
 void gen_d_file_dialog_set_allow_mixed_selection(DFileDialog *self, bool on) { self->setAllowMixedSelection(on); }
@@ -145,6 +152,7 @@ void gen_d_ipv4_line_edit_set_selection(DIpv4LineEdit *self, int32_t start, int3
 void gen_d_ipv4_line_edit_select_all(DIpv4LineEdit *self) { self->selectAll(); }
 DKeySequenceEdit *gen_d_key_sequence_edit_new() { return new DKeySequenceEdit; }
 void gen_d_key_sequence_edit_clear(DKeySequenceEdit *self) { self->clear(); }
+DLineEdit *gen_d_line_edit_new() { return new DLineEdit; }
 void gen_d_line_edit_set_placeholder_text(DLineEdit *self, rust::Str arg0) { self->setPlaceholderText(from_rust_str(arg0)); }
 void gen_d_line_edit_set_alert(DLineEdit *self, bool isAlert) { self->setAlert(isAlert); }
 bool gen_d_line_edit_is_alert(DLineEdit *self) { return self->isAlert(); }
@@ -170,13 +178,18 @@ void gen_d_line_edit_set_cut_enabled(DLineEdit *self, bool enable) { self->setCu
 bool gen_d_line_edit_paste_enabled(DLineEdit *self) { return self->pasteEnabled(); }
 void gen_d_line_edit_set_paste_enabled(DLineEdit *self, bool enable) { self->setPasteEnabled(enable); }
 DListView *gen_d_list_view_new() { return new DListView; }
+QWidget * gen_d_list_view_get_header_widget(DListView *self, int32_t index) { return self->getHeaderWidget(index); }
+QWidget * gen_d_list_view_get_footer_widget(DListView *self, int32_t index) { return self->getFooterWidget(index); }
 int32_t gen_d_list_view_count(DListView *self) { return self->count(); }
 bool gen_d_list_view_remove_item(DListView *self, int32_t index) { return self->removeItem(index); }
 bool gen_d_list_view_remove_items(DListView *self, int32_t index, int32_t count) { return self->removeItems(index, count); }
 void gen_d_list_view_remove_header_widget(DListView *self, int32_t index) { self->removeHeaderWidget(index); }
+QWidget * gen_d_list_view_take_header_widget(DListView *self, int32_t index) { return self->takeHeaderWidget(index); }
 void gen_d_list_view_remove_footer_widget(DListView *self, int32_t index) { self->removeFooterWidget(index); }
+QWidget * gen_d_list_view_take_footer_widget(DListView *self, int32_t index) { return self->takeFooterWidget(index); }
 void gen_d_list_view_set_item_spacing(DListView *self, int32_t spacing) { self->setItemSpacing(spacing); }
 void gen_d_list_view_set_item_radius(DListView *self, int32_t radius) { self->setItemRadius(radius); }
+DLoadingIndicator *gen_d_loading_indicator_new() { return new DLoadingIndicator; }
 bool gen_d_loading_indicator_loading(DLoadingIndicator *self) { return self->loading(); }
 QWidget * gen_d_loading_indicator_widget_source(DLoadingIndicator *self) { return self->widgetSource(); }
 int32_t gen_d_loading_indicator_ani_duration(DLoadingIndicator *self) { return self->aniDuration(); }
@@ -204,9 +217,11 @@ int32_t gen_d_page_indicator_secondary_point_radius(DPageIndicator *self) { retu
 void gen_d_page_indicator_set_secondary_point_radius(DPageIndicator *self, int32_t size) { self->setSecondaryPointRadius(size); }
 int32_t gen_d_page_indicator_point_distance(DPageIndicator *self) { return self->pointDistance(); }
 void gen_d_page_indicator_set_point_distance(DPageIndicator *self, int32_t distance) { self->setPointDistance(distance); }
+DPasswordEdit *gen_d_password_edit_new() { return new DPasswordEdit; }
 bool gen_d_password_edit_is_echo_mode(DPasswordEdit *self) { return self->isEchoMode(); }
 void gen_d_password_edit_set_echo_button_is_visible(DPasswordEdit *self, bool visible) { self->setEchoButtonIsVisible(visible); }
 bool gen_d_password_edit_echo_button_is_visible(DPasswordEdit *self) { return self->echoButtonIsVisible(); }
+DPictureSequenceView *gen_d_picture_sequence_view_new() { return new DPictureSequenceView; }
 void gen_d_picture_sequence_view_play(DPictureSequenceView *self) { self->play(); }
 void gen_d_picture_sequence_view_pause(DPictureSequenceView *self) { self->pause(); }
 void gen_d_picture_sequence_view_stop(DPictureSequenceView *self) { self->stop(); }
@@ -261,6 +276,7 @@ void gen_d_search_edit_clear_edit(DSearchEdit *self) { self->clearEdit(); }
 bool gen_d_search_edit_is_voice_input(DSearchEdit *self) { return self->isVoiceInput(); }
 void gen_d_search_edit_set_placeholder_text(DSearchEdit *self, rust::Str text) { self->setPlaceholderText(from_rust_str(text)); }
 rust::String gen_d_search_edit_placeholder_text(DSearchEdit *self) { return to_rust_string(self->placeholderText()); }
+DSettingsDialog *gen_d_settings_dialog_new() { return new DSettingsDialog; }
 DSettingsWidgetFactory * gen_d_settings_dialog_widget_factory(DSettingsDialog *self) { return self->widgetFactory(); }
 bool gen_d_settings_dialog_group_is_visible(DSettingsDialog *self, rust::Str groupKey) { return self->groupIsVisible(from_rust_str(groupKey)); }
 void gen_d_settings_dialog_set_reset_visible(DSettingsDialog *self, bool visible) { self->setResetVisible(visible); }
@@ -294,6 +310,7 @@ void gen_d_simple_list_view_ctrl_scroll_page_down(DSimpleListView *self) { self-
 void gen_d_simple_list_view_ctrl_scroll_page_up(DSimpleListView *self) { self->ctrlScrollPageUp(); }
 void gen_d_simple_list_view_ctrl_scroll_to_end(DSimpleListView *self) { self->ctrlScrollToEnd(); }
 void gen_d_simple_list_view_ctrl_scroll_to_home(DSimpleListView *self) { self->ctrlScrollToHome(); }
+DSlider *gen_d_slider_new() { return new DSlider; }
 void gen_d_slider_set_minimum(DSlider *self, int32_t min) { self->setMinimum(min); }
 int32_t gen_d_slider_minimum(DSlider *self) { return self->minimum(); }
 void gen_d_slider_set_value(DSlider *self, int32_t value) { self->setValue(value); }
@@ -325,22 +342,34 @@ DSwitchButton *gen_d_switch_button_new() { return new DSwitchButton; }
 DSwitchLineExpand *gen_d_switch_line_expand_new() { return new DSwitchLineExpand; }
 void gen_d_switch_line_expand_set_title(DSwitchLineExpand *self, rust::Str title) { self->setTitle(from_rust_str(title)); }
 void gen_d_switch_line_expand_set_expand(DSwitchLineExpand *self, bool value) { self->setExpand(value); }
+DBaseLine * gen_d_switch_line_expand_header(DSwitchLineExpand *self) { return self->header(); }
+DTabletWindowOptionButton *gen_d_tablet_window_option_button_new() { return new DTabletWindowOptionButton; }
 void gen_d_tick_effect_play(DTickEffect *self) { self->play(); }
 void gen_d_tick_effect_stop(DTickEffect *self) { self->stop(); }
 void gen_d_tick_effect_pause(DTickEffect *self) { self->pause(); }
 void gen_d_tick_effect_resume(DTickEffect *self) { self->resume(); }
 void gen_d_tick_effect_set_fixed_pixel_move(DTickEffect *self, int32_t pixel) { self->setFixedPixelMove(pixel); }
+DTipLabel *gen_d_tip_label_new() { return new DTipLabel; }
 rust::String gen_d_titlebar_tool_base_interface_id(DTitlebarToolBaseInterface *self) { return to_rust_string(self->id()); }
 rust::String gen_d_titlebar_tool_base_interface_description(DTitlebarToolBaseInterface *self) { return to_rust_string(self->description()); }
 rust::String gen_d_titlebar_tool_base_interface_icon_name(DTitlebarToolBaseInterface *self) { return to_rust_string(self->iconName()); }
+QWidget * gen_d_title_bar_tool_interface_create_view(DTitleBarToolInterface *self) { return self->createView(); }
+QWidget * gen_d_title_bar_spacer_interface_create_placeholder_view(DTitleBarSpacerInterface *self) { return self->createPlaceholderView(); }
 int32_t gen_d_title_bar_spacer_interface_size(DTitleBarSpacerInterface *self) { return self->size(); }
+QWidget * gen_d_titlebar_settings_tools_edit_panel(DTitlebarSettings *self) { return self->toolsEditPanel(); }
+DToolButton *gen_d_tool_button_new() { return new DToolButton; }
 DWaterProgress *gen_d_water_progress_new() { return new DWaterProgress; }
 int32_t gen_d_water_progress_value(DWaterProgress *self) { return self->value(); }
 void gen_d_water_progress_start(DWaterProgress *self) { self->start(); }
 void gen_d_water_progress_stop(DWaterProgress *self) { self->stop(); }
 void gen_d_water_progress_set_value(DWaterProgress *self, int32_t value) { self->setValue(value); }
 void gen_d_water_progress_set_text_visible(DWaterProgress *self, bool visible) { self->setTextVisible(visible); }
+DWindowCloseButton *gen_d_window_close_button_new() { return new DWindowCloseButton; }
+DWindowMaxButton *gen_d_window_max_button_new() { return new DWindowMaxButton; }
 bool gen_d_window_max_button_is_maximized(DWindowMaxButton *self) { return self->isMaximized(); }
 void gen_d_window_max_button_set_maximized(DWindowMaxButton *self, bool isMaximized) { self->setMaximized(isMaximized); }
+DWindowMinButton *gen_d_window_min_button_new() { return new DWindowMinButton; }
+DWindowOptionButton *gen_d_window_option_button_new() { return new DWindowOptionButton; }
+DWindowQuitFullButton *gen_d_window_quit_full_button_new() { return new DWindowQuitFullButton; }
 
 } // namespace dtkrs
