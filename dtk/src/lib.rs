@@ -594,9 +594,20 @@ impl QTimer {
         let id = dtk_sys::register_cb0(f);
         unsafe { ffi::relay_connect0(self.ptr.cast(), "timeout()", id) }
     }
-    /// one-shot timer
+    /// one-shot timer; the callback entry is removed from the registry after firing
     pub fn single_shot(msec: i32, f: impl FnMut() + 'static) {
-        let id = dtk_sys::register_cb0(f);
+        use std::cell::Cell;
+        use std::rc::Rc;
+        let slot = Rc::new(Cell::new(0usize));
+        let slot2 = slot.clone();
+        let mut f = Some(f);
+        let id = dtk_sys::register_cb0(move || {
+            if let Some(mut f) = f.take() {
+                f();
+            }
+            dtk_sys::unregister_cb(slot2.get()); // self-clean: one-shot entries must not accumulate
+        });
+        slot.set(id);
         unsafe { ffi::timer_single_shot(msec, id) }
     }
 }

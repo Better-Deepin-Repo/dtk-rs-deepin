@@ -256,20 +256,28 @@ bool item_data_bool(QTableWidgetItem *it, int32_t role) { return it->data(role).
 
 // ---- value types ----
 QColor *color_new_rgb(int32_t r, int32_t g, int32_t b, int32_t a) { return new QColor(r, g, b, a); }
+void color_delete(QColor *c) { delete c; }
 QFont *font_new() { return new QFont; }
 void font_set_point_size(QFont *f, int32_t size) { f->setPointSize(size); }
 void font_set_bold(QFont *f, bool bold) { f->setBold(bold); }
+void font_delete(QFont *f) { delete f; }
 QPalette *palette_new() { return new QPalette; }
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color) {
     pal->setColor(static_cast<QPalette::ColorGroup>(group), static_cast<QPalette::ColorRole>(role), *color);
 }
+void palette_delete(QPalette *pal) { delete pal; }
 QPixmap *pixmap_new(rust::Str path) { return new QPixmap(from_rust_str(path)); }
+void pixmap_delete(QPixmap *pm) { delete pm; }
 QPixmap *standard_icon_pixmap(QWidget *w, int32_t icon, int32_t size) {
     return new QPixmap(w->style()->standardIcon(static_cast<QStyle::StandardPixmap>(icon)).pixmap(size, size));
 }
 QSize *size_new(int32_t w, int32_t h) { return new QSize(w, h); }
+void size_delete(QSize *s) { delete s; }
 QPoint *point_new(int32_t x, int32_t y) { return new QPoint(x, y); }
+void point_delete(QPoint *p) { delete p; }
 QRect *rect_new(int32_t x, int32_t y, int32_t w, int32_t h) { return new QRect(x, y, w, h); }
+void rect_delete(QRect *r) { delete r; }
+void icon_delete(QIcon *icon) { delete icon; }
 
 // ---- QSocketNotifier ----
 QSocketNotifier *socket_notifier_new(int32_t fd) {

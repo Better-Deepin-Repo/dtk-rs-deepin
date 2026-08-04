@@ -418,10 +418,15 @@ def emit(classes):
                     call_args.append(f"{pname}.ptr")
                 elif pkind == "qtptr":
                     wr_args.append(f"{pname}: &{pcls}")
+                    # AUDIT(2026-02): casting between ffi::QWidget and genffi::QWidget is sound.
+                    # cxx opaque C++ types are zero-sized Rust structs that are never
+                    # dereferenced in Rust; both name the same C++ type ::QWidget via
+                    # `using ::QWidget;` in namespace dtkrs (dtk_shim.h / dtk_gen_shim.h).
+                    # A raw pointer cast moves no bits and assumes no layout.
                     call_args.append(f"{pname}.ptr as _")
                 elif pkind == "val":
                     wr_args.append(f"{pname}: &{pcls}")
-                    call_args.append(f"{pname}.ptr as _")  # same-name opaque types across cxx bridges; raw pointer cast
+                    call_args.append(f"{pname}.ptr as _")  # same audit as qtptr above
                 else:
                     wr_args.append(rs)
                     call_args.append(pname)
@@ -435,10 +440,10 @@ def emit(classes):
                 expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }})"
             elif ret_kind == "qtptr":
                 ret_decl = " -> QWidget"
-                expr = f"QWidget::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"
+                expr = f"QWidget::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"  # see qtptr audit comment above
             elif ret_kind == "val":
                 ret_decl = f" -> {ret_cls}"
-                expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"
+                expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"  # see qtptr audit comment above
             else:
                 ret_decl = "" if ret_rs == "()" else f" -> {ret_rs}"
                 expr = f"unsafe {{ genffi::{fn_name}({calls}) }}"

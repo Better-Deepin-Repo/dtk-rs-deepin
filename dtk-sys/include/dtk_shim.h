@@ -177,16 +177,24 @@ bool item_data_bool(QTableWidgetItem *it, int32_t role);
 
 // ---- value types ----
 QColor *color_new_rgb(int32_t r, int32_t g, int32_t b, int32_t a);
+void color_delete(QColor *c);
 QFont *font_new();
 void font_set_point_size(QFont *f, int32_t size);
 void font_set_bold(QFont *f, bool bold);
+void font_delete(QFont *f);
 QPalette *palette_new();
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color);
+void palette_delete(QPalette *pal);
 QPixmap *pixmap_new(rust::Str path); // file or qrc path
+void pixmap_delete(QPixmap *pm);
 QPixmap *standard_icon_pixmap(QWidget *w, int32_t icon, int32_t size); // QStyle::StandardPixmap
 QSize *size_new(int32_t w, int32_t h);
+void size_delete(QSize *s);
 QPoint *point_new(int32_t x, int32_t y);
+void point_delete(QPoint *p);
 QRect *rect_new(int32_t x, int32_t y, int32_t w, int32_t h);
+void rect_delete(QRect *r);
+void icon_delete(QIcon *icon);
 
 // ---- QSocketNotifier ----
 QSocketNotifier *socket_notifier_new(int32_t fd); // Read type; activated goes through the relay

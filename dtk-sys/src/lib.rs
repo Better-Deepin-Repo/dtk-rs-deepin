@@ -140,16 +140,24 @@ pub mod ffi {
 
         // value types
         unsafe fn color_new_rgb(r: i32, g: i32, b: i32, a: i32) -> *mut QColor;
+        unsafe fn color_delete(c: *mut QColor);
         unsafe fn font_new() -> *mut QFont;
         unsafe fn font_set_point_size(f: *mut QFont, size: i32);
         unsafe fn font_set_bold(f: *mut QFont, bold: bool);
+        unsafe fn font_delete(f: *mut QFont);
         unsafe fn palette_new() -> *mut QPalette;
         unsafe fn palette_set_color(pal: *mut QPalette, group: i32, role: i32, color: *mut QColor);
+        unsafe fn palette_delete(pal: *mut QPalette);
         unsafe fn pixmap_new(path: &str) -> *mut QPixmap;
+        unsafe fn pixmap_delete(pm: *mut QPixmap);
         unsafe fn standard_icon_pixmap(w: *mut QWidget, icon: i32, size: i32) -> *mut QPixmap;
         unsafe fn size_new(w: i32, h: i32) -> *mut QSize;
+        unsafe fn size_delete(s: *mut QSize);
         unsafe fn point_new(x: i32, y: i32) -> *mut QPoint;
+        unsafe fn point_delete(p: *mut QPoint);
         unsafe fn rect_new(x: i32, y: i32, w: i32, h: i32) -> *mut QRect;
+        unsafe fn rect_delete(r: *mut QRect);
+        unsafe fn icon_delete(icon: *mut QIcon);
 
         // QSocketNotifier
         unsafe fn socket_notifier_new(fd: i32) -> *mut QSocketNotifier;
@@ -235,6 +243,12 @@ pub fn register_cb_paint(
     let id = next_id();
     CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Paint(Box::new(f))));
     id
+}
+
+/// Remove a callback from the registry. Returns false if the id is unknown.
+/// Does NOT disconnect the Qt signal: the DtkRelay stays connected but becomes a no-op.
+pub fn unregister_cb(id: usize) -> bool {
+    CALLBACKS.with(|c| c.borrow_mut().remove(&id)).is_some()
 }
 
 // remove-then-call so callbacks can safely register new callbacks; put back after

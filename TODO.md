@@ -27,9 +27,13 @@ Known gaps in dtk-rs, roughly in priority order.
 
 ## Hygiene
 
-- [ ] Value-type wrappers (QColor/QFont/QPalette/QPixmap/QSize/QPoint/QRect, QIcon)
-      intentionally leak today. Add `Drop` calling a shim `delete` fn.
-- [ ] Callback registry never frees entries; signals connected on long-lived objects
-      accumulate. Add an unregister path if it ever shows up in profiles.
-- [ ] `qtptr` cross-bridge cast (`as _`) works because the opaque types are
-      layout-identical; fine in practice, worth a comment-level audit if cxx changes.
+- [x] Value-type wrappers (QColor/QFont/QPalette/QPixmap/QSize/QPoint/QRect, QIcon):
+      fixed — `Drop` calls a shim `*_delete` fn; no more intentional leak.
+- [x] Callback registry: fixed — `unregister_cb`/`dtk::unregister_callback(id)` exists,
+      `connect_signal*` returns the id, and `QTimer::single_shot` self-cleans.
+      Remaining caveat: the Qt-side DtkRelay connection stays connected after
+      unregister and just becomes a no-op (harmless, tiny per-connection cost).
+- [x] `qtptr` cross-bridge cast (`as _`): audited — sound. cxx opaque C++ types are
+      zero-sized Rust structs never dereferenced in Rust; both bridge modules name
+      the same C++ type (`using ::QWidget;` in namespace dtkrs). The cast moves no
+      bits and assumes no layout. Conclusion recorded in tools/gen.py comments.
