@@ -31,6 +31,26 @@ fn main() {
     }
     vbox.add_widget(&btn.as_widget());
 
+    // new binding checks: real argv, palette getter, window icon, box-layout stretch/alignment
+    if std::env::args().any(|a| a == "--smoke") {
+        assert!(DApplication::has_arg("--smoke"), "real argv not passed to QApplication");
+        assert!(!DApplication::has_arg("--hidden"));
+        let pal = win.palette();
+        let hl = pal.color(qt::PALETTE_ACTIVE, qt::ROLE_HIGHLIGHT);
+        pal.set_color(qt::PALETTE_INACTIVE, qt::ROLE_HIGHLIGHT, &hl);
+        let got = pal.color(qt::PALETTE_INACTIVE, qt::ROLE_HIGHLIGHT);
+        assert_eq!(got.rgba_u32(), hl.rgba_u32(), "palette color round-trip broken");
+        win.set_window_icon(&QIcon::from_theme("deepin-liferaft"));
+
+        let hbox = QHBoxLayout::new(None);
+        hbox.add_stretch(1); // pushes the button right
+        let b2 = DPushButton::new("right");
+        hbox.add_widget_ex(&b2.as_widget(), 0, qt::ALIGN_TOP);
+        vbox.add_layout(&hbox);
+        std::mem::forget(b2);
+        std::mem::forget(hbox);
+    }
+
     // --smoke only: verify PaintDelegate + QSocketNotifier chains
     let smoke = std::env::args().any(|a| a == "--smoke");
     let painted = Rc::new(Cell::new(false));
@@ -44,8 +64,11 @@ fn main() {
             let painted = painted.clone();
             let delegate = PaintDelegate::new(move |p, idx, x, y, w, h, _state| {
                 assert_eq!(idx.data_string(0), "icon cell"); // DisplayRole
+                p.set_clip_rect(x, y, w, h);
                 p.fill_rect(x, y, w, h, &QColor::rgb(200, 220, 255));
-                p.draw_text(x, y, w, h, qt::ALIGN_CENTER, "painted");
+                let elided = p.elided_text("a-very-long-application-name", qt::ELIDE_RIGHT, w);
+                assert!(elided.ends_with('\u{2026}') || elided.len() < 26, "elide failed: {elided}");
+                p.draw_text(x, y, w, h, qt::ALIGN_CENTER, &elided);
                 painted.set(true);
             });
             table.set_delegate_for_column(0, &delegate);

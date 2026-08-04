@@ -27,6 +27,9 @@ macro_rules! widget_wrapper {
             pub fn set_window_title(&self, title: &str) {
                 unsafe { ffi::widget_set_window_title(self.ptr.cast(), title) }
             }
+            pub fn set_window_icon(&self, icon: &QIcon) {
+                unsafe { ffi::widget_set_window_icon(self.ptr.cast(), icon.ptr) }
+            }
             pub fn set_fixed_size(&self, w: i32, h: i32) {
                 unsafe { ffi::widget_set_fixed_size(self.ptr.cast(), w, h) }
             }
@@ -144,15 +147,22 @@ pub struct DApplication {
     _not_send: PhantomData<*mut ()>,
 }
 
+/// real process argv for QApplication; ponytail: '|' separator, can't appear in normal flags
+fn env_args_joined() -> String {
+    std::env::args().collect::<Vec<_>>().join("|")
+}
+
 impl DApplication {
     pub fn new(name: &str) -> Self {
-        let ptr = unsafe { ffi::application_new(name) };
+        let args = env_args_joined();
+        let ptr = unsafe { ffi::application_new(name, &args) };
         Self { ptr, _not_send: PhantomData }
     }
     /// with quit guard: QEvent::Quit asks the guard; false swallows the event (Rust retries itself)
     pub fn new_with_quit_guard(name: &str, guard: impl FnMut() -> bool + 'static) -> Self {
         let id = dtk_sys::register_cb_guard(guard);
-        let ptr = unsafe { ffi::application_new_ex(name, id) };
+        let args = env_args_joined();
+        let ptr = unsafe { ffi::application_new_ex(name, &args, id) };
         Self { ptr, _not_send: PhantomData }
     }
     pub fn exec(&self) -> i32 {
@@ -259,6 +269,10 @@ impl QColor {
     pub fn rgba(r: i32, g: i32, b: i32, a: i32) -> Self {
         Self::from_raw(unsafe { ffi::color_new_rgb(r, g, b, a) })
     }
+    /// packed 0xAARRGGBB
+    pub fn rgba_u32(&self) -> u32 {
+        unsafe { ffi::color_rgba(self.ptr) as u32 }
+    }
 }
 
 impl QFont {
@@ -286,6 +300,10 @@ impl QPalette {
     /// use qt module constants for group/role
     pub fn set_color(&self, group: i32, role: i32, color: &QColor) {
         unsafe { ffi::palette_set_color(self.ptr, group, role, color.ptr) }
+    }
+    /// read a color (e.g. copy Active Highlight into the Inactive group)
+    pub fn color(&self, group: i32, role: i32) -> QColor {
+        QColor::from_raw(unsafe { ffi::palette_color(self.ptr, group, role) })
     }
 }
 
@@ -358,6 +376,11 @@ pub mod qt {
     pub const ROLE_WINDOW: i32 = 10;
     pub const ROLE_HIGHLIGHT: i32 = 12;
     pub const ROLE_HIGHLIGHTED_TEXT: i32 = 13;
+    // Qt::TextElideMode
+    pub const ELIDE_LEFT: i32 = 0;
+    pub const ELIDE_RIGHT: i32 = 1;
+    pub const ELIDE_MIDDLE: i32 = 2;
+    pub const ELIDE_NONE: i32 = 3;
     // QStyleOption::State
     pub const STATE_SELECTED: i32 = 0x1;
     pub const STATE_MOUSE_OVER: i32 = 0x2000;
@@ -451,6 +474,14 @@ macro_rules! layout_wrapper {
             }
             pub fn add_widget(&self, w: &QWidget) {
                 unsafe { ffi::layout_add_widget(self.ptr.cast(), w.ptr) }
+            }
+            /// box layouts only: stretch factor + qt::ALIGN_* alignment
+            pub fn add_widget_ex(&self, w: &QWidget, stretch: i32, alignment: i32) {
+                unsafe { ffi::layout_add_widget_ex(self.ptr.cast(), w.ptr, stretch, alignment) }
+            }
+            /// box layouts only: insert stretchable space (e.g. push buttons right)
+            pub fn add_stretch(&self, stretch: i32) {
+                unsafe { ffi::layout_add_stretch(self.ptr.cast(), stretch) }
             }
             pub fn add_layout<L: AsLayout>(&self, child: &L) {
                 unsafe { ffi::layout_add_layout(self.ptr.cast(), child.layout_ptr()) }
@@ -688,6 +719,13 @@ impl Painter {
     }
     pub fn fill_rect(&self, x: i32, y: i32, w: i32, h: i32, color: &QColor) {
         unsafe { ffi::painter_fill_rect(self.ptr, x, y, w, h, color.ptr) }
+    }
+    pub fn set_clip_rect(&self, x: i32, y: i32, w: i32, h: i32) {
+        unsafe { ffi::painter_set_clip_rect(self.ptr, x, y, w, h) }
+    }
+    /// elide text to width using the painter's current font; use qt::ELIDE_* for mode
+    pub fn elided_text(&self, text: &str, mode: i32, width: i32) -> String {
+        unsafe { ffi::painter_elided_text(self.ptr, text, mode, width) }
     }
 }
 

@@ -39,8 +39,9 @@ pub mod ffi {
         type DPushButton;
 
         // DApplication
-        unsafe fn application_new(name: &str) -> *mut DApplication;
-        unsafe fn application_new_ex(name: &str, quit_guard_id: usize) -> *mut DApplication;
+        // args: '|'-separated real argv (incl. argv[0]); application_name set separately
+        unsafe fn application_new(name: &str, args: &str) -> *mut DApplication;
+        unsafe fn application_new_ex(name: &str, args: &str, quit_guard_id: usize) -> *mut DApplication;
         unsafe fn application_exec(app: *mut DApplication) -> i32;
         unsafe fn application_quit();
         unsafe fn application_set_quit_on_last_window_closed(quit: bool);
@@ -53,6 +54,7 @@ pub mod ffi {
         unsafe fn widget_resize(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_set_enabled(w: *mut QWidget, on: bool);
         unsafe fn widget_set_window_title(w: *mut QWidget, title: &str);
+        unsafe fn widget_set_window_icon(w: *mut QWidget, icon: *mut QIcon);
         unsafe fn widget_set_fixed_size(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_raise(w: *mut QWidget);
         unsafe fn widget_activate_window(w: *mut QWidget);
@@ -99,6 +101,8 @@ pub mod ffi {
         unsafe fn hbox_new(parent: *mut QWidget) -> *mut QHBoxLayout;
         unsafe fn widget_new(parent: *mut QWidget) -> *mut QWidget;
         unsafe fn layout_add_widget(l: *mut QLayout, w: *mut QWidget);
+        unsafe fn layout_add_widget_ex(l: *mut QLayout, w: *mut QWidget, stretch: i32, alignment: i32);
+        unsafe fn layout_add_stretch(l: *mut QLayout, stretch: i32);
         unsafe fn layout_add_layout(l: *mut QLayout, child: *mut QLayout);
         unsafe fn layout_set_spacing(l: *mut QLayout, spacing: i32);
         unsafe fn layout_set_contents_margins(l: *mut QLayout, l_: i32, t: i32, r: i32, b: i32);
@@ -140,6 +144,7 @@ pub mod ffi {
 
         // value types
         unsafe fn color_new_rgb(r: i32, g: i32, b: i32, a: i32) -> *mut QColor;
+        unsafe fn color_rgba(c: *mut QColor) -> i32;
         unsafe fn color_delete(c: *mut QColor);
         unsafe fn font_new() -> *mut QFont;
         unsafe fn font_set_point_size(f: *mut QFont, size: i32);
@@ -147,6 +152,7 @@ pub mod ffi {
         unsafe fn font_delete(f: *mut QFont);
         unsafe fn palette_new() -> *mut QPalette;
         unsafe fn palette_set_color(pal: *mut QPalette, group: i32, role: i32, color: *mut QColor);
+        unsafe fn palette_color(pal: *mut QPalette, group: i32, role: i32) -> *mut QColor;
         unsafe fn palette_delete(pal: *mut QPalette);
         unsafe fn pixmap_new(path: &str) -> *mut QPixmap;
         unsafe fn pixmap_delete(pm: *mut QPixmap);
@@ -174,6 +180,8 @@ pub mod ffi {
         unsafe fn painter_draw_pixmap(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, pm: *mut QPixmap);
         unsafe fn painter_draw_icon(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, icon: *mut QIcon);
         unsafe fn painter_fill_rect(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, color: *mut QColor);
+        unsafe fn painter_set_clip_rect(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32);
+        unsafe fn painter_elided_text(p: *mut QPainter, text: &str, mode: i32, width: i32) -> String;
 
         // QModelIndex data access
         unsafe fn index_data_string(idx: *mut QModelIndex, role: i32) -> String;

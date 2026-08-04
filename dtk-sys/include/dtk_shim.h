@@ -76,8 +76,9 @@ rust::String to_rust_string(const QString &s);
 QString from_rust_str(rust::Str s);
 
 // ---- DApplication ----
-DApplication *application_new(rust::Str name);
-DApplication *application_new_ex(rust::Str name, size_t quit_guard_id); // guard returning false swallows the Quit event
+// args: '|'-separated argv (incl. argv[0]); ponytail: '|' can't appear in normal flags like --hidden
+DApplication *application_new(rust::Str name, rust::Str args);
+DApplication *application_new_ex(rust::Str name, rust::Str args, size_t quit_guard_id); // guard returning false swallows the Quit event
 int32_t application_exec(DApplication *app);
 void application_quit();
 void application_set_quit_on_last_window_closed(bool quit);
@@ -90,6 +91,7 @@ void widget_show(QWidget *w);
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px);
 void widget_set_enabled(QWidget *w, bool on);
 void widget_set_window_title(QWidget *w, rust::Str title);
+void widget_set_window_icon(QWidget *w, QIcon *icon);
 void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px);
 void widget_raise(QWidget *w);
 void widget_activate_window(QWidget *w);
@@ -136,6 +138,8 @@ QVBoxLayout *vbox_new(QWidget *parent);
 QHBoxLayout *hbox_new(QWidget *parent);
 QWidget *widget_new(QWidget *parent);
 void layout_add_widget(QLayout *l, QWidget *w);
+void layout_add_widget_ex(QLayout *l, QWidget *w, int32_t stretch, int32_t alignment); // box layouts only
+void layout_add_stretch(QLayout *l, int32_t stretch); // box layouts only
 void layout_add_layout(QLayout *l, QLayout *child);
 void layout_set_spacing(QLayout *l, int32_t spacing);
 void layout_set_contents_margins(QLayout *l, int32_t l_, int32_t t, int32_t r, int32_t b);
@@ -177,6 +181,7 @@ bool item_data_bool(QTableWidgetItem *it, int32_t role);
 
 // ---- value types ----
 QColor *color_new_rgb(int32_t r, int32_t g, int32_t b, int32_t a);
+int32_t color_rgba(QColor *c); // packed 0xAARRGGBB
 void color_delete(QColor *c);
 QFont *font_new();
 void font_set_point_size(QFont *f, int32_t size);
@@ -184,6 +189,7 @@ void font_set_bold(QFont *f, bool bold);
 void font_delete(QFont *f);
 QPalette *palette_new();
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color);
+QColor *palette_color(QPalette *pal, int32_t group, int32_t role); // heap copy, owned by the caller
 void palette_delete(QPalette *pal);
 QPixmap *pixmap_new(rust::Str path); // file or qrc path
 void pixmap_delete(QPixmap *pm);
@@ -211,6 +217,8 @@ void painter_draw_text(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, 
 void painter_draw_pixmap(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QPixmap *pm);
 void painter_draw_icon(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QIcon *icon);
 void painter_fill_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QColor *color);
+void painter_set_clip_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h);
+rust::String painter_elided_text(QPainter *p, rust::Str text, int32_t mode, int32_t width); // Qt::TextElideMode
 
 // ---- QModelIndex data access ----
 rust::String index_data_string(QModelIndex *idx, int32_t role);

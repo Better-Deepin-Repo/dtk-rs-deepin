@@ -9,6 +9,8 @@
 #include <QTableWidgetItem>
 #include <cstdio>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace dtkrs {
 
@@ -75,27 +77,37 @@ QString from_rust_str(rust::Str s) {
 }
 
 // ---- DApplication ----
-DApplication *application_new(rust::Str name) {
-    // QApplication requires argv to outlive the app; static storage does that
-    static int argc = 1;
-    static char arg0[256];
-    std::snprintf(arg0, sizeof(arg0), "%.*s", static_cast<int>(name.size()), name.data());
-    static char *argv[] = {arg0, nullptr};
+// QApplication requires argc AND argv to outlive the app (Qt6 stores int& argc):
+// static storage, filled on first call (QApplication is a singleton anyway)
+static std::pair<int &, char **> make_argv(rust::Str name, rust::Str args) {
+    static std::vector<std::string> store;
+    static std::vector<char *> argv;
+    static int argc;
+    for (const auto &a : from_rust_str(args).split(QLatin1Char('|'), Qt::SkipEmptyParts))
+        store.push_back(a.toStdString());
+    if (store.empty())
+        store.emplace_back(name.data(), name.size());
+    for (auto &s : store)
+        argv.push_back(s.data());
+    argv.push_back(nullptr); // Qt expects argv[argc] == nullptr
+    argc = static_cast<int>(store.size());
+    return {argc, argv.data()};
+}
+
+DApplication *application_new(rust::Str name, rust::Str args) {
+    auto [argc, argv] = make_argv(name, args);
     auto *app = new DApplication(argc, argv);
-    app->setApplicationName(QString::fromUtf8(arg0));
+    app->setApplicationName(from_rust_str(name));
     return app;
 }
 
 int32_t application_exec(DApplication *app) { return app->exec(); }
 void application_quit() { QCoreApplication::quit(); }
 
-DApplication *application_new_ex(rust::Str name, size_t quit_guard_id) {
-    static int argc = 1;
-    static char arg0[256];
-    std::snprintf(arg0, sizeof(arg0), "%.*s", static_cast<int>(name.size()), name.data());
-    static char *argv[] = {arg0, nullptr};
+DApplication *application_new_ex(rust::Str name, rust::Str args, size_t quit_guard_id) {
+    auto [argc, argv] = make_argv(name, args);
     auto *app = new DtkAppEx(argc, argv, quit_guard_id);
-    app->setApplicationName(QString::fromUtf8(arg0));
+    app->setApplicationName(from_rust_str(name));
     return app;
 }
 
@@ -115,6 +127,7 @@ void widget_show(QWidget *w) { w->show(); }
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px) { w->resize(w_px, h_px); }
 void widget_set_enabled(QWidget *w, bool on) { w->setEnabled(on); }
 void widget_set_window_title(QWidget *w, rust::Str title) { w->setWindowTitle(from_rust_str(title)); }
+void widget_set_window_icon(QWidget *w, QIcon *icon) { w->setWindowIcon(*icon); }
 void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixedSize(w_px, h_px); }
 void widget_raise(QWidget *w) { w->raise(); }
 void widget_activate_window(QWidget *w) { w->activateWindow(); }
@@ -171,6 +184,17 @@ QVBoxLayout *vbox_new(QWidget *parent) { return new QVBoxLayout(parent); }
 QHBoxLayout *hbox_new(QWidget *parent) { return new QHBoxLayout(parent); }
 QWidget *widget_new(QWidget *parent) { return new QWidget(parent); }
 void layout_add_widget(QLayout *l, QWidget *w) { l->addWidget(w); }
+void layout_add_widget_ex(QLayout *l, QWidget *w, int32_t stretch, int32_t alignment) {
+    // ponytail: stretch/alignment only exist on QBoxLayout; other layouts fall back to plain add
+    if (auto *box = qobject_cast<QBoxLayout *>(l))
+        box->addWidget(w, stretch, Qt::Alignment::fromInt(alignment));
+    else
+        l->addWidget(w);
+}
+void layout_add_stretch(QLayout *l, int32_t stretch) {
+    if (auto *box = qobject_cast<QBoxLayout *>(l))
+        box->addStretch(stretch);
+}
 void layout_add_layout(QLayout *l, QLayout *child) { l->addItem(child); }
 void layout_set_spacing(QLayout *l, int32_t spacing) { l->setSpacing(spacing); }
 void layout_set_contents_margins(QLayout *l, int32_t l_, int32_t t, int32_t r, int32_t b) {
@@ -256,6 +280,7 @@ bool item_data_bool(QTableWidgetItem *it, int32_t role) { return it->data(role).
 
 // ---- value types ----
 QColor *color_new_rgb(int32_t r, int32_t g, int32_t b, int32_t a) { return new QColor(r, g, b, a); }
+int32_t color_rgba(QColor *c) { return static_cast<int32_t>(c->rgba()); }
 void color_delete(QColor *c) { delete c; }
 QFont *font_new() { return new QFont; }
 void font_set_point_size(QFont *f, int32_t size) { f->setPointSize(size); }
@@ -264,6 +289,10 @@ void font_delete(QFont *f) { delete f; }
 QPalette *palette_new() { return new QPalette; }
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color) {
     pal->setColor(static_cast<QPalette::ColorGroup>(group), static_cast<QPalette::ColorRole>(role), *color);
+}
+QColor *palette_color(QPalette *pal, int32_t group, int32_t role) {
+    return new QColor(pal->color(static_cast<QPalette::ColorGroup>(group),
+                                 static_cast<QPalette::ColorRole>(role)));
 }
 void palette_delete(QPalette *pal) { delete pal; }
 QPixmap *pixmap_new(rust::Str path) { return new QPixmap(from_rust_str(path)); }
@@ -306,6 +335,13 @@ void painter_draw_icon(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, 
 }
 void painter_fill_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QColor *color) {
     p->fillRect(QRect(x, y, w, h), *color);
+}
+void painter_set_clip_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h) {
+    p->setClipRect(x, y, w, h);
+}
+rust::String painter_elided_text(QPainter *p, rust::Str text, int32_t mode, int32_t width) {
+    return to_rust_string(
+        p->fontMetrics().elidedText(from_rust_str(text), static_cast<Qt::TextElideMode>(mode), width));
 }
 
 // ---- QModelIndex data access ----
