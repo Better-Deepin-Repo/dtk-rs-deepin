@@ -1,0 +1,2 @@
+// DTK6 缺失的别名头，dcircleprogress.h 还在引用
+#include <dthememanager.h>

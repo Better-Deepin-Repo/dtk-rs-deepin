@@ -1,0 +1,12 @@
+[package]
+name = "dtk-sys"
+version = "0.1.0"
+edition = "2024"
+links = "dtk6widget"
+
+[dependencies]
+cxx = "1"
+
+[build-dependencies]
+cxx-build = "1"
+pkg-config = "0.3"

@@ -1,0 +1,462 @@
+// 自动生成 by tools/gen.py，勿手改
+#pragma once
+#include "dtk_shim.h"
+#include <dabstractdialog.h>
+#include <daccessibilitychecker.h>
+#include <dalertcontrol.h>
+#include <darrowbutton.h>
+#include <darrowlinedrawer.h>
+#include <darrowrectangle.h>
+#include <dbackgroundgroup.h>
+#include <dbaseline.h>
+#include <dblureffectwidget.h>
+#include <dcircleprogress.h>
+#include <dcoloredprogressbar.h>
+#include <dcombobox.h>
+#include <dcrumbedit.h>
+#include <ddrawer.h>
+#include <ddrawergroup.h>
+#include <dfilechooseredit.h>
+#include <dfiledialog.h>
+#include <dfontcombobox.h>
+#include <dgraphicsgloweffect.h>
+#include <dheaderline.h>
+#include <dimageviewer.h>
+#include <dipv4lineedit.h>
+#include <dkeysequenceedit.h>
+#include <dlineedit.h>
+#include <dlistview.h>
+#include <dloadingindicator.h>
+#include <dmpriscontrol.h>
+#include <dpageindicator.h>
+#include <dpasswordedit.h>
+#include <dpicturesequenceview.h>
+#include <dprintpreviewwidget.h>
+#include <dsearchcombobox.h>
+#include <dsearchedit.h>
+#include <dsettingsdialog.h>
+#include <dsettingswidgetfactory.h>
+#include <dshadowline.h>
+#include <dsimplelistitem.h>
+#include <dsimplelistview.h>
+#include <dsizemode.h>
+#include <dslider.h>
+#include <dspinbox.h>
+#include <dspinner.h>
+#include <dswitchbutton.h>
+#include <dswitchlineexpand.h>
+#include <dtabletwindowoptionbutton.h>
+#include <dtickeffect.h>
+#include <dtiplabel.h>
+#include <dtitlebarsettings.h>
+#include <dtoolbutton.h>
+#include <dwaterprogress.h>
+#include <dwindowclosebutton.h>
+#include <dwindowmaxbutton.h>
+#include <dwindowminbutton.h>
+#include <dwindowoptionbutton.h>
+#include <dwindowquitfullbutton.h>
+
+namespace dtkrs {
+using DAbstractDialog = Dtk::Widget::DAbstractDialog;
+using DAccessibilityChecker = Dtk::Widget::DAccessibilityChecker;
+using DAlertControl = Dtk::Widget::DAlertControl;
+using DArrowButton = Dtk::Widget::DArrowButton;
+using DArrowLineDrawer = Dtk::Widget::DArrowLineDrawer;
+using DArrowRectangle = Dtk::Widget::DArrowRectangle;
+using DBackgroundGroup = Dtk::Widget::DBackgroundGroup;
+using DBaseLine = Dtk::Widget::DBaseLine;
+using DBlurEffectWidget = Dtk::Widget::DBlurEffectWidget;
+using DCircleProgress = Dtk::Widget::DCircleProgress;
+using DColoredProgressBar = Dtk::Widget::DColoredProgressBar;
+using DComboBox = Dtk::Widget::DComboBox;
+using DCrumbTextFormat = Dtk::Widget::DCrumbTextFormat;
+using DCrumbEdit = Dtk::Widget::DCrumbEdit;
+using DDrawer = Dtk::Widget::DDrawer;
+using DDrawerGroup = Dtk::Widget::DDrawerGroup;
+using DFileChooserEdit = Dtk::Widget::DFileChooserEdit;
+using DFileDialog = Dtk::Widget::DFileDialog;
+using DFontComboBox = Dtk::Widget::DFontComboBox;
+using DGraphicsGlowEffect = Dtk::Widget::DGraphicsGlowEffect;
+using DHeaderLine = Dtk::Widget::DHeaderLine;
+using DImageViewer = Dtk::Widget::DImageViewer;
+using DIpv4LineEdit = Dtk::Widget::DIpv4LineEdit;
+using DKeySequenceEdit = Dtk::Widget::DKeySequenceEdit;
+using DLineEdit = Dtk::Widget::DLineEdit;
+using DListView = Dtk::Widget::DListView;
+using DLoadingIndicator = Dtk::Widget::DLoadingIndicator;
+using DMPRISControl = Dtk::Widget::DMPRISControl;
+using DPageIndicator = Dtk::Widget::DPageIndicator;
+using DPasswordEdit = Dtk::Widget::DPasswordEdit;
+using DPictureSequenceView = Dtk::Widget::DPictureSequenceView;
+using DPrintPreviewWidget = Dtk::Widget::DPrintPreviewWidget;
+using DSearchComboBox = Dtk::Widget::DSearchComboBox;
+using DSearchEdit = Dtk::Widget::DSearchEdit;
+using DSettingsDialog = Dtk::Widget::DSettingsDialog;
+using DSettingsWidgetFactory = Dtk::Widget::DSettingsWidgetFactory;
+using DShadowLine = Dtk::Widget::DShadowLine;
+using DSimpleListItem = Dtk::Widget::DSimpleListItem;
+using DSimpleListView = Dtk::Widget::DSimpleListView;
+using DSizeModeHelper = Dtk::Widget::DSizeModeHelper;
+using DSlider = Dtk::Widget::DSlider;
+using DSpinBox = Dtk::Widget::DSpinBox;
+using DDoubleSpinBox = Dtk::Widget::DDoubleSpinBox;
+using DSpinner = Dtk::Widget::DSpinner;
+using DSwitchButton = Dtk::Widget::DSwitchButton;
+using DSwitchLineExpand = Dtk::Widget::DSwitchLineExpand;
+using DTabletWindowOptionButton = Dtk::Widget::DTabletWindowOptionButton;
+using DTickEffect = Dtk::Widget::DTickEffect;
+using DTipLabel = Dtk::Widget::DTipLabel;
+using DTitlebarToolBaseInterface = Dtk::Widget::DTitlebarToolBaseInterface;
+using DTitleBarToolInterface = Dtk::Widget::DTitleBarToolInterface;
+using DTitleBarSpacerInterface = Dtk::Widget::DTitleBarSpacerInterface;
+using DTitlebarSettings = Dtk::Widget::DTitlebarSettings;
+using DToolButton = Dtk::Widget::DToolButton;
+using DWaterProgress = Dtk::Widget::DWaterProgress;
+using DWindowCloseButton = Dtk::Widget::DWindowCloseButton;
+using DWindowMaxButton = Dtk::Widget::DWindowMaxButton;
+using DWindowMinButton = Dtk::Widget::DWindowMinButton;
+using DWindowOptionButton = Dtk::Widget::DWindowOptionButton;
+using DWindowQuitFullButton = Dtk::Widget::DWindowQuitFullButton;
+void gen_d_abstract_dialog_move_to_center(DAbstractDialog *self);
+void gen_d_abstract_dialog_move_to_top_right(DAbstractDialog *self);
+DAccessibilityChecker *gen_d_accessibility_checker_new();
+bool gen_d_accessibility_checker_check(DAccessibilityChecker *self);
+void gen_d_accessibility_checker_start(DAccessibilityChecker *self, int32_t msec);
+void gen_d_alert_control_set_alert(DAlertControl *self, bool isAlert);
+bool gen_d_alert_control_is_alert(DAlertControl *self);
+void gen_d_alert_control_show_alert_message(DAlertControl *self, rust::Str text, int32_t duration);
+void gen_d_alert_control_hide_alert_message(DAlertControl *self);
+DArrowButton *gen_d_arrow_button_new();
+int32_t gen_d_arrow_button_arrow_direction(DArrowButton *self);
+int32_t gen_d_arrow_button_button_state(DArrowButton *self);
+DArrowLineDrawer *gen_d_arrow_line_drawer_new();
+void gen_d_arrow_line_drawer_set_title(DArrowLineDrawer *self, rust::Str title);
+void gen_d_arrow_line_drawer_set_expand(DArrowLineDrawer *self, bool value);
+int32_t gen_d_arrow_rectangle_radius(DArrowRectangle *self);
+bool gen_d_arrow_rectangle_radius_force_enabled(DArrowRectangle *self);
+int32_t gen_d_arrow_rectangle_arrow_height(DArrowRectangle *self);
+int32_t gen_d_arrow_rectangle_arrow_width(DArrowRectangle *self);
+int32_t gen_d_arrow_rectangle_arrow_x(DArrowRectangle *self);
+int32_t gen_d_arrow_rectangle_arrow_y(DArrowRectangle *self);
+int32_t gen_d_arrow_rectangle_margin(DArrowRectangle *self);
+int32_t gen_d_arrow_rectangle_border_width(DArrowRectangle *self);
+void gen_d_arrow_rectangle_set_radius(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_set_radius_force_enable(DArrowRectangle *self, bool enable);
+void gen_d_arrow_rectangle_set_arrow_height(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_set_arrow_width(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_set_arrow_x(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_set_arrow_y(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_set_margin(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_set_border_width(DArrowRectangle *self, int32_t borderWidth);
+void gen_d_arrow_rectangle_set_width(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_set_height(DArrowRectangle *self, int32_t value);
+void gen_d_arrow_rectangle_show(DArrowRectangle *self, int32_t x, int32_t y);
+void gen_d_arrow_rectangle_resize_with_content(DArrowRectangle *self);
+void gen_d_arrow_rectangle_move_(DArrowRectangle *self, int32_t x, int32_t y);
+double gen_d_arrow_rectangle_shadow_x_offset(DArrowRectangle *self);
+double gen_d_arrow_rectangle_shadow_y_offset(DArrowRectangle *self);
+double gen_d_arrow_rectangle_shadow_blur_radius(DArrowRectangle *self);
+void gen_d_arrow_rectangle_set_shadow_blur_radius(DArrowRectangle *self, double shadowBlurRadius);
+void gen_d_arrow_rectangle_set_shadow_x_offset(DArrowRectangle *self, double shadowXOffset);
+void gen_d_arrow_rectangle_set_shadow_y_offset(DArrowRectangle *self, double shadowYOffset);
+void gen_d_arrow_rectangle_set_left_right_radius(DArrowRectangle *self, bool enable);
+void gen_d_arrow_rectangle_set_radius_arrow_style_enable(DArrowRectangle *self, bool enable);
+DBackgroundGroup *gen_d_background_group_new();
+bool gen_d_background_group_use_widget_background(DBackgroundGroup *self);
+void gen_d_background_group_set_item_spacing(DBackgroundGroup *self, int32_t spacing);
+void gen_d_background_group_set_use_widget_background(DBackgroundGroup *self, bool useWidgetBackground);
+DBaseLine *gen_d_base_line_new();
+void gen_d_base_line_set_left_margin(DBaseLine *self, int32_t margin);
+void gen_d_base_line_set_right_margin(DBaseLine *self, int32_t margin);
+int32_t gen_d_base_line_left_margin(DBaseLine *self);
+int32_t gen_d_base_line_right_margin(DBaseLine *self);
+DBlurEffectWidget *gen_d_blur_effect_widget_new();
+int32_t gen_d_blur_effect_widget_radius(DBlurEffectWidget *self);
+int32_t gen_d_blur_effect_widget_blur_rect_x_radius(DBlurEffectWidget *self);
+int32_t gen_d_blur_effect_widget_blur_rect_y_radius(DBlurEffectWidget *self);
+bool gen_d_blur_effect_widget_is_full(DBlurEffectWidget *self);
+bool gen_d_blur_effect_widget_blur_enabled(DBlurEffectWidget *self);
+uint8_t gen_d_blur_effect_widget_mask_alpha(DBlurEffectWidget *self);
+void gen_d_blur_effect_widget_set_radius(DBlurEffectWidget *self, int32_t radius);
+void gen_d_blur_effect_widget_set_blur_rect_x_radius(DBlurEffectWidget *self, int32_t blurRectXRadius);
+void gen_d_blur_effect_widget_set_blur_rect_y_radius(DBlurEffectWidget *self, int32_t blurRectYRadius);
+void gen_d_blur_effect_widget_set_mask_alpha(DBlurEffectWidget *self, uint8_t alpha);
+void gen_d_blur_effect_widget_set_full(DBlurEffectWidget *self, bool full);
+void gen_d_blur_effect_widget_set_blur_enabled(DBlurEffectWidget *self, bool blurEnabled);
+DCircleProgress *gen_d_circle_progress_new();
+int32_t gen_d_circle_progress_value(DCircleProgress *self);
+void gen_d_circle_progress_set_value(DCircleProgress *self, int32_t value);
+rust::String gen_d_circle_progress_text(DCircleProgress *self);
+void gen_d_circle_progress_set_text(DCircleProgress *self, rust::Str text);
+int32_t gen_d_circle_progress_line_width(DCircleProgress *self);
+void gen_d_circle_progress_set_line_width(DCircleProgress *self, int32_t width);
+DColoredProgressBar *gen_d_colored_progress_bar_new();
+void gen_d_colored_progress_bar_remove_threshold(DColoredProgressBar *self, int32_t threshold);
+DComboBox *gen_d_combo_box_new();
+void gen_d_combo_box_show_popup(DComboBox *self);
+rust::String gen_d_crumb_text_format_text(DCrumbTextFormat *self);
+void gen_d_crumb_text_format_set_text(DCrumbTextFormat *self, rust::Str text);
+int32_t gen_d_crumb_text_format_background_radius(DCrumbTextFormat *self);
+void gen_d_crumb_text_format_set_background_radius(DCrumbTextFormat *self, int32_t radius);
+DCrumbEdit *gen_d_crumb_edit_new();
+bool gen_d_crumb_edit_insert_crumb(DCrumbEdit *self, rust::Str text, int32_t pos);
+bool gen_d_crumb_edit_append_crumb(DCrumbEdit *self, rust::Str text);
+bool gen_d_crumb_edit_contain_crumb(DCrumbEdit *self, rust::Str text);
+bool gen_d_crumb_edit_crumb_read_only(DCrumbEdit *self);
+int32_t gen_d_crumb_edit_crumb_radius(DCrumbEdit *self);
+rust::String gen_d_crumb_edit_splitter(DCrumbEdit *self);
+void gen_d_crumb_edit_set_crumb_read_only(DCrumbEdit *self, bool crumbReadOnly);
+void gen_d_crumb_edit_set_crumb_radius(DCrumbEdit *self, int32_t crumbRadius);
+void gen_d_crumb_edit_set_splitter(DCrumbEdit *self, rust::Str splitter);
+DDrawer *gen_d_drawer_new();
+void gen_d_drawer_set_header_height(DDrawer *self, int32_t height);
+void gen_d_drawer_set_expand(DDrawer *self, bool value);
+bool gen_d_drawer_expand(DDrawer *self);
+void gen_d_drawer_set_animation_duration(DDrawer *self, int32_t duration);
+void gen_d_drawer_set_separator_visible(DDrawer *self, bool arg);
+void gen_d_drawer_set_expanded_separator_visible(DDrawer *self, bool arg);
+DDrawerGroup *gen_d_drawer_group_new();
+DDrawer * gen_d_drawer_group_checked_expand(DDrawerGroup *self);
+DDrawer * gen_d_drawer_group_expand(DDrawerGroup *self, int32_t id);
+int32_t gen_d_drawer_group_checked_id(DDrawerGroup *self);
+void gen_d_file_chooser_edit_init_dialog(DFileChooserEdit *self);
+void gen_d_file_dialog_add_line_edit(DFileDialog *self, rust::Str text);
+void gen_d_file_dialog_set_allow_mixed_selection(DFileDialog *self, bool on);
+rust::String gen_d_file_dialog_get_combo_box_value(DFileDialog *self, rust::Str text);
+rust::String gen_d_file_dialog_get_line_edit_value(DFileDialog *self, rust::Str text);
+void gen_d_file_dialog_set_visible(DFileDialog *self, bool visible);
+DFontComboBox *gen_d_font_combo_box_new();
+DGraphicsGlowEffect *gen_d_graphics_glow_effect_new();
+DHeaderLine *gen_d_header_line_new();
+void gen_d_header_line_set_title(DHeaderLine *self, rust::Str title);
+rust::String gen_d_header_line_title(DHeaderLine *self);
+DImageViewer *gen_d_image_viewer_new();
+rust::String gen_d_image_viewer_file_name(DImageViewer *self);
+void gen_d_image_viewer_set_file_name(DImageViewer *self, rust::Str fileName);
+double gen_d_image_viewer_scale_factor(DImageViewer *self);
+void gen_d_image_viewer_set_scale_factor(DImageViewer *self, double factor);
+void gen_d_image_viewer_scale_image(DImageViewer *self, double factor);
+void gen_d_image_viewer_auto_fit_image(DImageViewer *self);
+void gen_d_image_viewer_fit_to_widget(DImageViewer *self);
+void gen_d_image_viewer_fit_normal_size(DImageViewer *self);
+void gen_d_image_viewer_rotate_clockwise(DImageViewer *self);
+void gen_d_image_viewer_rotate_counterclockwise(DImageViewer *self);
+int32_t gen_d_image_viewer_rotate_angle(DImageViewer *self);
+void gen_d_image_viewer_reset_rotate_angle(DImageViewer *self);
+void gen_d_image_viewer_clear(DImageViewer *self);
+void gen_d_image_viewer_center_on(DImageViewer *self, double x, double y);
+void gen_d_image_viewer_begin_crop_image(DImageViewer *self);
+void gen_d_image_viewer_end_crop_image(DImageViewer *self);
+void gen_d_image_viewer_reset_crop_image(DImageViewer *self);
+void gen_d_image_viewer_set_crop_aspect_ratio(DImageViewer *self, double w, double h);
+DIpv4LineEdit *gen_d_ipv4_line_edit_new();
+rust::String gen_d_ipv4_line_edit_display_text(DIpv4LineEdit *self);
+int32_t gen_d_ipv4_line_edit_cursor_position(DIpv4LineEdit *self);
+bool gen_d_ipv4_line_edit_has_acceptable_input(DIpv4LineEdit *self);
+bool gen_d_ipv4_line_edit_is_read_only(DIpv4LineEdit *self);
+void gen_d_ipv4_line_edit_set_cursor_position(DIpv4LineEdit *self, int32_t cursorPosition);
+void gen_d_ipv4_line_edit_set_read_only(DIpv4LineEdit *self, bool readOnly);
+void gen_d_ipv4_line_edit_set_selection(DIpv4LineEdit *self, int32_t start, int32_t length);
+void gen_d_ipv4_line_edit_select_all(DIpv4LineEdit *self);
+DKeySequenceEdit *gen_d_key_sequence_edit_new();
+void gen_d_key_sequence_edit_clear(DKeySequenceEdit *self);
+void gen_d_line_edit_set_placeholder_text(DLineEdit *self, rust::Str arg0);
+void gen_d_line_edit_set_alert(DLineEdit *self, bool isAlert);
+bool gen_d_line_edit_is_alert(DLineEdit *self);
+void gen_d_line_edit_show_alert_message(DLineEdit *self, rust::Str text, int32_t duration);
+void gen_d_line_edit_hide_alert_message(DLineEdit *self);
+void gen_d_line_edit_set_left_widgets_visible(DLineEdit *self, bool visible);
+void gen_d_line_edit_set_right_widgets_visible(DLineEdit *self, bool visible);
+void gen_d_line_edit_set_clear_button_enabled(DLineEdit *self, bool enable);
+bool gen_d_line_edit_is_clear_button_enabled(DLineEdit *self);
+void gen_d_line_edit_set_text(DLineEdit *self, rust::Str text);
+rust::String gen_d_line_edit_text(DLineEdit *self);
+void gen_d_line_edit_clear(DLineEdit *self);
+bool gen_d_line_edit_speech_to_text_is_enabled(DLineEdit *self);
+void gen_d_line_edit_set_speech_to_text_enabled(DLineEdit *self, bool enable);
+bool gen_d_line_edit_text_to_speech_is_enabled(DLineEdit *self);
+void gen_d_line_edit_set_text_to_speech_enabled(DLineEdit *self, bool enable);
+bool gen_d_line_edit_text_to_translate_is_enabled(DLineEdit *self);
+void gen_d_line_edit_set_text_to_translate_enabled(DLineEdit *self, bool enable);
+bool gen_d_line_edit_copy_enabled(DLineEdit *self);
+void gen_d_line_edit_set_copy_enabled(DLineEdit *self, bool enable);
+bool gen_d_line_edit_cut_enabled(DLineEdit *self);
+void gen_d_line_edit_set_cut_enabled(DLineEdit *self, bool enable);
+bool gen_d_line_edit_paste_enabled(DLineEdit *self);
+void gen_d_line_edit_set_paste_enabled(DLineEdit *self, bool enable);
+DListView *gen_d_list_view_new();
+int32_t gen_d_list_view_count(DListView *self);
+bool gen_d_list_view_remove_item(DListView *self, int32_t index);
+bool gen_d_list_view_remove_items(DListView *self, int32_t index, int32_t count);
+void gen_d_list_view_remove_header_widget(DListView *self, int32_t index);
+void gen_d_list_view_remove_footer_widget(DListView *self, int32_t index);
+void gen_d_list_view_set_item_spacing(DListView *self, int32_t spacing);
+void gen_d_list_view_set_item_radius(DListView *self, int32_t radius);
+bool gen_d_loading_indicator_loading(DLoadingIndicator *self);
+QWidget * gen_d_loading_indicator_widget_source(DLoadingIndicator *self);
+int32_t gen_d_loading_indicator_ani_duration(DLoadingIndicator *self);
+bool gen_d_loading_indicator_smooth(DLoadingIndicator *self);
+double gen_d_loading_indicator_rotate(DLoadingIndicator *self);
+void gen_d_loading_indicator_start(DLoadingIndicator *self);
+void gen_d_loading_indicator_stop(DLoadingIndicator *self);
+void gen_d_loading_indicator_set_loading(DLoadingIndicator *self, bool flag);
+void gen_d_loading_indicator_set_ani_duration(DLoadingIndicator *self, int32_t msecs);
+void gen_d_loading_indicator_set_widget_source(DLoadingIndicator *self, QWidget * widgetSource);
+void gen_d_loading_indicator_set_smooth(DLoadingIndicator *self, bool smooth);
+DMPRISControl *gen_d_m_p_r_i_s_control_new();
+bool gen_d_m_p_r_i_s_control_is_working(DMPRISControl *self);
+void gen_d_m_p_r_i_s_control_set_picture_visible(DMPRISControl *self, bool visible);
+DPageIndicator *gen_d_page_indicator_new();
+int32_t gen_d_page_indicator_page_count(DPageIndicator *self);
+void gen_d_page_indicator_set_page_count(DPageIndicator *self, int32_t count);
+void gen_d_page_indicator_next_page(DPageIndicator *self);
+void gen_d_page_indicator_previous_page(DPageIndicator *self);
+void gen_d_page_indicator_set_current_page(DPageIndicator *self, int32_t index);
+int32_t gen_d_page_indicator_current_page_index(DPageIndicator *self);
+int32_t gen_d_page_indicator_point_radius(DPageIndicator *self);
+void gen_d_page_indicator_set_point_radius(DPageIndicator *self, int32_t size);
+int32_t gen_d_page_indicator_secondary_point_radius(DPageIndicator *self);
+void gen_d_page_indicator_set_secondary_point_radius(DPageIndicator *self, int32_t size);
+int32_t gen_d_page_indicator_point_distance(DPageIndicator *self);
+void gen_d_page_indicator_set_point_distance(DPageIndicator *self, int32_t distance);
+bool gen_d_password_edit_is_echo_mode(DPasswordEdit *self);
+void gen_d_password_edit_set_echo_button_is_visible(DPasswordEdit *self, bool visible);
+bool gen_d_password_edit_echo_button_is_visible(DPasswordEdit *self);
+void gen_d_picture_sequence_view_play(DPictureSequenceView *self);
+void gen_d_picture_sequence_view_pause(DPictureSequenceView *self);
+void gen_d_picture_sequence_view_stop(DPictureSequenceView *self);
+int32_t gen_d_picture_sequence_view_speed(DPictureSequenceView *self);
+void gen_d_picture_sequence_view_set_speed(DPictureSequenceView *self, int32_t speed);
+bool gen_d_picture_sequence_view_single_shot(DPictureSequenceView *self);
+void gen_d_picture_sequence_view_set_single_shot(DPictureSequenceView *self, bool singleShot);
+void gen_d_print_preview_widget_set_visible(DPrintPreviewWidget *self, bool visible);
+void gen_d_print_preview_widget_set_page_range(DPrintPreviewWidget *self, int32_t from, int32_t to);
+void gen_d_print_preview_widget_set_page_range_a_l_l(DPrintPreviewWidget *self);
+int32_t gen_d_print_preview_widget_pages_count(DPrintPreviewWidget *self);
+int32_t gen_d_print_preview_widget_current_page(DPrintPreviewWidget *self);
+bool gen_d_print_preview_widget_turn_page_able(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_set_scale(DPrintPreviewWidget *self, double scale);
+double gen_d_print_preview_widget_get_scale(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_update_view(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_update_water_mark(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_refresh_begin(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_refresh_end(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_set_water_mark_type(DPrintPreviewWidget *self, int32_t type_);
+void gen_d_print_preview_widget_set_water_mark_rotate(DPrintPreviewWidget *self, double rotate);
+void gen_d_print_preview_widget_set_water_mark_scale(DPrintPreviewWidget *self, double scale);
+void gen_d_print_preview_widget_set_water_mark_opacity(DPrintPreviewWidget *self, double opacity);
+void gen_d_print_preview_widget_set_confidential_water_mark(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_set_draft_water_mark(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_set_sample_water_mark(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_set_custom_water_mark(DPrintPreviewWidget *self, rust::Str text);
+void gen_d_print_preview_widget_set_text_water_mark(DPrintPreviewWidget *self, rust::Str text);
+void gen_d_print_preview_widget_set_water_mark_layout(DPrintPreviewWidget *self, int32_t layout);
+void gen_d_print_preview_widget_set_print_from_path(DPrintPreviewWidget *self, rust::Str path);
+rust::String gen_d_print_preview_widget_print_from_path(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_set_asyn_preview(DPrintPreviewWidget *self, int32_t totalPage);
+bool gen_d_print_preview_widget_is_asyn_preview(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_is_page_by_page(DPrintPreviewWidget *self, int32_t pageCopy, bool isFirst);
+int32_t gen_d_print_preview_widget_target_page_count(DPrintPreviewWidget *self, int32_t pageCount);
+int32_t gen_d_print_preview_widget_origin_page_count(DPrintPreviewWidget *self);
+rust::String gen_d_print_preview_widget_printer_color_model(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_update_preview(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_turn_front(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_turn_back(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_turn_begin(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_turn_end(DPrintPreviewWidget *self);
+void gen_d_print_preview_widget_set_current_page(DPrintPreviewWidget *self, int32_t page);
+void gen_d_print_preview_widget_print(DPrintPreviewWidget *self, bool isSavedPicture);
+DSearchComboBox *gen_d_search_combo_box_new();
+void gen_d_search_combo_box_set_editable(DSearchComboBox *self, bool editable);
+DSearchEdit *gen_d_search_edit_new();
+void gen_d_search_edit_set_place_holder(DSearchEdit *self, rust::Str placeHolder);
+rust::String gen_d_search_edit_place_holder(DSearchEdit *self);
+void gen_d_search_edit_clear(DSearchEdit *self);
+void gen_d_search_edit_clear_edit(DSearchEdit *self);
+bool gen_d_search_edit_is_voice_input(DSearchEdit *self);
+void gen_d_search_edit_set_placeholder_text(DSearchEdit *self, rust::Str text);
+rust::String gen_d_search_edit_placeholder_text(DSearchEdit *self);
+DSettingsWidgetFactory * gen_d_settings_dialog_widget_factory(DSettingsDialog *self);
+bool gen_d_settings_dialog_group_is_visible(DSettingsDialog *self, rust::Str groupKey);
+void gen_d_settings_dialog_set_reset_visible(DSettingsDialog *self, bool visible);
+void gen_d_settings_dialog_scroll_to_group(DSettingsDialog *self, rust::Str groupKey);
+void gen_d_settings_dialog_set_group_visible(DSettingsDialog *self, rust::Str groupKey, bool visible);
+DSettingsWidgetFactory *gen_d_settings_widget_factory_new();
+DShadowLine *gen_d_shadow_line_new();
+DSimpleListView *gen_d_simple_list_view_new();
+void gen_d_simple_list_view_set_row_height(DSimpleListView *self, int32_t height);
+void gen_d_simple_list_view_set_clip_radius(DSimpleListView *self, int32_t radius);
+void gen_d_simple_list_view_remove_item(DSimpleListView *self, DSimpleListItem * item);
+void gen_d_simple_list_view_clear_items(DSimpleListView *self);
+void gen_d_simple_list_view_clear_selections(DSimpleListView *self, bool clearLastSelection);
+void gen_d_simple_list_view_search(DSimpleListView *self, rust::Str searchContent);
+void gen_d_simple_list_view_set_single_select(DSimpleListView *self, bool singleSelect);
+void gen_d_simple_list_view_keep_select_when_click_blank(DSimpleListView *self, bool keep);
+void gen_d_simple_list_view_select_all_items(DSimpleListView *self);
+void gen_d_simple_list_view_select_first_item(DSimpleListView *self);
+void gen_d_simple_list_view_select_last_item(DSimpleListView *self);
+void gen_d_simple_list_view_select_next_item(DSimpleListView *self);
+void gen_d_simple_list_view_select_prev_item(DSimpleListView *self);
+void gen_d_simple_list_view_shift_select_page_down(DSimpleListView *self);
+void gen_d_simple_list_view_shift_select_page_up(DSimpleListView *self);
+void gen_d_simple_list_view_shift_select_to_end(DSimpleListView *self);
+void gen_d_simple_list_view_shift_select_to_home(DSimpleListView *self);
+void gen_d_simple_list_view_shift_select_to_next(DSimpleListView *self);
+void gen_d_simple_list_view_shift_select_to_prev(DSimpleListView *self);
+void gen_d_simple_list_view_scroll_page_down(DSimpleListView *self);
+void gen_d_simple_list_view_scroll_page_up(DSimpleListView *self);
+void gen_d_simple_list_view_ctrl_scroll_page_down(DSimpleListView *self);
+void gen_d_simple_list_view_ctrl_scroll_page_up(DSimpleListView *self);
+void gen_d_simple_list_view_ctrl_scroll_to_end(DSimpleListView *self);
+void gen_d_simple_list_view_ctrl_scroll_to_home(DSimpleListView *self);
+void gen_d_slider_set_minimum(DSlider *self, int32_t min);
+int32_t gen_d_slider_minimum(DSlider *self);
+void gen_d_slider_set_value(DSlider *self, int32_t value);
+int32_t gen_d_slider_value(DSlider *self);
+void gen_d_slider_set_page_step(DSlider *self, int32_t pageStep);
+int32_t gen_d_slider_page_step(DSlider *self);
+void gen_d_slider_set_maximum(DSlider *self, int32_t max);
+int32_t gen_d_slider_maximum(DSlider *self);
+void gen_d_slider_set_mouse_wheel_enabled(DSlider *self, bool enabled);
+void gen_d_slider_set_tip_value(DSlider *self, rust::Str value);
+void gen_d_slider_set_handle_visible(DSlider *self, bool b);
+bool gen_d_slider_handle_visible(DSlider *self);
+void gen_d_slider_set_enabled_across_style(DSlider *self, bool enabled);
+DSpinBox *gen_d_spin_box_new();
+bool gen_d_spin_box_is_alert(DSpinBox *self);
+void gen_d_spin_box_show_alert_message(DSpinBox *self, rust::Str text, int32_t duration);
+void gen_d_spin_box_set_enabled_embed_style(DSpinBox *self, bool enabled);
+void gen_d_spin_box_set_alert(DSpinBox *self, bool alert);
+DDoubleSpinBox *gen_d_double_spin_box_new();
+bool gen_d_double_spin_box_is_alert(DDoubleSpinBox *self);
+void gen_d_double_spin_box_show_alert_message(DDoubleSpinBox *self, rust::Str text, int32_t duration);
+void gen_d_double_spin_box_set_enabled_embed_style(DDoubleSpinBox *self, bool enabled);
+void gen_d_double_spin_box_set_alert(DDoubleSpinBox *self, bool alert);
+DSpinner *gen_d_spinner_new();
+bool gen_d_spinner_is_playing(DSpinner *self);
+void gen_d_spinner_start(DSpinner *self);
+void gen_d_spinner_stop(DSpinner *self);
+DSwitchButton *gen_d_switch_button_new();
+DSwitchLineExpand *gen_d_switch_line_expand_new();
+void gen_d_switch_line_expand_set_title(DSwitchLineExpand *self, rust::Str title);
+void gen_d_switch_line_expand_set_expand(DSwitchLineExpand *self, bool value);
+void gen_d_tick_effect_play(DTickEffect *self);
+void gen_d_tick_effect_stop(DTickEffect *self);
+void gen_d_tick_effect_pause(DTickEffect *self);
+void gen_d_tick_effect_resume(DTickEffect *self);
+void gen_d_tick_effect_set_fixed_pixel_move(DTickEffect *self, int32_t pixel);
+rust::String gen_d_titlebar_tool_base_interface_id(DTitlebarToolBaseInterface *self);
+rust::String gen_d_titlebar_tool_base_interface_description(DTitlebarToolBaseInterface *self);
+rust::String gen_d_titlebar_tool_base_interface_icon_name(DTitlebarToolBaseInterface *self);
+int32_t gen_d_title_bar_spacer_interface_size(DTitleBarSpacerInterface *self);
+DWaterProgress *gen_d_water_progress_new();
+int32_t gen_d_water_progress_value(DWaterProgress *self);
+void gen_d_water_progress_start(DWaterProgress *self);
+void gen_d_water_progress_stop(DWaterProgress *self);
+void gen_d_water_progress_set_value(DWaterProgress *self, int32_t value);
+void gen_d_water_progress_set_text_visible(DWaterProgress *self, bool visible);
+bool gen_d_window_max_button_is_maximized(DWindowMaxButton *self);
+void gen_d_window_max_button_set_maximized(DWindowMaxButton *self, bool isMaximized);
+
+} // namespace dtkrs

@@ -1,0 +1,1391 @@
+// 自动生成 by tools/gen.py，勿手改
+#![allow(clippy::all, non_snake_case, unused_imports)]
+use crate::{Signal0, SignalI32, QWidget};
+use dtk_sys::ffi;
+use dtk_sys::gen_ffi::genffi;
+use std::marker::PhantomData;
+widget_wrapper!(DAbstractDialog, genffi::DAbstractDialog);
+impl DAbstractDialog {
+    pub fn move_to_center(&self) {
+        unsafe { genffi::gen_d_abstract_dialog_move_to_center(self.ptr) }
+    }
+    pub fn move_to_top_right(&self) {
+        unsafe { genffi::gen_d_abstract_dialog_move_to_top_right(self.ptr) }
+    }
+}
+
+widget_wrapper!(DAccessibilityChecker, genffi::DAccessibilityChecker);
+impl DAccessibilityChecker {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_accessibility_checker_new() })
+    }
+    pub fn check(&self) -> bool {
+        unsafe { genffi::gen_d_accessibility_checker_check(self.ptr) }
+    }
+    pub fn start(&self, msec: i32) {
+        unsafe { genffi::gen_d_accessibility_checker_start(self.ptr, msec) }
+    }
+}
+
+impl Default for DAccessibilityChecker {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DAlertControl, genffi::DAlertControl);
+impl DAlertControl {
+    pub fn set_alert(&self, isAlert: bool) {
+        unsafe { genffi::gen_d_alert_control_set_alert(self.ptr, isAlert) }
+    }
+    pub fn is_alert(&self) -> bool {
+        unsafe { genffi::gen_d_alert_control_is_alert(self.ptr) }
+    }
+    pub fn show_alert_message(&self, text: &str, duration: i32) {
+        unsafe { genffi::gen_d_alert_control_show_alert_message(self.ptr, text, duration) }
+    }
+    pub fn hide_alert_message(&self) {
+        unsafe { genffi::gen_d_alert_control_hide_alert_message(self.ptr) }
+    }
+}
+
+widget_wrapper!(DArrowButton, genffi::DArrowButton);
+impl DArrowButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_arrow_button_new() })
+    }
+    pub fn arrow_direction(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_button_arrow_direction(self.ptr) }
+    }
+    pub fn button_state(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_button_button_state(self.ptr) }
+    }
+}
+
+impl Default for DArrowButton {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DArrowLineDrawer, genffi::DArrowLineDrawer);
+impl DArrowLineDrawer {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_arrow_line_drawer_new() })
+    }
+    pub fn set_title(&self, title: &str) {
+        unsafe { genffi::gen_d_arrow_line_drawer_set_title(self.ptr, title) }
+    }
+    pub fn set_expand(&self, value: bool) {
+        unsafe { genffi::gen_d_arrow_line_drawer_set_expand(self.ptr, value) }
+    }
+}
+
+impl Default for DArrowLineDrawer {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DArrowRectangle, genffi::DArrowRectangle);
+impl DArrowRectangle {
+    pub fn radius(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_radius(self.ptr) }
+    }
+    pub fn radius_force_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_arrow_rectangle_radius_force_enabled(self.ptr) }
+    }
+    pub fn arrow_height(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_arrow_height(self.ptr) }
+    }
+    pub fn arrow_width(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_arrow_width(self.ptr) }
+    }
+    pub fn arrow_x(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_arrow_x(self.ptr) }
+    }
+    pub fn arrow_y(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_arrow_y(self.ptr) }
+    }
+    pub fn margin(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_margin(self.ptr) }
+    }
+    pub fn border_width(&self) -> i32 {
+        unsafe { genffi::gen_d_arrow_rectangle_border_width(self.ptr) }
+    }
+    pub fn set_radius(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_radius(self.ptr, value) }
+    }
+    pub fn set_radius_force_enable(&self, enable: bool) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_radius_force_enable(self.ptr, enable) }
+    }
+    pub fn set_arrow_height(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_arrow_height(self.ptr, value) }
+    }
+    pub fn set_arrow_width(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_arrow_width(self.ptr, value) }
+    }
+    pub fn set_arrow_x(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_arrow_x(self.ptr, value) }
+    }
+    pub fn set_arrow_y(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_arrow_y(self.ptr, value) }
+    }
+    pub fn set_margin(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_margin(self.ptr, value) }
+    }
+    pub fn set_border_width(&self, borderWidth: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_border_width(self.ptr, borderWidth) }
+    }
+    pub fn set_width(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_width(self.ptr, value) }
+    }
+    pub fn set_height(&self, value: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_height(self.ptr, value) }
+    }
+    pub fn resize_with_content(&self) {
+        unsafe { genffi::gen_d_arrow_rectangle_resize_with_content(self.ptr) }
+    }
+    pub fn move_(&self, x: i32, y: i32) {
+        unsafe { genffi::gen_d_arrow_rectangle_move_(self.ptr, x, y) }
+    }
+    pub fn shadow_x_offset(&self) -> f64 {
+        unsafe { genffi::gen_d_arrow_rectangle_shadow_x_offset(self.ptr) }
+    }
+    pub fn shadow_y_offset(&self) -> f64 {
+        unsafe { genffi::gen_d_arrow_rectangle_shadow_y_offset(self.ptr) }
+    }
+    pub fn shadow_blur_radius(&self) -> f64 {
+        unsafe { genffi::gen_d_arrow_rectangle_shadow_blur_radius(self.ptr) }
+    }
+    pub fn set_shadow_blur_radius(&self, shadowBlurRadius: f64) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_shadow_blur_radius(self.ptr, shadowBlurRadius) }
+    }
+    pub fn set_shadow_x_offset(&self, shadowXOffset: f64) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_shadow_x_offset(self.ptr, shadowXOffset) }
+    }
+    pub fn set_shadow_y_offset(&self, shadowYOffset: f64) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_shadow_y_offset(self.ptr, shadowYOffset) }
+    }
+    pub fn set_left_right_radius(&self, enable: bool) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_left_right_radius(self.ptr, enable) }
+    }
+    pub fn set_radius_arrow_style_enable(&self, enable: bool) {
+        unsafe { genffi::gen_d_arrow_rectangle_set_radius_arrow_style_enable(self.ptr, enable) }
+    }
+}
+
+widget_wrapper!(DBackgroundGroup, genffi::DBackgroundGroup);
+impl DBackgroundGroup {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_background_group_new() })
+    }
+    pub fn use_widget_background(&self) -> bool {
+        unsafe { genffi::gen_d_background_group_use_widget_background(self.ptr) }
+    }
+    pub fn set_item_spacing(&self, spacing: i32) {
+        unsafe { genffi::gen_d_background_group_set_item_spacing(self.ptr, spacing) }
+    }
+    pub fn set_use_widget_background(&self, useWidgetBackground: bool) {
+        unsafe { genffi::gen_d_background_group_set_use_widget_background(self.ptr, useWidgetBackground) }
+    }
+}
+
+impl Default for DBackgroundGroup {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DBaseLine, genffi::DBaseLine);
+impl DBaseLine {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_base_line_new() })
+    }
+    pub fn set_left_margin(&self, margin: i32) {
+        unsafe { genffi::gen_d_base_line_set_left_margin(self.ptr, margin) }
+    }
+    pub fn set_right_margin(&self, margin: i32) {
+        unsafe { genffi::gen_d_base_line_set_right_margin(self.ptr, margin) }
+    }
+    pub fn left_margin(&self) -> i32 {
+        unsafe { genffi::gen_d_base_line_left_margin(self.ptr) }
+    }
+    pub fn right_margin(&self) -> i32 {
+        unsafe { genffi::gen_d_base_line_right_margin(self.ptr) }
+    }
+}
+
+impl Default for DBaseLine {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DBlurEffectWidget, genffi::DBlurEffectWidget);
+impl DBlurEffectWidget {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_blur_effect_widget_new() })
+    }
+    pub fn radius(&self) -> i32 {
+        unsafe { genffi::gen_d_blur_effect_widget_radius(self.ptr) }
+    }
+    pub fn blur_rect_x_radius(&self) -> i32 {
+        unsafe { genffi::gen_d_blur_effect_widget_blur_rect_x_radius(self.ptr) }
+    }
+    pub fn blur_rect_y_radius(&self) -> i32 {
+        unsafe { genffi::gen_d_blur_effect_widget_blur_rect_y_radius(self.ptr) }
+    }
+    pub fn is_full(&self) -> bool {
+        unsafe { genffi::gen_d_blur_effect_widget_is_full(self.ptr) }
+    }
+    pub fn blur_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_blur_effect_widget_blur_enabled(self.ptr) }
+    }
+    pub fn mask_alpha(&self) -> u8 {
+        unsafe { genffi::gen_d_blur_effect_widget_mask_alpha(self.ptr) }
+    }
+    pub fn set_radius(&self, radius: i32) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_radius(self.ptr, radius) }
+    }
+    pub fn set_blur_rect_x_radius(&self, blurRectXRadius: i32) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_blur_rect_x_radius(self.ptr, blurRectXRadius) }
+    }
+    pub fn set_blur_rect_y_radius(&self, blurRectYRadius: i32) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_blur_rect_y_radius(self.ptr, blurRectYRadius) }
+    }
+    pub fn set_mask_alpha(&self, alpha: u8) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_mask_alpha(self.ptr, alpha) }
+    }
+    pub fn set_full(&self, full: bool) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_full(self.ptr, full) }
+    }
+    pub fn set_blur_enabled(&self, blurEnabled: bool) {
+        unsafe { genffi::gen_d_blur_effect_widget_set_blur_enabled(self.ptr, blurEnabled) }
+    }
+}
+
+impl Default for DBlurEffectWidget {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DCircleProgress, genffi::DCircleProgress);
+impl DCircleProgress {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_circle_progress_new() })
+    }
+    pub fn value(&self) -> i32 {
+        unsafe { genffi::gen_d_circle_progress_value(self.ptr) }
+    }
+    pub fn set_value(&self, value: i32) {
+        unsafe { genffi::gen_d_circle_progress_set_value(self.ptr, value) }
+    }
+    pub fn text(&self) -> String {
+        unsafe { genffi::gen_d_circle_progress_text(self.ptr) }
+    }
+    pub fn set_text(&self, text: &str) {
+        unsafe { genffi::gen_d_circle_progress_set_text(self.ptr, text) }
+    }
+    pub fn line_width(&self) -> i32 {
+        unsafe { genffi::gen_d_circle_progress_line_width(self.ptr) }
+    }
+    pub fn set_line_width(&self, width: i32) {
+        unsafe { genffi::gen_d_circle_progress_set_line_width(self.ptr, width) }
+    }
+}
+
+impl Default for DCircleProgress {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DColoredProgressBar, genffi::DColoredProgressBar);
+impl DColoredProgressBar {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_colored_progress_bar_new() })
+    }
+    pub fn remove_threshold(&self, threshold: i32) {
+        unsafe { genffi::gen_d_colored_progress_bar_remove_threshold(self.ptr, threshold) }
+    }
+}
+
+impl Default for DColoredProgressBar {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DComboBox, genffi::DComboBox);
+impl DComboBox {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_combo_box_new() })
+    }
+    pub fn show_popup(&self) {
+        unsafe { genffi::gen_d_combo_box_show_popup(self.ptr) }
+    }
+}
+
+impl Default for DComboBox {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DCrumbTextFormat, genffi::DCrumbTextFormat);
+impl DCrumbTextFormat {
+    pub fn text(&self) -> String {
+        unsafe { genffi::gen_d_crumb_text_format_text(self.ptr) }
+    }
+    pub fn set_text(&self, text: &str) {
+        unsafe { genffi::gen_d_crumb_text_format_set_text(self.ptr, text) }
+    }
+    pub fn background_radius(&self) -> i32 {
+        unsafe { genffi::gen_d_crumb_text_format_background_radius(self.ptr) }
+    }
+    pub fn set_background_radius(&self, radius: i32) {
+        unsafe { genffi::gen_d_crumb_text_format_set_background_radius(self.ptr, radius) }
+    }
+}
+
+widget_wrapper!(DCrumbEdit, genffi::DCrumbEdit);
+impl DCrumbEdit {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_crumb_edit_new() })
+    }
+    pub fn insert_crumb(&self, text: &str, pos: i32) -> bool {
+        unsafe { genffi::gen_d_crumb_edit_insert_crumb(self.ptr, text, pos) }
+    }
+    pub fn append_crumb(&self, text: &str) -> bool {
+        unsafe { genffi::gen_d_crumb_edit_append_crumb(self.ptr, text) }
+    }
+    pub fn contain_crumb(&self, text: &str) -> bool {
+        unsafe { genffi::gen_d_crumb_edit_contain_crumb(self.ptr, text) }
+    }
+    pub fn crumb_read_only(&self) -> bool {
+        unsafe { genffi::gen_d_crumb_edit_crumb_read_only(self.ptr) }
+    }
+    pub fn crumb_radius(&self) -> i32 {
+        unsafe { genffi::gen_d_crumb_edit_crumb_radius(self.ptr) }
+    }
+    pub fn splitter(&self) -> String {
+        unsafe { genffi::gen_d_crumb_edit_splitter(self.ptr) }
+    }
+    pub fn set_crumb_read_only(&self, crumbReadOnly: bool) {
+        unsafe { genffi::gen_d_crumb_edit_set_crumb_read_only(self.ptr, crumbReadOnly) }
+    }
+    pub fn set_crumb_radius(&self, crumbRadius: i32) {
+        unsafe { genffi::gen_d_crumb_edit_set_crumb_radius(self.ptr, crumbRadius) }
+    }
+    pub fn set_splitter(&self, splitter: &str) {
+        unsafe { genffi::gen_d_crumb_edit_set_splitter(self.ptr, splitter) }
+    }
+}
+
+impl Default for DCrumbEdit {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DDrawer, genffi::DDrawer);
+impl DDrawer {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_drawer_new() })
+    }
+    pub fn set_header_height(&self, height: i32) {
+        unsafe { genffi::gen_d_drawer_set_header_height(self.ptr, height) }
+    }
+    pub fn set_expand(&self, value: bool) {
+        unsafe { genffi::gen_d_drawer_set_expand(self.ptr, value) }
+    }
+    pub fn expand(&self) -> bool {
+        unsafe { genffi::gen_d_drawer_expand(self.ptr) }
+    }
+    pub fn set_animation_duration(&self, duration: i32) {
+        unsafe { genffi::gen_d_drawer_set_animation_duration(self.ptr, duration) }
+    }
+    pub fn set_separator_visible(&self, arg: bool) {
+        unsafe { genffi::gen_d_drawer_set_separator_visible(self.ptr, arg) }
+    }
+    pub fn set_expanded_separator_visible(&self, arg: bool) {
+        unsafe { genffi::gen_d_drawer_set_expanded_separator_visible(self.ptr, arg) }
+    }
+}
+
+impl Default for DDrawer {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DDrawerGroup, genffi::DDrawerGroup);
+impl DDrawerGroup {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_drawer_group_new() })
+    }
+    pub fn checked_expand(&self) -> DDrawer {
+        DDrawer::from_raw(unsafe { genffi::gen_d_drawer_group_checked_expand(self.ptr) })
+    }
+    pub fn expand(&self, id: i32) -> DDrawer {
+        DDrawer::from_raw(unsafe { genffi::gen_d_drawer_group_expand(self.ptr, id) })
+    }
+    pub fn checked_id(&self) -> i32 {
+        unsafe { genffi::gen_d_drawer_group_checked_id(self.ptr) }
+    }
+}
+
+impl Default for DDrawerGroup {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DFileChooserEdit, genffi::DFileChooserEdit);
+impl DFileChooserEdit {
+    pub fn init_dialog(&self) {
+        unsafe { genffi::gen_d_file_chooser_edit_init_dialog(self.ptr) }
+    }
+}
+
+widget_wrapper!(DFileDialog, genffi::DFileDialog);
+impl DFileDialog {
+    pub fn add_line_edit(&self, text: &str) {
+        unsafe { genffi::gen_d_file_dialog_add_line_edit(self.ptr, text) }
+    }
+    pub fn set_allow_mixed_selection(&self, on: bool) {
+        unsafe { genffi::gen_d_file_dialog_set_allow_mixed_selection(self.ptr, on) }
+    }
+    pub fn get_combo_box_value(&self, text: &str) -> String {
+        unsafe { genffi::gen_d_file_dialog_get_combo_box_value(self.ptr, text) }
+    }
+    pub fn get_line_edit_value(&self, text: &str) -> String {
+        unsafe { genffi::gen_d_file_dialog_get_line_edit_value(self.ptr, text) }
+    }
+    pub fn set_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_file_dialog_set_visible(self.ptr, visible) }
+    }
+}
+
+widget_wrapper!(DFontComboBox, genffi::DFontComboBox);
+impl DFontComboBox {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_font_combo_box_new() })
+    }
+}
+
+impl Default for DFontComboBox {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DGraphicsGlowEffect, genffi::DGraphicsGlowEffect);
+impl DGraphicsGlowEffect {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_graphics_glow_effect_new() })
+    }
+}
+
+impl Default for DGraphicsGlowEffect {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DHeaderLine, genffi::DHeaderLine);
+impl DHeaderLine {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_header_line_new() })
+    }
+    pub fn set_title(&self, title: &str) {
+        unsafe { genffi::gen_d_header_line_set_title(self.ptr, title) }
+    }
+    pub fn title(&self) -> String {
+        unsafe { genffi::gen_d_header_line_title(self.ptr) }
+    }
+}
+
+impl Default for DHeaderLine {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DImageViewer, genffi::DImageViewer);
+impl DImageViewer {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_image_viewer_new() })
+    }
+    pub fn file_name(&self) -> String {
+        unsafe { genffi::gen_d_image_viewer_file_name(self.ptr) }
+    }
+    pub fn set_file_name(&self, fileName: &str) {
+        unsafe { genffi::gen_d_image_viewer_set_file_name(self.ptr, fileName) }
+    }
+    pub fn scale_factor(&self) -> f64 {
+        unsafe { genffi::gen_d_image_viewer_scale_factor(self.ptr) }
+    }
+    pub fn set_scale_factor(&self, factor: f64) {
+        unsafe { genffi::gen_d_image_viewer_set_scale_factor(self.ptr, factor) }
+    }
+    pub fn scale_image(&self, factor: f64) {
+        unsafe { genffi::gen_d_image_viewer_scale_image(self.ptr, factor) }
+    }
+    pub fn auto_fit_image(&self) {
+        unsafe { genffi::gen_d_image_viewer_auto_fit_image(self.ptr) }
+    }
+    pub fn fit_to_widget(&self) {
+        unsafe { genffi::gen_d_image_viewer_fit_to_widget(self.ptr) }
+    }
+    pub fn fit_normal_size(&self) {
+        unsafe { genffi::gen_d_image_viewer_fit_normal_size(self.ptr) }
+    }
+    pub fn rotate_clockwise(&self) {
+        unsafe { genffi::gen_d_image_viewer_rotate_clockwise(self.ptr) }
+    }
+    pub fn rotate_counterclockwise(&self) {
+        unsafe { genffi::gen_d_image_viewer_rotate_counterclockwise(self.ptr) }
+    }
+    pub fn rotate_angle(&self) -> i32 {
+        unsafe { genffi::gen_d_image_viewer_rotate_angle(self.ptr) }
+    }
+    pub fn reset_rotate_angle(&self) {
+        unsafe { genffi::gen_d_image_viewer_reset_rotate_angle(self.ptr) }
+    }
+    pub fn clear(&self) {
+        unsafe { genffi::gen_d_image_viewer_clear(self.ptr) }
+    }
+    pub fn center_on(&self, x: f64, y: f64) {
+        unsafe { genffi::gen_d_image_viewer_center_on(self.ptr, x, y) }
+    }
+    pub fn begin_crop_image(&self) {
+        unsafe { genffi::gen_d_image_viewer_begin_crop_image(self.ptr) }
+    }
+    pub fn end_crop_image(&self) {
+        unsafe { genffi::gen_d_image_viewer_end_crop_image(self.ptr) }
+    }
+    pub fn reset_crop_image(&self) {
+        unsafe { genffi::gen_d_image_viewer_reset_crop_image(self.ptr) }
+    }
+    pub fn set_crop_aspect_ratio(&self, w: f64, h: f64) {
+        unsafe { genffi::gen_d_image_viewer_set_crop_aspect_ratio(self.ptr, w, h) }
+    }
+}
+
+impl Default for DImageViewer {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DIpv4LineEdit, genffi::DIpv4LineEdit);
+impl DIpv4LineEdit {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_ipv4_line_edit_new() })
+    }
+    pub fn display_text(&self) -> String {
+        unsafe { genffi::gen_d_ipv4_line_edit_display_text(self.ptr) }
+    }
+    pub fn cursor_position(&self) -> i32 {
+        unsafe { genffi::gen_d_ipv4_line_edit_cursor_position(self.ptr) }
+    }
+    pub fn has_acceptable_input(&self) -> bool {
+        unsafe { genffi::gen_d_ipv4_line_edit_has_acceptable_input(self.ptr) }
+    }
+    pub fn is_read_only(&self) -> bool {
+        unsafe { genffi::gen_d_ipv4_line_edit_is_read_only(self.ptr) }
+    }
+    pub fn set_cursor_position(&self, cursorPosition: i32) {
+        unsafe { genffi::gen_d_ipv4_line_edit_set_cursor_position(self.ptr, cursorPosition) }
+    }
+    pub fn set_read_only(&self, readOnly: bool) {
+        unsafe { genffi::gen_d_ipv4_line_edit_set_read_only(self.ptr, readOnly) }
+    }
+    pub fn set_selection(&self, start: i32, length: i32) {
+        unsafe { genffi::gen_d_ipv4_line_edit_set_selection(self.ptr, start, length) }
+    }
+    pub fn select_all(&self) {
+        unsafe { genffi::gen_d_ipv4_line_edit_select_all(self.ptr) }
+    }
+}
+
+impl Default for DIpv4LineEdit {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DKeySequenceEdit, genffi::DKeySequenceEdit);
+impl DKeySequenceEdit {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_key_sequence_edit_new() })
+    }
+    pub fn clear(&self) {
+        unsafe { genffi::gen_d_key_sequence_edit_clear(self.ptr) }
+    }
+}
+
+impl Default for DKeySequenceEdit {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DLineEdit, genffi::DLineEdit);
+impl DLineEdit {
+    pub fn set_placeholder_text(&self, arg0: &str) {
+        unsafe { genffi::gen_d_line_edit_set_placeholder_text(self.ptr, arg0) }
+    }
+    pub fn set_alert(&self, isAlert: bool) {
+        unsafe { genffi::gen_d_line_edit_set_alert(self.ptr, isAlert) }
+    }
+    pub fn is_alert(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_is_alert(self.ptr) }
+    }
+    pub fn show_alert_message(&self, text: &str, duration: i32) {
+        unsafe { genffi::gen_d_line_edit_show_alert_message(self.ptr, text, duration) }
+    }
+    pub fn hide_alert_message(&self) {
+        unsafe { genffi::gen_d_line_edit_hide_alert_message(self.ptr) }
+    }
+    pub fn set_left_widgets_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_line_edit_set_left_widgets_visible(self.ptr, visible) }
+    }
+    pub fn set_right_widgets_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_line_edit_set_right_widgets_visible(self.ptr, visible) }
+    }
+    pub fn set_clear_button_enabled(&self, enable: bool) {
+        unsafe { genffi::gen_d_line_edit_set_clear_button_enabled(self.ptr, enable) }
+    }
+    pub fn is_clear_button_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_is_clear_button_enabled(self.ptr) }
+    }
+    pub fn set_text(&self, text: &str) {
+        unsafe { genffi::gen_d_line_edit_set_text(self.ptr, text) }
+    }
+    pub fn text(&self) -> String {
+        unsafe { genffi::gen_d_line_edit_text(self.ptr) }
+    }
+    pub fn clear(&self) {
+        unsafe { genffi::gen_d_line_edit_clear(self.ptr) }
+    }
+    pub fn speech_to_text_is_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_speech_to_text_is_enabled(self.ptr) }
+    }
+    pub fn set_speech_to_text_enabled(&self, enable: bool) {
+        unsafe { genffi::gen_d_line_edit_set_speech_to_text_enabled(self.ptr, enable) }
+    }
+    pub fn text_to_speech_is_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_text_to_speech_is_enabled(self.ptr) }
+    }
+    pub fn set_text_to_speech_enabled(&self, enable: bool) {
+        unsafe { genffi::gen_d_line_edit_set_text_to_speech_enabled(self.ptr, enable) }
+    }
+    pub fn text_to_translate_is_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_text_to_translate_is_enabled(self.ptr) }
+    }
+    pub fn set_text_to_translate_enabled(&self, enable: bool) {
+        unsafe { genffi::gen_d_line_edit_set_text_to_translate_enabled(self.ptr, enable) }
+    }
+    pub fn copy_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_copy_enabled(self.ptr) }
+    }
+    pub fn set_copy_enabled(&self, enable: bool) {
+        unsafe { genffi::gen_d_line_edit_set_copy_enabled(self.ptr, enable) }
+    }
+    pub fn cut_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_cut_enabled(self.ptr) }
+    }
+    pub fn set_cut_enabled(&self, enable: bool) {
+        unsafe { genffi::gen_d_line_edit_set_cut_enabled(self.ptr, enable) }
+    }
+    pub fn paste_enabled(&self) -> bool {
+        unsafe { genffi::gen_d_line_edit_paste_enabled(self.ptr) }
+    }
+    pub fn set_paste_enabled(&self, enable: bool) {
+        unsafe { genffi::gen_d_line_edit_set_paste_enabled(self.ptr, enable) }
+    }
+}
+
+widget_wrapper!(DListView, genffi::DListView);
+impl DListView {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_list_view_new() })
+    }
+    pub fn count(&self) -> i32 {
+        unsafe { genffi::gen_d_list_view_count(self.ptr) }
+    }
+    pub fn remove_item(&self, index: i32) -> bool {
+        unsafe { genffi::gen_d_list_view_remove_item(self.ptr, index) }
+    }
+    pub fn remove_items(&self, index: i32, count: i32) -> bool {
+        unsafe { genffi::gen_d_list_view_remove_items(self.ptr, index, count) }
+    }
+    pub fn remove_header_widget(&self, index: i32) {
+        unsafe { genffi::gen_d_list_view_remove_header_widget(self.ptr, index) }
+    }
+    pub fn remove_footer_widget(&self, index: i32) {
+        unsafe { genffi::gen_d_list_view_remove_footer_widget(self.ptr, index) }
+    }
+    pub fn set_item_spacing(&self, spacing: i32) {
+        unsafe { genffi::gen_d_list_view_set_item_spacing(self.ptr, spacing) }
+    }
+    pub fn set_item_radius(&self, radius: i32) {
+        unsafe { genffi::gen_d_list_view_set_item_radius(self.ptr, radius) }
+    }
+}
+
+impl Default for DListView {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DLoadingIndicator, genffi::DLoadingIndicator);
+impl DLoadingIndicator {
+    pub fn loading(&self) -> bool {
+        unsafe { genffi::gen_d_loading_indicator_loading(self.ptr) }
+    }
+    pub fn widget_source(&self) -> QWidget {
+        QWidget::from_raw(unsafe { genffi::gen_d_loading_indicator_widget_source(self.ptr) } as _)
+    }
+    pub fn ani_duration(&self) -> i32 {
+        unsafe { genffi::gen_d_loading_indicator_ani_duration(self.ptr) }
+    }
+    pub fn smooth(&self) -> bool {
+        unsafe { genffi::gen_d_loading_indicator_smooth(self.ptr) }
+    }
+    pub fn rotate(&self) -> f64 {
+        unsafe { genffi::gen_d_loading_indicator_rotate(self.ptr) }
+    }
+    pub fn start(&self) {
+        unsafe { genffi::gen_d_loading_indicator_start(self.ptr) }
+    }
+    pub fn stop(&self) {
+        unsafe { genffi::gen_d_loading_indicator_stop(self.ptr) }
+    }
+    pub fn set_loading(&self, flag: bool) {
+        unsafe { genffi::gen_d_loading_indicator_set_loading(self.ptr, flag) }
+    }
+    pub fn set_ani_duration(&self, msecs: i32) {
+        unsafe { genffi::gen_d_loading_indicator_set_ani_duration(self.ptr, msecs) }
+    }
+    pub fn set_widget_source(&self, widgetSource: &QWidget) {
+        unsafe { genffi::gen_d_loading_indicator_set_widget_source(self.ptr, widgetSource.ptr as _) }
+    }
+    pub fn set_smooth(&self, smooth: bool) {
+        unsafe { genffi::gen_d_loading_indicator_set_smooth(self.ptr, smooth) }
+    }
+}
+
+widget_wrapper!(DMPRISControl, genffi::DMPRISControl);
+impl DMPRISControl {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_m_p_r_i_s_control_new() })
+    }
+    pub fn is_working(&self) -> bool {
+        unsafe { genffi::gen_d_m_p_r_i_s_control_is_working(self.ptr) }
+    }
+    pub fn set_picture_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_m_p_r_i_s_control_set_picture_visible(self.ptr, visible) }
+    }
+}
+
+impl Default for DMPRISControl {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DPageIndicator, genffi::DPageIndicator);
+impl DPageIndicator {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_page_indicator_new() })
+    }
+    pub fn page_count(&self) -> i32 {
+        unsafe { genffi::gen_d_page_indicator_page_count(self.ptr) }
+    }
+    pub fn set_page_count(&self, count: i32) {
+        unsafe { genffi::gen_d_page_indicator_set_page_count(self.ptr, count) }
+    }
+    pub fn next_page(&self) {
+        unsafe { genffi::gen_d_page_indicator_next_page(self.ptr) }
+    }
+    pub fn previous_page(&self) {
+        unsafe { genffi::gen_d_page_indicator_previous_page(self.ptr) }
+    }
+    pub fn set_current_page(&self, index: i32) {
+        unsafe { genffi::gen_d_page_indicator_set_current_page(self.ptr, index) }
+    }
+    pub fn current_page_index(&self) -> i32 {
+        unsafe { genffi::gen_d_page_indicator_current_page_index(self.ptr) }
+    }
+    pub fn point_radius(&self) -> i32 {
+        unsafe { genffi::gen_d_page_indicator_point_radius(self.ptr) }
+    }
+    pub fn set_point_radius(&self, size: i32) {
+        unsafe { genffi::gen_d_page_indicator_set_point_radius(self.ptr, size) }
+    }
+    pub fn secondary_point_radius(&self) -> i32 {
+        unsafe { genffi::gen_d_page_indicator_secondary_point_radius(self.ptr) }
+    }
+    pub fn set_secondary_point_radius(&self, size: i32) {
+        unsafe { genffi::gen_d_page_indicator_set_secondary_point_radius(self.ptr, size) }
+    }
+    pub fn point_distance(&self) -> i32 {
+        unsafe { genffi::gen_d_page_indicator_point_distance(self.ptr) }
+    }
+    pub fn set_point_distance(&self, distance: i32) {
+        unsafe { genffi::gen_d_page_indicator_set_point_distance(self.ptr, distance) }
+    }
+}
+
+impl Default for DPageIndicator {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DPasswordEdit, genffi::DPasswordEdit);
+impl DPasswordEdit {
+    pub fn is_echo_mode(&self) -> bool {
+        unsafe { genffi::gen_d_password_edit_is_echo_mode(self.ptr) }
+    }
+    pub fn set_echo_button_is_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_password_edit_set_echo_button_is_visible(self.ptr, visible) }
+    }
+    pub fn echo_button_is_visible(&self) -> bool {
+        unsafe { genffi::gen_d_password_edit_echo_button_is_visible(self.ptr) }
+    }
+}
+
+widget_wrapper!(DPictureSequenceView, genffi::DPictureSequenceView);
+impl DPictureSequenceView {
+    pub fn play(&self) {
+        unsafe { genffi::gen_d_picture_sequence_view_play(self.ptr) }
+    }
+    pub fn pause(&self) {
+        unsafe { genffi::gen_d_picture_sequence_view_pause(self.ptr) }
+    }
+    pub fn stop(&self) {
+        unsafe { genffi::gen_d_picture_sequence_view_stop(self.ptr) }
+    }
+    pub fn speed(&self) -> i32 {
+        unsafe { genffi::gen_d_picture_sequence_view_speed(self.ptr) }
+    }
+    pub fn set_speed(&self, speed: i32) {
+        unsafe { genffi::gen_d_picture_sequence_view_set_speed(self.ptr, speed) }
+    }
+    pub fn single_shot(&self) -> bool {
+        unsafe { genffi::gen_d_picture_sequence_view_single_shot(self.ptr) }
+    }
+    pub fn set_single_shot(&self, singleShot: bool) {
+        unsafe { genffi::gen_d_picture_sequence_view_set_single_shot(self.ptr, singleShot) }
+    }
+}
+
+widget_wrapper!(DPrintPreviewWidget, genffi::DPrintPreviewWidget);
+impl DPrintPreviewWidget {
+    pub fn set_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_print_preview_widget_set_visible(self.ptr, visible) }
+    }
+    pub fn set_page_range(&self, from: i32, to: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_page_range(self.ptr, from, to) }
+    }
+    pub fn set_page_range_a_l_l(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_set_page_range_a_l_l(self.ptr) }
+    }
+    pub fn pages_count(&self) -> i32 {
+        unsafe { genffi::gen_d_print_preview_widget_pages_count(self.ptr) }
+    }
+    pub fn current_page(&self) -> i32 {
+        unsafe { genffi::gen_d_print_preview_widget_current_page(self.ptr) }
+    }
+    pub fn turn_page_able(&self) -> bool {
+        unsafe { genffi::gen_d_print_preview_widget_turn_page_able(self.ptr) }
+    }
+    pub fn set_scale(&self, scale: f64) {
+        unsafe { genffi::gen_d_print_preview_widget_set_scale(self.ptr, scale) }
+    }
+    pub fn get_scale(&self) -> f64 {
+        unsafe { genffi::gen_d_print_preview_widget_get_scale(self.ptr) }
+    }
+    pub fn update_view(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_update_view(self.ptr) }
+    }
+    pub fn update_water_mark(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_update_water_mark(self.ptr) }
+    }
+    pub fn refresh_begin(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_refresh_begin(self.ptr) }
+    }
+    pub fn refresh_end(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_refresh_end(self.ptr) }
+    }
+    pub fn set_water_mark_type(&self, type_: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_water_mark_type(self.ptr, type_) }
+    }
+    pub fn set_water_mark_rotate(&self, rotate: f64) {
+        unsafe { genffi::gen_d_print_preview_widget_set_water_mark_rotate(self.ptr, rotate) }
+    }
+    pub fn set_water_mark_scale(&self, scale: f64) {
+        unsafe { genffi::gen_d_print_preview_widget_set_water_mark_scale(self.ptr, scale) }
+    }
+    pub fn set_water_mark_opacity(&self, opacity: f64) {
+        unsafe { genffi::gen_d_print_preview_widget_set_water_mark_opacity(self.ptr, opacity) }
+    }
+    pub fn set_confidential_water_mark(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_set_confidential_water_mark(self.ptr) }
+    }
+    pub fn set_draft_water_mark(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_set_draft_water_mark(self.ptr) }
+    }
+    pub fn set_sample_water_mark(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_set_sample_water_mark(self.ptr) }
+    }
+    pub fn set_custom_water_mark(&self, text: &str) {
+        unsafe { genffi::gen_d_print_preview_widget_set_custom_water_mark(self.ptr, text) }
+    }
+    pub fn set_text_water_mark(&self, text: &str) {
+        unsafe { genffi::gen_d_print_preview_widget_set_text_water_mark(self.ptr, text) }
+    }
+    pub fn set_water_mark_layout(&self, layout: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_water_mark_layout(self.ptr, layout) }
+    }
+    pub fn set_print_from_path(&self, path: &str) {
+        unsafe { genffi::gen_d_print_preview_widget_set_print_from_path(self.ptr, path) }
+    }
+    pub fn print_from_path(&self) -> String {
+        unsafe { genffi::gen_d_print_preview_widget_print_from_path(self.ptr) }
+    }
+    pub fn set_asyn_preview(&self, totalPage: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_asyn_preview(self.ptr, totalPage) }
+    }
+    pub fn is_asyn_preview(&self) -> bool {
+        unsafe { genffi::gen_d_print_preview_widget_is_asyn_preview(self.ptr) }
+    }
+    pub fn is_page_by_page(&self, pageCopy: i32, isFirst: bool) {
+        unsafe { genffi::gen_d_print_preview_widget_is_page_by_page(self.ptr, pageCopy, isFirst) }
+    }
+    pub fn target_page_count(&self, pageCount: i32) -> i32 {
+        unsafe { genffi::gen_d_print_preview_widget_target_page_count(self.ptr, pageCount) }
+    }
+    pub fn origin_page_count(&self) -> i32 {
+        unsafe { genffi::gen_d_print_preview_widget_origin_page_count(self.ptr) }
+    }
+    pub fn printer_color_model(&self) -> String {
+        unsafe { genffi::gen_d_print_preview_widget_printer_color_model(self.ptr) }
+    }
+    pub fn update_preview(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_update_preview(self.ptr) }
+    }
+    pub fn turn_front(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_turn_front(self.ptr) }
+    }
+    pub fn turn_back(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_turn_back(self.ptr) }
+    }
+    pub fn turn_begin(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_turn_begin(self.ptr) }
+    }
+    pub fn turn_end(&self) {
+        unsafe { genffi::gen_d_print_preview_widget_turn_end(self.ptr) }
+    }
+    pub fn set_current_page(&self, page: i32) {
+        unsafe { genffi::gen_d_print_preview_widget_set_current_page(self.ptr, page) }
+    }
+    pub fn print(&self, isSavedPicture: bool) {
+        unsafe { genffi::gen_d_print_preview_widget_print(self.ptr, isSavedPicture) }
+    }
+}
+
+widget_wrapper!(DSearchComboBox, genffi::DSearchComboBox);
+impl DSearchComboBox {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_search_combo_box_new() })
+    }
+    pub fn set_editable(&self, editable: bool) {
+        unsafe { genffi::gen_d_search_combo_box_set_editable(self.ptr, editable) }
+    }
+}
+
+impl Default for DSearchComboBox {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DSearchEdit, genffi::DSearchEdit);
+impl DSearchEdit {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_search_edit_new() })
+    }
+    pub fn set_place_holder(&self, placeHolder: &str) {
+        unsafe { genffi::gen_d_search_edit_set_place_holder(self.ptr, placeHolder) }
+    }
+    pub fn place_holder(&self) -> String {
+        unsafe { genffi::gen_d_search_edit_place_holder(self.ptr) }
+    }
+    pub fn clear(&self) {
+        unsafe { genffi::gen_d_search_edit_clear(self.ptr) }
+    }
+    pub fn clear_edit(&self) {
+        unsafe { genffi::gen_d_search_edit_clear_edit(self.ptr) }
+    }
+    pub fn is_voice_input(&self) -> bool {
+        unsafe { genffi::gen_d_search_edit_is_voice_input(self.ptr) }
+    }
+    pub fn set_placeholder_text(&self, text: &str) {
+        unsafe { genffi::gen_d_search_edit_set_placeholder_text(self.ptr, text) }
+    }
+    pub fn placeholder_text(&self) -> String {
+        unsafe { genffi::gen_d_search_edit_placeholder_text(self.ptr) }
+    }
+}
+
+impl Default for DSearchEdit {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DSettingsDialog, genffi::DSettingsDialog);
+impl DSettingsDialog {
+    pub fn widget_factory(&self) -> DSettingsWidgetFactory {
+        DSettingsWidgetFactory::from_raw(unsafe { genffi::gen_d_settings_dialog_widget_factory(self.ptr) })
+    }
+    pub fn group_is_visible(&self, groupKey: &str) -> bool {
+        unsafe { genffi::gen_d_settings_dialog_group_is_visible(self.ptr, groupKey) }
+    }
+    pub fn set_reset_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_settings_dialog_set_reset_visible(self.ptr, visible) }
+    }
+    pub fn scroll_to_group(&self, groupKey: &str) {
+        unsafe { genffi::gen_d_settings_dialog_scroll_to_group(self.ptr, groupKey) }
+    }
+    pub fn set_group_visible(&self, groupKey: &str, visible: bool) {
+        unsafe { genffi::gen_d_settings_dialog_set_group_visible(self.ptr, groupKey, visible) }
+    }
+}
+
+widget_wrapper!(DSettingsWidgetFactory, genffi::DSettingsWidgetFactory);
+impl DSettingsWidgetFactory {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_settings_widget_factory_new() })
+    }
+}
+
+impl Default for DSettingsWidgetFactory {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DShadowLine, genffi::DShadowLine);
+impl DShadowLine {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_shadow_line_new() })
+    }
+}
+
+impl Default for DShadowLine {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DSimpleListItem, genffi::DSimpleListItem);
+impl DSimpleListItem {
+}
+
+widget_wrapper!(DSimpleListView, genffi::DSimpleListView);
+impl DSimpleListView {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_simple_list_view_new() })
+    }
+    pub fn set_row_height(&self, height: i32) {
+        unsafe { genffi::gen_d_simple_list_view_set_row_height(self.ptr, height) }
+    }
+    pub fn set_clip_radius(&self, radius: i32) {
+        unsafe { genffi::gen_d_simple_list_view_set_clip_radius(self.ptr, radius) }
+    }
+    pub fn remove_item(&self, item: &DSimpleListItem) {
+        unsafe { genffi::gen_d_simple_list_view_remove_item(self.ptr, item.ptr) }
+    }
+    pub fn clear_items(&self) {
+        unsafe { genffi::gen_d_simple_list_view_clear_items(self.ptr) }
+    }
+    pub fn clear_selections(&self, clearLastSelection: bool) {
+        unsafe { genffi::gen_d_simple_list_view_clear_selections(self.ptr, clearLastSelection) }
+    }
+    pub fn search(&self, searchContent: &str) {
+        unsafe { genffi::gen_d_simple_list_view_search(self.ptr, searchContent) }
+    }
+    pub fn set_single_select(&self, singleSelect: bool) {
+        unsafe { genffi::gen_d_simple_list_view_set_single_select(self.ptr, singleSelect) }
+    }
+    pub fn keep_select_when_click_blank(&self, keep: bool) {
+        unsafe { genffi::gen_d_simple_list_view_keep_select_when_click_blank(self.ptr, keep) }
+    }
+    pub fn select_all_items(&self) {
+        unsafe { genffi::gen_d_simple_list_view_select_all_items(self.ptr) }
+    }
+    pub fn select_first_item(&self) {
+        unsafe { genffi::gen_d_simple_list_view_select_first_item(self.ptr) }
+    }
+    pub fn select_last_item(&self) {
+        unsafe { genffi::gen_d_simple_list_view_select_last_item(self.ptr) }
+    }
+    pub fn select_next_item(&self) {
+        unsafe { genffi::gen_d_simple_list_view_select_next_item(self.ptr) }
+    }
+    pub fn select_prev_item(&self) {
+        unsafe { genffi::gen_d_simple_list_view_select_prev_item(self.ptr) }
+    }
+    pub fn shift_select_page_down(&self) {
+        unsafe { genffi::gen_d_simple_list_view_shift_select_page_down(self.ptr) }
+    }
+    pub fn shift_select_page_up(&self) {
+        unsafe { genffi::gen_d_simple_list_view_shift_select_page_up(self.ptr) }
+    }
+    pub fn shift_select_to_end(&self) {
+        unsafe { genffi::gen_d_simple_list_view_shift_select_to_end(self.ptr) }
+    }
+    pub fn shift_select_to_home(&self) {
+        unsafe { genffi::gen_d_simple_list_view_shift_select_to_home(self.ptr) }
+    }
+    pub fn shift_select_to_next(&self) {
+        unsafe { genffi::gen_d_simple_list_view_shift_select_to_next(self.ptr) }
+    }
+    pub fn shift_select_to_prev(&self) {
+        unsafe { genffi::gen_d_simple_list_view_shift_select_to_prev(self.ptr) }
+    }
+    pub fn scroll_page_down(&self) {
+        unsafe { genffi::gen_d_simple_list_view_scroll_page_down(self.ptr) }
+    }
+    pub fn scroll_page_up(&self) {
+        unsafe { genffi::gen_d_simple_list_view_scroll_page_up(self.ptr) }
+    }
+    pub fn ctrl_scroll_page_down(&self) {
+        unsafe { genffi::gen_d_simple_list_view_ctrl_scroll_page_down(self.ptr) }
+    }
+    pub fn ctrl_scroll_page_up(&self) {
+        unsafe { genffi::gen_d_simple_list_view_ctrl_scroll_page_up(self.ptr) }
+    }
+    pub fn ctrl_scroll_to_end(&self) {
+        unsafe { genffi::gen_d_simple_list_view_ctrl_scroll_to_end(self.ptr) }
+    }
+    pub fn ctrl_scroll_to_home(&self) {
+        unsafe { genffi::gen_d_simple_list_view_ctrl_scroll_to_home(self.ptr) }
+    }
+}
+
+impl Default for DSimpleListView {
+    fn default() -> Self { Self::new() }
+}
+
+object_wrapper!(DSizeModeHelper, genffi::DSizeModeHelper);
+impl DSizeModeHelper {
+}
+
+widget_wrapper!(DSlider, genffi::DSlider);
+impl DSlider {
+    pub fn set_minimum(&self, min: i32) {
+        unsafe { genffi::gen_d_slider_set_minimum(self.ptr, min) }
+    }
+    pub fn minimum(&self) -> i32 {
+        unsafe { genffi::gen_d_slider_minimum(self.ptr) }
+    }
+    pub fn set_value(&self, value: i32) {
+        unsafe { genffi::gen_d_slider_set_value(self.ptr, value) }
+    }
+    pub fn value(&self) -> i32 {
+        unsafe { genffi::gen_d_slider_value(self.ptr) }
+    }
+    pub fn set_page_step(&self, pageStep: i32) {
+        unsafe { genffi::gen_d_slider_set_page_step(self.ptr, pageStep) }
+    }
+    pub fn page_step(&self) -> i32 {
+        unsafe { genffi::gen_d_slider_page_step(self.ptr) }
+    }
+    pub fn set_maximum(&self, max: i32) {
+        unsafe { genffi::gen_d_slider_set_maximum(self.ptr, max) }
+    }
+    pub fn maximum(&self) -> i32 {
+        unsafe { genffi::gen_d_slider_maximum(self.ptr) }
+    }
+    pub fn set_mouse_wheel_enabled(&self, enabled: bool) {
+        unsafe { genffi::gen_d_slider_set_mouse_wheel_enabled(self.ptr, enabled) }
+    }
+    pub fn set_tip_value(&self, value: &str) {
+        unsafe { genffi::gen_d_slider_set_tip_value(self.ptr, value) }
+    }
+    pub fn set_handle_visible(&self, b: bool) {
+        unsafe { genffi::gen_d_slider_set_handle_visible(self.ptr, b) }
+    }
+    pub fn handle_visible(&self) -> bool {
+        unsafe { genffi::gen_d_slider_handle_visible(self.ptr) }
+    }
+    pub fn set_enabled_across_style(&self, enabled: bool) {
+        unsafe { genffi::gen_d_slider_set_enabled_across_style(self.ptr, enabled) }
+    }
+}
+
+widget_wrapper!(DSpinBox, genffi::DSpinBox);
+impl DSpinBox {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_spin_box_new() })
+    }
+    pub fn is_alert(&self) -> bool {
+        unsafe { genffi::gen_d_spin_box_is_alert(self.ptr) }
+    }
+    pub fn show_alert_message(&self, text: &str, duration: i32) {
+        unsafe { genffi::gen_d_spin_box_show_alert_message(self.ptr, text, duration) }
+    }
+    pub fn set_enabled_embed_style(&self, enabled: bool) {
+        unsafe { genffi::gen_d_spin_box_set_enabled_embed_style(self.ptr, enabled) }
+    }
+    pub fn set_alert(&self, alert: bool) {
+        unsafe { genffi::gen_d_spin_box_set_alert(self.ptr, alert) }
+    }
+}
+
+impl Default for DSpinBox {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DDoubleSpinBox, genffi::DDoubleSpinBox);
+impl DDoubleSpinBox {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_double_spin_box_new() })
+    }
+    pub fn is_alert(&self) -> bool {
+        unsafe { genffi::gen_d_double_spin_box_is_alert(self.ptr) }
+    }
+    pub fn show_alert_message(&self, text: &str, duration: i32) {
+        unsafe { genffi::gen_d_double_spin_box_show_alert_message(self.ptr, text, duration) }
+    }
+    pub fn set_enabled_embed_style(&self, enabled: bool) {
+        unsafe { genffi::gen_d_double_spin_box_set_enabled_embed_style(self.ptr, enabled) }
+    }
+    pub fn set_alert(&self, alert: bool) {
+        unsafe { genffi::gen_d_double_spin_box_set_alert(self.ptr, alert) }
+    }
+}
+
+impl Default for DDoubleSpinBox {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DSpinner, genffi::DSpinner);
+impl DSpinner {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_spinner_new() })
+    }
+    pub fn is_playing(&self) -> bool {
+        unsafe { genffi::gen_d_spinner_is_playing(self.ptr) }
+    }
+    pub fn start(&self) {
+        unsafe { genffi::gen_d_spinner_start(self.ptr) }
+    }
+    pub fn stop(&self) {
+        unsafe { genffi::gen_d_spinner_stop(self.ptr) }
+    }
+}
+
+impl Default for DSpinner {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DSwitchButton, genffi::DSwitchButton);
+impl DSwitchButton {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_switch_button_new() })
+    }
+}
+
+impl Default for DSwitchButton {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DSwitchLineExpand, genffi::DSwitchLineExpand);
+impl DSwitchLineExpand {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_switch_line_expand_new() })
+    }
+    pub fn set_title(&self, title: &str) {
+        unsafe { genffi::gen_d_switch_line_expand_set_title(self.ptr, title) }
+    }
+    pub fn set_expand(&self, value: bool) {
+        unsafe { genffi::gen_d_switch_line_expand_set_expand(self.ptr, value) }
+    }
+}
+
+impl Default for DSwitchLineExpand {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DTabletWindowOptionButton, genffi::DTabletWindowOptionButton);
+impl DTabletWindowOptionButton {
+}
+
+widget_wrapper!(DTickEffect, genffi::DTickEffect);
+impl DTickEffect {
+    pub fn play(&self) {
+        unsafe { genffi::gen_d_tick_effect_play(self.ptr) }
+    }
+    pub fn stop(&self) {
+        unsafe { genffi::gen_d_tick_effect_stop(self.ptr) }
+    }
+    pub fn pause(&self) {
+        unsafe { genffi::gen_d_tick_effect_pause(self.ptr) }
+    }
+    pub fn resume(&self) {
+        unsafe { genffi::gen_d_tick_effect_resume(self.ptr) }
+    }
+    pub fn set_fixed_pixel_move(&self, pixel: i32) {
+        unsafe { genffi::gen_d_tick_effect_set_fixed_pixel_move(self.ptr, pixel) }
+    }
+}
+
+widget_wrapper!(DTipLabel, genffi::DTipLabel);
+impl DTipLabel {
+}
+
+widget_wrapper!(DTitlebarToolBaseInterface, genffi::DTitlebarToolBaseInterface);
+impl DTitlebarToolBaseInterface {
+    pub fn id(&self) -> String {
+        unsafe { genffi::gen_d_titlebar_tool_base_interface_id(self.ptr) }
+    }
+    pub fn description(&self) -> String {
+        unsafe { genffi::gen_d_titlebar_tool_base_interface_description(self.ptr) }
+    }
+    pub fn icon_name(&self) -> String {
+        unsafe { genffi::gen_d_titlebar_tool_base_interface_icon_name(self.ptr) }
+    }
+}
+
+widget_wrapper!(DTitleBarToolInterface, genffi::DTitleBarToolInterface);
+impl DTitleBarToolInterface {
+}
+
+widget_wrapper!(DTitleBarSpacerInterface, genffi::DTitleBarSpacerInterface);
+impl DTitleBarSpacerInterface {
+    pub fn size(&self) -> i32 {
+        unsafe { genffi::gen_d_title_bar_spacer_interface_size(self.ptr) }
+    }
+}
+
+object_wrapper!(DTitlebarSettings, genffi::DTitlebarSettings);
+impl DTitlebarSettings {
+}
+
+widget_wrapper!(DToolButton, genffi::DToolButton);
+impl DToolButton {
+}
+
+widget_wrapper!(DWaterProgress, genffi::DWaterProgress);
+impl DWaterProgress {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { genffi::gen_d_water_progress_new() })
+    }
+    pub fn value(&self) -> i32 {
+        unsafe { genffi::gen_d_water_progress_value(self.ptr) }
+    }
+    pub fn start(&self) {
+        unsafe { genffi::gen_d_water_progress_start(self.ptr) }
+    }
+    pub fn stop(&self) {
+        unsafe { genffi::gen_d_water_progress_stop(self.ptr) }
+    }
+    pub fn set_value(&self, value: i32) {
+        unsafe { genffi::gen_d_water_progress_set_value(self.ptr, value) }
+    }
+    pub fn set_text_visible(&self, visible: bool) {
+        unsafe { genffi::gen_d_water_progress_set_text_visible(self.ptr, visible) }
+    }
+}
+
+impl Default for DWaterProgress {
+    fn default() -> Self { Self::new() }
+}
+
+widget_wrapper!(DWindowCloseButton, genffi::DWindowCloseButton);
+impl DWindowCloseButton {
+}
+
+widget_wrapper!(DWindowMaxButton, genffi::DWindowMaxButton);
+impl DWindowMaxButton {
+    pub fn is_maximized(&self) -> bool {
+        unsafe { genffi::gen_d_window_max_button_is_maximized(self.ptr) }
+    }
+    pub fn set_maximized(&self, isMaximized: bool) {
+        unsafe { genffi::gen_d_window_max_button_set_maximized(self.ptr, isMaximized) }
+    }
+}
+
+widget_wrapper!(DWindowMinButton, genffi::DWindowMinButton);
+impl DWindowMinButton {
+}
+
+widget_wrapper!(DWindowOptionButton, genffi::DWindowOptionButton);
+impl DWindowOptionButton {
+}
+
+widget_wrapper!(DWindowQuitFullButton, genffi::DWindowQuitFullButton);
+impl DWindowQuitFullButton {
+}
+
