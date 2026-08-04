@@ -119,6 +119,10 @@ impl QWidget {
     pub fn show(&self) {
         unsafe { ffi::widget_show(self.ptr) }
     }
+    /// deferred delete (next event-loop turn)
+    pub fn delete_later(&self) {
+        unsafe { ffi::object_delete_later(self.ptr.cast()) }
+    }
 }
 
 /// connect an arg-less signal on any widget (e.g. clicked, timeout)
@@ -382,7 +386,7 @@ pub mod qt {
     pub const ELIDE_MIDDLE: i32 = 2;
     pub const ELIDE_NONE: i32 = 3;
     // QStyleOption::State
-    pub const STATE_SELECTED: i32 = 0x1;
+    pub const STATE_SELECTED: i32 = 0x8000;
     pub const STATE_MOUSE_OVER: i32 = 0x2000;
 }
 

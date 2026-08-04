@@ -195,7 +195,13 @@ void layout_add_stretch(QLayout *l, int32_t stretch) {
     if (auto *box = qobject_cast<QBoxLayout *>(l))
         box->addStretch(stretch);
 }
-void layout_add_layout(QLayout *l, QLayout *child) { l->addItem(child); }
+void layout_add_layout(QLayout *l, QLayout *child) {
+    // ponytail: QLayout::addItem() leaves child layouts inactive/zero-height; QBoxLayout::addLayout works
+    if (auto *box = qobject_cast<QBoxLayout *>(l))
+        box->addLayout(child);
+    else
+        l->addItem(child);
+}
 void layout_set_spacing(QLayout *l, int32_t spacing) { l->setSpacing(spacing); }
 void layout_set_contents_margins(QLayout *l, int32_t l_, int32_t t, int32_t r, int32_t b) {
     l->setContentsMargins(l_, t, r, b);
