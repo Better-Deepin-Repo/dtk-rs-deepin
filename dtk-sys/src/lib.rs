@@ -23,6 +23,8 @@ pub mod ffi {
         type QFont;
         type QPalette;
         type QPixmap;
+        type QMargins;
+        type DDciIcon;
         type QPoint;
         type QRect;
         type QSize;
@@ -37,6 +39,7 @@ pub mod ffi {
         type DLabel;
         type DSuggestButton;
         type DPushButton;
+        type QMessageBox;
 
         // DApplication
         // args: '|'-separated real argv (incl. argv[0]); application_name set separately
@@ -100,6 +103,57 @@ pub mod ffi {
         unsafe fn push_button_new(text: &str) -> *mut DPushButton;
         unsafe fn button_set_text(b: *mut DPushButton, text: &str);
         unsafe fn button_click(b: *mut DPushButton);
+
+        // QMessageBox (DMessageBox typedef)
+        unsafe fn qmessagebox_new() -> *mut QMessageBox;
+        unsafe fn qmessagebox_new_with(
+            icon: i32,
+            title: &str,
+            text: &str,
+            buttons: i32,
+            parent: *mut QWidget,
+        ) -> *mut QMessageBox;
+        unsafe fn qmessagebox_set_text(mb: *mut QMessageBox, text: &str);
+        unsafe fn qmessagebox_set_icon(mb: *mut QMessageBox, icon: i32);
+        unsafe fn qmessagebox_set_standard_buttons(mb: *mut QMessageBox, buttons: i32);
+        unsafe fn qmessagebox_set_informative_text(mb: *mut QMessageBox, text: &str);
+        unsafe fn qmessagebox_set_detailed_text(mb: *mut QMessageBox, text: &str);
+        unsafe fn qmessagebox_add_button_text(mb: *mut QMessageBox, text: &str, role: i32) -> *mut DPushButton;
+        unsafe fn qmessagebox_add_button_standard(mb: *mut QMessageBox, button: i32) -> *mut DPushButton;
+        unsafe fn qmessagebox_set_default_button(mb: *mut QMessageBox, button: i32);
+        unsafe fn qmessagebox_exec(mb: *mut QMessageBox) -> i32;
+        unsafe fn qmessagebox_clicked_button(mb: *mut QMessageBox) -> i32;
+        unsafe fn qmessagebox_text(mb: *mut QMessageBox) -> String;
+        // static helpers
+        unsafe fn qmessagebox_information(
+            parent: *mut QWidget,
+            title: &str,
+            text: &str,
+            buttons: i32,
+            default_button: i32,
+        ) -> i32;
+        unsafe fn qmessagebox_warning(
+            parent: *mut QWidget,
+            title: &str,
+            text: &str,
+            buttons: i32,
+            default_button: i32,
+        ) -> i32;
+        unsafe fn qmessagebox_critical(
+            parent: *mut QWidget,
+            title: &str,
+            text: &str,
+            buttons: i32,
+            default_button: i32,
+        ) -> i32;
+        unsafe fn qmessagebox_question(
+            parent: *mut QWidget,
+            title: &str,
+            text: &str,
+            buttons: i32,
+            default_button: i32,
+        ) -> i32;
+        unsafe fn qmessagebox_about(parent: *mut QWidget, title: &str, text: &str);
 
         // layouts
         unsafe fn vbox_new(parent: *mut QWidget) -> *mut QVBoxLayout;
@@ -170,6 +224,11 @@ pub mod ffi {
         unsafe fn palette_delete(pal: *mut QPalette);
         unsafe fn pixmap_new(path: &str) -> *mut QPixmap;
         unsafe fn pixmap_delete(pm: *mut QPixmap);
+        // QMargins
+        unsafe fn q_margins_new(left: i32, top: i32, right: i32, bottom: i32) -> *mut QMargins;
+        // DDciIcon (dtkgui)
+        unsafe fn ddci_icon_new() -> *mut DDciIcon;
+        unsafe fn ddci_icon_from_file(path: &str) -> *mut DDciIcon;
         unsafe fn standard_icon_pixmap(w: *mut QWidget, icon: i32, size: i32) -> *mut QPixmap;
         unsafe fn size_new(w: i32, h: i32) -> *mut QSize;
         unsafe fn size_delete(s: *mut QSize);

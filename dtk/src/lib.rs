@@ -7,6 +7,11 @@
 use dtk_sys::ffi;
 use std::marker::PhantomData;
 
+/// null for None (Qt parent pointer)
+fn opt_ptr(w: Option<&QWidget>) -> *mut ffi::QWidget {
+    w.map_or(std::ptr::null_mut(), |w| w.ptr)
+}
+
 macro_rules! widget_wrapper {
     ($name:ident, $ffi:ty) => {
         object_wrapper!($name, $ffi);
@@ -119,7 +124,7 @@ impl QWidget {
         }
     }
     pub fn new(parent: Option<&QWidget>) -> Self {
-        let p = parent.map_or(std::ptr::null_mut(), |p| p.ptr);
+        let p = opt_ptr(parent);
         Self::from_raw(unsafe { ffi::widget_new(p) })
     }
     pub fn show(&self) {
@@ -280,6 +285,8 @@ value_wrapper!(QPixmap, ffi::QPixmap);
 value_wrapper!(QPoint, ffi::QPoint);
 value_wrapper!(QRect, ffi::QRect);
 value_wrapper!(QSize, ffi::QSize);
+value_wrapper!(QMargins, ffi::QMargins);
+value_wrapper!(DDciIcon, ffi::DDciIcon);
 
 impl QColor {
     pub fn rgb(r: i32, g: i32, b: i32) -> Self {
@@ -357,6 +364,28 @@ impl QSize {
     }
 }
 
+impl QMargins {
+    pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
+        Self::from_raw(unsafe { ffi::q_margins_new(left, top, right, bottom) })
+    }
+}
+
+impl DDciIcon {
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { ffi::ddci_icon_new() })
+    }
+    /// load from a .dci file path
+    pub fn from_file(path: &str) -> Self {
+        Self::from_raw(unsafe { ffi::ddci_icon_from_file(path) })
+    }
+}
+
+impl Default for DDciIcon {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Qt enum/QFlags constants (for params mapped to i32)
 pub mod qt {
     // Qt::Alignment
@@ -403,6 +432,47 @@ pub mod qt {
     // QStyleOption::State
     pub const STATE_SELECTED: i32 = 0x8000;
     pub const STATE_MOUSE_OVER: i32 = 0x2000;
+    // QMessageBox::Icon
+    pub const MSG_ICON_NO_ICON: i32 = 0;
+    pub const MSG_ICON_INFORMATION: i32 = 1;
+    pub const MSG_ICON_WARNING: i32 = 2;
+    pub const MSG_ICON_CRITICAL: i32 = 3;
+    pub const MSG_ICON_QUESTION: i32 = 4;
+    // QMessageBox::ButtonRole
+    pub const MSG_ROLE_INVALID: i32 = -1;
+    pub const MSG_ROLE_ACCEPT: i32 = 0;
+    pub const MSG_ROLE_REJECT: i32 = 1;
+    pub const MSG_ROLE_DESTRUCTIVE: i32 = 2;
+    pub const MSG_ROLE_ACTION: i32 = 3;
+    pub const MSG_ROLE_HELP: i32 = 4;
+    pub const MSG_ROLE_YES: i32 = 5;
+    pub const MSG_ROLE_NO: i32 = 6;
+    pub const MSG_ROLE_RESET: i32 = 7;
+    pub const MSG_ROLE_APPLY: i32 = 8;
+    // QMessageBox::StandardButton (QFlags-compatible bitmask)
+    pub const MSG_BTN_NO_BUTTON: i32 = 0x00000000;
+    pub const MSG_BTN_OK: i32 = 0x00000400;
+    pub const MSG_BTN_SAVE: i32 = 0x00000800;
+    pub const MSG_BTN_SAVE_ALL: i32 = 0x00001000;
+    pub const MSG_BTN_OPEN: i32 = 0x00002000;
+    pub const MSG_BTN_YES: i32 = 0x00004000;
+    pub const MSG_BTN_YES_TO_ALL: i32 = 0x00008000;
+    pub const MSG_BTN_NO: i32 = 0x00010000;
+    pub const MSG_BTN_NO_TO_ALL: i32 = 0x00020000;
+    pub const MSG_BTN_ABORT: i32 = 0x00040000;
+    pub const MSG_BTN_RETRY: i32 = 0x00080000;
+    pub const MSG_BTN_IGNORE: i32 = 0x00100000;
+    pub const MSG_BTN_CLOSE: i32 = 0x00200000;
+    pub const MSG_BTN_CANCEL: i32 = 0x00400000;
+    pub const MSG_BTN_DISCARD: i32 = 0x00800000;
+    pub const MSG_BTN_HELP: i32 = 0x01000000;
+    pub const MSG_BTN_APPLY: i32 = 0x02000000;
+    pub const MSG_BTN_RESET: i32 = 0x04000000;
+    pub const MSG_BTN_RESTORE_DEFAULTS: i32 = 0x08000000;
+    /// convenience: standard Yes|No button set
+    pub const MSG_BTN_YES_NO: i32 = 0x00014000;
+    /// convenience: standard Ok|Cancel button set
+    pub const MSG_BTN_OK_CANCEL: i32 = 0x00400400;
 }
 
 // ---- QIcon ----
@@ -413,6 +483,13 @@ pub struct QIcon {
 }
 
 impl QIcon {
+    pub(crate) fn from_raw(ptr: *mut ffi::QIcon) -> Self {
+        assert!(!ptr.is_null());
+        Self {
+            ptr,
+            _not_send: PhantomData,
+        }
+    }
     pub fn from_theme(name: &str) -> Self {
         Self {
             ptr: unsafe { ffi::icon_from_theme(name) },
@@ -490,6 +567,88 @@ impl DPushButton {
     }
 }
 
+// ---- DMessageBox (DMessageBox = typedef QMessageBox) ----
+
+widget_wrapper!(DMessageBox, ffi::QMessageBox);
+
+impl DMessageBox {
+    /// create an empty dialog; set title/text/icon/buttons then exec()
+    pub fn new() -> Self {
+        Self::from_raw(unsafe { ffi::qmessagebox_new() })
+    }
+    /// create a pre-configured dialog; use qt::MSG_ICON_* and qt::MSG_BTN_* constants
+    pub fn with(icon: i32, title: &str, text: &str, buttons: i32, parent: Option<&QWidget>) -> Self {
+        let p = opt_ptr(parent);
+        Self::from_raw(unsafe { ffi::qmessagebox_new_with(icon, title, text, buttons, p) })
+    }
+    pub fn set_text(&self, text: &str) {
+        unsafe { ffi::qmessagebox_set_text(self.ptr, text) }
+    }
+    pub fn set_icon(&self, icon: i32) {
+        unsafe { ffi::qmessagebox_set_icon(self.ptr, icon) }
+    }
+    pub fn set_informative_text(&self, text: &str) {
+        unsafe { ffi::qmessagebox_set_informative_text(self.ptr, text) }
+    }
+    pub fn set_detailed_text(&self, text: &str) {
+        unsafe { ffi::qmessagebox_set_detailed_text(self.ptr, text) }
+    }
+    pub fn set_standard_buttons(&self, buttons: i32) {
+        unsafe { ffi::qmessagebox_set_standard_buttons(self.ptr, buttons) }
+    }
+    /// add a custom button with a text + ButtonRole; returns the button handle
+    pub fn add_button(&self, text: &str, role: i32) -> DPushButton {
+        DPushButton::from_raw(unsafe { ffi::qmessagebox_add_button_text(self.ptr, text, role) })
+    }
+    /// add a standard button (qt::MSG_BTN_*); returns the button handle
+    pub fn add_standard_button(&self, button: i32) -> DPushButton {
+        DPushButton::from_raw(unsafe { ffi::qmessagebox_add_button_standard(self.ptr, button) })
+    }
+    pub fn set_default_button(&self, button: i32) {
+        unsafe { ffi::qmessagebox_set_default_button(self.ptr, button) }
+    }
+    /// exec the dialog (blocking); returns the clicked StandardButton (qt::MSG_BTN_*)
+    pub fn exec(&self) -> i32 {
+        unsafe { ffi::qmessagebox_exec(self.ptr) }
+    }
+    /// which standard button was clicked after exec returns
+    pub fn clicked_button(&self) -> i32 {
+        unsafe { ffi::qmessagebox_clicked_button(self.ptr) }
+    }
+    pub fn text(&self) -> String {
+        unsafe { ffi::qmessagebox_text(self.ptr) }
+    }
+
+    // ---- static helpers ----
+    /// information dialog; returns clicked StandardButton
+    pub fn information(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+        let p = opt_ptr(parent);
+        unsafe { ffi::qmessagebox_information(p, title, text, buttons, default_button) }
+    }
+    pub fn warning(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+        let p = opt_ptr(parent);
+        unsafe { ffi::qmessagebox_warning(p, title, text, buttons, default_button) }
+    }
+    pub fn critical(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+        let p = opt_ptr(parent);
+        unsafe { ffi::qmessagebox_critical(p, title, text, buttons, default_button) }
+    }
+    pub fn question(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+        let p = opt_ptr(parent);
+        unsafe { ffi::qmessagebox_question(p, title, text, buttons, default_button) }
+    }
+    pub fn about(parent: Option<&QWidget>, title: &str, text: &str) {
+        let p = opt_ptr(parent);
+        unsafe { ffi::qmessagebox_about(p, title, text) }
+    }
+}
+
+impl Default for DMessageBox {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // ---- layouts ----
 
 macro_rules! layout_wrapper {
@@ -501,7 +660,7 @@ macro_rules! layout_wrapper {
         impl $name {
             /// when parent is Some, the layout installs directly on the parent widget
             pub fn new(parent: Option<&QWidget>) -> Self {
-                let p = parent.map_or(std::ptr::null_mut(), |p| p.ptr);
+                let p = opt_ptr(parent);
                 Self {
                     ptr: unsafe { ffi::$new(p) },
                     _not_send: PhantomData,

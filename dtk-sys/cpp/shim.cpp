@@ -195,6 +195,53 @@ DPushButton *push_button_new(rust::Str text) { return new DPushButton(from_rust_
 void button_set_text(DPushButton *b, rust::Str text) { b->setText(from_rust_str(text)); }
 void button_click(DPushButton *b) { b->click(); }
 
+// ---- QMessageBox (DMessageBox typedef) ----
+QMessageBox *qmessagebox_new() { return new QMessageBox; }
+QMessageBox *qmessagebox_new_with(int32_t icon, rust::Str title, rust::Str text, int32_t buttons, QWidget *parent) {
+    return new QMessageBox(static_cast<QMessageBox::Icon>(icon), from_rust_str(title), from_rust_str(text),
+                           static_cast<QMessageBox::StandardButtons>(buttons), parent);
+}
+void qmessagebox_set_text(QMessageBox *mb, rust::Str text) { mb->setText(from_rust_str(text)); }
+void qmessagebox_set_icon(QMessageBox *mb, int32_t icon) { mb->setIcon(static_cast<QMessageBox::Icon>(icon)); }
+void qmessagebox_set_standard_buttons(QMessageBox *mb, int32_t buttons) {
+    mb->setStandardButtons(static_cast<QMessageBox::StandardButtons>(buttons));
+}
+void qmessagebox_set_informative_text(QMessageBox *mb, rust::Str text) { mb->setInformativeText(from_rust_str(text)); }
+void qmessagebox_set_detailed_text(QMessageBox *mb, rust::Str text) { mb->setDetailedText(from_rust_str(text)); }
+DPushButton *qmessagebox_add_button_text(QMessageBox *mb, rust::Str text, int32_t role) {
+    return mb->addButton(from_rust_str(text), static_cast<QMessageBox::ButtonRole>(role));
+}
+DPushButton *qmessagebox_add_button_standard(QMessageBox *mb, int32_t button) {
+    return mb->addButton(static_cast<QMessageBox::StandardButton>(button));
+}
+void qmessagebox_set_default_button(QMessageBox *mb, int32_t button) {
+    mb->setDefaultButton(static_cast<QMessageBox::StandardButton>(button));
+}
+int32_t qmessagebox_exec(QMessageBox *mb) { return static_cast<int32_t>(mb->exec()); }
+int32_t qmessagebox_clicked_button(QMessageBox *mb) {
+    return static_cast<int32_t>(mb->standardButton(mb->clickedButton()));
+}
+rust::String qmessagebox_text(QMessageBox *mb) { return to_rust_string(mb->text()); }
+int32_t qmessagebox_information(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button) {
+    return static_cast<int32_t>(QMessageBox::information(parent, from_rust_str(title), from_rust_str(text),
+        static_cast<QMessageBox::StandardButtons>(buttons), static_cast<QMessageBox::StandardButton>(default_button)));
+}
+int32_t qmessagebox_warning(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button) {
+    return static_cast<int32_t>(QMessageBox::warning(parent, from_rust_str(title), from_rust_str(text),
+        static_cast<QMessageBox::StandardButtons>(buttons), static_cast<QMessageBox::StandardButton>(default_button)));
+}
+int32_t qmessagebox_critical(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button) {
+    return static_cast<int32_t>(QMessageBox::critical(parent, from_rust_str(title), from_rust_str(text),
+        static_cast<QMessageBox::StandardButtons>(buttons), static_cast<QMessageBox::StandardButton>(default_button)));
+}
+int32_t qmessagebox_question(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button) {
+    return static_cast<int32_t>(QMessageBox::question(parent, from_rust_str(title), from_rust_str(text),
+        static_cast<QMessageBox::StandardButtons>(buttons), static_cast<QMessageBox::StandardButton>(default_button)));
+}
+void qmessagebox_about(QWidget *parent, rust::Str title, rust::Str text) {
+    QMessageBox::about(parent, from_rust_str(title), from_rust_str(text));
+}
+
 // ---- layouts ----
 QVBoxLayout *vbox_new(QWidget *parent) { return new QVBoxLayout(parent); }
 QHBoxLayout *hbox_new(QWidget *parent) { return new QHBoxLayout(parent); }
@@ -319,6 +366,17 @@ QColor *palette_color(QPalette *pal, int32_t group, int32_t role) {
 void palette_delete(QPalette *pal) { delete pal; }
 QPixmap *pixmap_new(rust::Str path) { return new QPixmap(from_rust_str(path)); }
 void pixmap_delete(QPixmap *pm) { delete pm; }
+
+// ---- QMargins ----
+QMargins *q_margins_new(int32_t left, int32_t top, int32_t right, int32_t bottom) {
+    return new QMargins(left, top, right, bottom);
+}
+
+// ---- DDciIcon (dtkgui) ----
+DDciIcon *ddci_icon_new() { return new DDciIcon; }
+DDciIcon *ddci_icon_from_file(rust::Str path) {
+    return new DDciIcon(QString::fromUtf8(path.data(), static_cast<qsizetype>(path.size())));
+}
 QPixmap *standard_icon_pixmap(QWidget *w, int32_t icon, int32_t size) {
     return new QPixmap(w->style()->standardIcon(static_cast<QStyle::StandardPixmap>(icon)).pixmap(size, size));
 }

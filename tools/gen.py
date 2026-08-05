@@ -37,7 +37,9 @@ QT_WIDGET_BASES = {
     "QButtonGroup", "QListWidget", "QTableWidget", "QTreeWidget", "QColumnView",
 }
 
-VALUE_TYPES = {"QColor", "QSize", "QPoint", "QRect", "QFont", "QPixmap", "QIcon", "QPalette"}
+VALUE_TYPES = {"QColor", "QSize", "QPoint", "QRect", "QFont", "QPixmap", "QIcon", "QPalette", "QMargins"}
+# cross-namespace (dtkgui) value types: name -> (fully-qualified namespace, include header)
+EXT_VALUE_TYPES = {"DDciIcon": ("Dtk::Gui", "DDciIcon")}
 # types that are QFlags in Qt (fromInt/toInt conversion)
 QT_QFLAGS = {"Qt::Alignment", "Qt::WindowFlags", "Qt::MouseButtons", "Qt::KeyboardModifiers",
              "Qt::Orientations", "Qt::ItemFlags", "Qt::MatchFlags", "Qt::ApplicationStates",
@@ -53,7 +55,7 @@ CPP_OF_RUST = {"()": "void", "bool": "bool", "i32": "int32_t", "i16": "int16_t",
                "u32": "uint32_t", "u64": "uint64_t", "f64": "double", "f32": "float",
                "i8": "int8_t", "u8": "uint8_t", "String": "rust::String"}
 
-CLASS_RE = re.compile(r"^class\s+LIBDTKWIDGETSHARED_EXPORT\s+(\w+)\s*(?::\s*(.+?))?\s*$")
+CLASS_RE = re.compile(r"^class\s+(?:LIBDTKWIDGETSHARED_EXPORT\s+|D_DECL_DEPRECATED\s+)*(\w+)\s*(?::\s*(.+?))?\s*$")
 METHOD_RE = re.compile(
     r"^\s*(?:virtual\s+|Q_INVOKABLE\s+|D_DECL_DEPRECATED\s+|explicit\s+)*"
     r"(static\s+)?([\w:<>&*~ ]+?)\s*(~?\w+)\s*\((.*)\)\s*(const)?\s*(?:override\s*)?(?:=\s*\w+\s*)?;?\s*(?://.*)?$"
@@ -115,7 +117,7 @@ class Ctx:
             return None
         ptr = t.endswith("*")
         base = t.rstrip("*").strip()
-        base = base.replace("DTK_CORE_NAMESPACE::", "").replace("DTK_GUI_NAMESPACE::", "")
+        base = base.replace("DTK_CORE_NAMESPACE::", "").replace("DGUI_NAMESPACE::", "").replace("DTK_GUI_NAMESPACE::", "")
         # Qt enums / QFlags
         if base.startswith("Qt::"):
             kind = "qflags" if base in QT_QFLAGS else "qtenum"
@@ -141,15 +143,18 @@ class Ctx:
                 return ("*mut QWidget", "QWidget *", "qtptr", base)
             return None
         # value types: heap-allocated opaque pointers
-        if base in VALUE_TYPES:
+        if base in VALUE_TYPES | EXT_VALUE_TYPES:
             return (f"*mut {base}", f"{base} *", "val", base)
         if base in PRIM:
             r = PRIM[base]
             if r == "()" and not is_return:
                 return None
             return (r, CPP_OF_RUST[r], "prim", None)
-        if base == "QString" or base == "QByteArray":
+        if base == "QString":
             return ("String", CPP_OF_RUST["String"], "str", None) if is_return else ("&str", "rust::Str", "str", None)
+        if base == "QByteArray":
+            # QByteArray params need a QString->QByteArray hop; return as string via toUtf8
+            return ("String", CPP_OF_RUST["String"], "qba", None) if is_return else ("&str", "rust::Str", "qba", None)
         return None
 
 
@@ -162,15 +167,58 @@ def parse_header(path, ctx):
     cur = None
     nested = None  # non-exported nested class name (methods not generated, enums only registered)
     section = None  # None | 'pub' | 'other'
+    prev_was_template = False  # True if previous non-blank line was `template<...>`
+    # preprocessor stack: track `#if DTK_VERSION < DTK_VERSION_CHECK(6,...)` regions so we skip
+    # DTK5-only classes/methods. Each frame is True if the region is DTK5-only (skip in DTK6).
+    pp_stack = []
+    ns_stack = []  # namespace scope: e.g. ["Dtk::Widget"] when inside DWIDGET_BEGIN_NAMESPACE
+    def dtk5_active():
+        return any(pp_stack)
+    def current_ns():
+        return "::".join(ns_stack)
     with open(path, encoding="utf-8", errors="replace") as f:
         for line in f:
             line = line.rstrip("\n")
+            s = line.strip()
+            if not s:
+                continue
+            this_is_template = s.startswith("template") and "<" in s
+            # track DTK5-only preprocessor regions
+            if re.match(r"#if\s+DTK_VERSION\s*<\s*DTK_VERSION_CHECK\(\s*6", s):
+                pp_stack.append(True)
+                continue
+            if s.startswith("#if"):
+                pp_stack.append(False)
+                continue
+            if s.startswith("#else"):
+                if pp_stack:
+                    pp_stack[-1] = not pp_stack[-1]
+                continue
+            if s.startswith("#endif"):
+                if pp_stack:
+                    pp_stack.pop()
+                continue
+            # track namespace opens/closes (DWIDGET_BEGIN_NAMESPACE expands to namespace Dtk { namespace Widget {)
+            if re.match(r"^DWIDGET_BEGIN_NAMESPACE\b", s):
+                ns_stack.append("Dtk::Widget")
+                continue
+            if re.match(r"^DWIDGET_END_NAMESPACE\b", s):
+                if ns_stack:
+                    ns_stack.pop()
+                continue
+            if dtk5_active():
+                prev_was_template = this_is_template
+                continue
+            # skip template classes: a `class X` immediately preceded by `template<...>` is a template
+            # (cxx opaque types can't name template classes without args)
+            is_template_cls = prev_was_template
+            prev_was_template = this_is_template
             m = CLASS_RE.match(line)
-            if m and cur is None and nested is None:
+            if m and cur is None and nested is None and not is_template_cls:
                 bases = []
                 if m.group(2):
                     bases = [b.strip().split("::")[-1] for b in re.findall(r"public\s+([\w:]+)", m.group(2))]
-                cur = {"name": m.group(1), "bases": bases, "methods": [], "skipped": []}
+                cur = {"name": m.group(1), "bases": bases, "methods": [], "skipped": [], "ns": current_ns()}
                 section = None
                 continue
             # non-exported (nested/file-scope) class definition: track scope, do not generate methods
@@ -204,17 +252,21 @@ def parse_header(path, ctx):
             if re.match(r"^(Q_)?[Ss][Ii][Gg][Nn][Aa][Ll][Ss]", s) or s.startswith("Q_SIGNALS"):
                 section = "other"
                 continue
+            # detect pure-virtual: mark class abstract regardless of access section
+            if re.search(r"=\s*0\s*;", s):
+                cur["abstract"] = True
             if section != "pub" or not s:
                 continue
             if s.startswith(("{", "}", "~")):
                 continue  # inline function body / destructor
+            # destructor: `virtual ~Class()` or `~Class()` — METHOD_RE mis-absorbs the `~`
+            if re.match(rf"^(?:virtual\s+)?~{cur['name']}\b", s):
+                continue
             if any(k in s for k in ("Q_PROPERTY", "Q_DECLARE", "D_DECLARE", "typedef", "using ", "enum ", "struct ",
                                     "friend", "operator", "#", "D_DECL_DEPRECATED", "Q_OBJECT", "Q_ENUM", "Q_FLAG")):
                 continue
             if "(" not in s:
                 continue
-            if re.search(r"=\s*0\s*;", s):
-                cur["abstract"] = True
             s = re.sub(r"\s*Q_DECL_\w+", "", s)  # strip noexcept/override macros
             # constructor: no return type, name == class name
             cm = re.match(rf"^\s*(?:explicit\s+)?{cur['name']}\s*\((.*)\)\s*;?\s*$", s)
@@ -251,12 +303,13 @@ def gen_method(ctx, cls, is_static, ret, name, params):
     args = []  # (rust_sig_piece, cpp_sig_piece, call_piece)
     for i, p in enumerate(params):
         p_no_default = p.split("=")[0].strip()
-        parts = p_no_default.rsplit(" ", 1)
-        if len(parts) == 2:
-            ptype, pname = parts
+        # pull trailing identifier as name; everything before (incl. * or &) is the type.
+        # rsplit on space mishandles `Type *name` (star sticks to name, type loses ptr).
+        pm = re.match(r"^(.*?)(\b[A-Za-z_]\w*)\s*$", p_no_default)
+        if pm and pm.group(1).strip():
+            ptype, pname = pm.group(1).strip(), pm.group(2)
         else:
-            ptype, pname = parts[0], f"arg{i}"
-        pname = pname.replace("&", "").replace("*", "").strip() or f"arg{i}"
+            ptype, pname = p_no_default, f"arg{i}"
         if pname in RUST_KEYWORDS:
             pname += "_"
         q = ctx.map_type(ptype, is_return=False, scope=cls)
@@ -265,6 +318,8 @@ def gen_method(ctx, cls, is_static, ret, name, params):
         prs, pcpp, pkind, pcls = q
         if pkind == "str":
             args.append((f"{pname}: &str", f"rust::Str {pname}", f"from_rust_str({pname})", "str", None))
+        elif pkind == "qba":
+            args.append((f"{pname}: &str", f"rust::Str {pname}", f"QByteArray(from_rust_str({pname}).toUtf8())", "qba", None))
         elif pkind in ("ptr", "qtptr"):
             args.append((f"{pname}: *mut {pcls}", f"{pcpp} {pname}", pname, pkind, pcls))
         elif pkind == "val":
@@ -286,11 +341,16 @@ def main():
     # first pass: collect class names to build the context
     all_classes = set()
     for h in headers:
+        prev_t = False
         with open(h, encoding="utf-8", errors="replace") as f:
             for line in f:
+                s = line.strip()
+                if not s:
+                    continue
                 m = CLASS_RE.match(line)
-                if m:
+                if m and not prev_t:
                     all_classes.add(m.group(1))
+                prev_t = s.startswith("template") and "<" in s
     ctx = Ctx(all_classes - HAND_BOUND)
 
     # two passes: parse everything (collecting cross-class enum refs), then generate
@@ -317,7 +377,7 @@ def main():
                 else:
                     gen_methods.append(g)
             classes_out.append({
-                "name": c["name"], "is_widget": is_widget, "header": c["header"],
+                "name": c["name"], "is_widget": is_widget, "header": c["header"], "ns": c.get("ns", ""),
                 "ctor_new": c.get("ctor_new", False) and not c.get("abstract", False), "methods": gen_methods, "skipped": skipped,
             })
 
@@ -331,19 +391,30 @@ def emit(classes):
     bridge.append("// auto-generated by tools/gen.py, do not edit\n#[cxx::bridge(namespace = \"dtkrs\")]\npub mod genffi {\n    extern \"C++\" {\n        include!(\"dtk_gen_shim.h\");\n        type QWidget;\n")
     for vt in sorted(VALUE_TYPES):
         bridge.append(f"        type {vt};\n")
-    wrapper.append("// auto-generated by tools/gen.py, do not edit\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{Signal0, SignalI32, QWidget};\nuse crate::{QColor, QFont, QIcon, QPalette, QPixmap, QPoint, QRect, QSize};\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
+    for vt in sorted(EXT_VALUE_TYPES):
+        bridge.append(f"        type {vt};\n")
+    wrapper.append("// auto-generated by tools/gen.py, do not edit\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{Signal0, SignalI32, QWidget};\nuse crate::{QColor, QFont, QIcon, QMargins, QPalette, QPixmap, QPoint, QRect, QSize};\nuse crate::DDciIcon;\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
     report.append("# DTK6 widget binding coverage report\n")
 
     total_ok, total_skip = 0, 0
     used_headers = sorted({c["header"] for c in classes})
     for h in used_headers:
         shim_h.append(f"#include <{h}>\n")
+    # cross-namespace value types (e.g. dtkgui DDciIcon): include + namespaced using
+    for vt, (ns, inc) in EXT_VALUE_TYPES.items():
+        shim_h.append(f"#include <{inc}>\n")
     shim_h.append("\nnamespace dtkrs {\n")
     for vt in sorted(VALUE_TYPES):
         shim_h.append(f"using ::{vt};\n")
+    for vt, (ns, _inc) in EXT_VALUE_TYPES.items():
+        shim_h.append(f"using {ns}::{vt};\n")
     for c in classes:
         name = c["name"]
-        shim_h.append(f"using {name} = Dtk::Widget::{name};\n")
+        ns = c.get("ns", "Dtk::Widget")
+        if ns:
+            shim_h.append(f"using {ns}::{name};\n")
+        else:
+            shim_h.append(f"using ::{name};\n")
         bridge.append(f"        type {name};\n")
 
     bridge.append("\n")
@@ -370,12 +441,17 @@ def emit(classes):
             call = f"{name}::{meth}({call_args})" if is_static else f"self->{meth}({call_args})"
             if ret_kind == "str":
                 call = f"to_rust_string({call})"
+            elif ret_kind == "qba":
+                call = f"to_rust_string(QString({call}))"
             elif ret_kind == "val":
                 call = f"new {ret_cls}({call})"
             elif ret_kind in ("enum", "qtenum"):
                 call = f"static_cast<int32_t>({call})"
             elif ret_kind == "qflags":
                 call = f"({call}).toInt()"
+            # const-correctness: wrap const returns in const_cast so the shim compiles
+            if ret_kind == "ptr":
+                call = f"const_cast<{ret_cls} *>({call})"
             body = f"return {call};" if ret_rs != "()" else f"{call};"
             shim_h.append(f"{ret_cpp} {fn}({cpp_sig});\n")
             shim_cpp.append(f"{ret_cpp} {fn}({cpp_sig}) {{ {body} }}\n")

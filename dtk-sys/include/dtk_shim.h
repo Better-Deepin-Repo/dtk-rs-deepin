@@ -21,6 +21,8 @@
 #include <QFont>
 #include <QPalette>
 #include <QPixmap>
+#include <QMargins>
+#include <DDciIcon>
 #include <QPoint>
 #include <QRect>
 #include <QSize>
@@ -28,6 +30,7 @@
 #include <QStyledItemDelegate>
 #include <QModelIndex>
 #include <QSocketNotifier>
+#include <QMessageBox>
 #include <QEvent>
 #include <QCloseEvent>
 #include <QShowEvent>
@@ -55,6 +58,8 @@ using ::QColor;
 using ::QFont;
 using ::QPalette;
 using ::QPixmap;
+using ::QMargins;
+using Dtk::Gui::DDciIcon;
 using ::QPoint;
 using ::QRect;
 using ::QSize;
@@ -70,6 +75,7 @@ using DTitlebar = Dtk::Widget::DTitlebar;
 using DLabel = Dtk::Widget::DLabel;
 using DSuggestButton = Dtk::Widget::DSuggestButton;
 using DPushButton = Dtk::Widget::DPushButton;
+using QMessageBox = ::QMessageBox;
 
 // ---- QString <-> rust string ----
 rust::String to_rust_string(const QString &s);
@@ -132,7 +138,28 @@ void label_set_pixmap(DLabel *l, QPixmap *pm);
 DSuggestButton *suggest_button_new(rust::Str text);
 DPushButton *push_button_new(rust::Str text);
 void button_set_text(DPushButton *b, rust::Str text);
-void button_click(DPushButton *b); // programmatic click, emits clicked
+void button_click(DPushButton *b);
+
+// ---- QMessageBox (DMessageBox typedef = QMessageBox) ----
+QMessageBox *qmessagebox_new();
+QMessageBox *qmessagebox_new_with(int32_t icon, rust::Str title, rust::Str text, int32_t buttons, QWidget *parent);
+void qmessagebox_set_text(QMessageBox *mb, rust::Str text);
+void qmessagebox_set_icon(QMessageBox *mb, int32_t icon);
+void qmessagebox_set_standard_buttons(QMessageBox *mb, int32_t buttons);
+void qmessagebox_set_informative_text(QMessageBox *mb, rust::Str text);
+void qmessagebox_set_detailed_text(QMessageBox *mb, rust::Str text);
+DPushButton *qmessagebox_add_button_text(QMessageBox *mb, rust::Str text, int32_t role);
+DPushButton *qmessagebox_add_button_standard(QMessageBox *mb, int32_t button);
+void qmessagebox_set_default_button(QMessageBox *mb, int32_t button);
+int32_t qmessagebox_exec(QMessageBox *mb);
+int32_t qmessagebox_clicked_button(QMessageBox *mb);
+rust::String qmessagebox_text(QMessageBox *mb);
+// static helpers (return clicked StandardButton as i32)
+int32_t qmessagebox_information(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button);
+int32_t qmessagebox_warning(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button);
+int32_t qmessagebox_critical(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button);
+int32_t qmessagebox_question(QWidget *parent, rust::Str title, rust::Str text, int32_t buttons, int32_t default_button);
+void qmessagebox_about(QWidget *parent, rust::Str title, rust::Str text);
 
 // ---- layouts ----
 QVBoxLayout *vbox_new(QWidget *parent);
@@ -202,6 +229,13 @@ void point_delete(QPoint *p);
 QRect *rect_new(int32_t x, int32_t y, int32_t w, int32_t h);
 void rect_delete(QRect *r);
 void icon_delete(QIcon *icon);
+
+// ---- QMargins ----
+QMargins *q_margins_new(int32_t left, int32_t top, int32_t right, int32_t bottom);
+
+// ---- DDciIcon (dtkgui) ----
+DDciIcon *ddci_icon_new();
+DDciIcon *ddci_icon_from_file(rust::Str path);
 
 // ---- QSocketNotifier ----
 QSocketNotifier *socket_notifier_new(int32_t fd); // Read type; activated goes through the relay
