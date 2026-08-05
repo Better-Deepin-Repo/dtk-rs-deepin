@@ -237,10 +237,12 @@ void icon_delete(QIcon *icon);
 
 // ---- QMargins ----
 QMargins *q_margins_new(int32_t left, int32_t top, int32_t right, int32_t bottom);
+void margins_delete(QMargins *m);
 
 // ---- DDciIcon (dtkgui) ----
 DDciIcon *ddci_icon_new();
 DDciIcon *ddci_icon_from_file(rust::Str path);
+void ddci_icon_delete(DDciIcon *i);
 
 // ---- QSocketNotifier ----
 QSocketNotifier *socket_notifier_new(int32_t fd); // Read type; activated goes through the relay

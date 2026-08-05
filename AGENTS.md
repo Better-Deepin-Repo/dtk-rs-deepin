@@ -17,6 +17,7 @@ dtk/         safe wrappers
 tools/gen.py header-scanning generator; parses /usr/include/dtk6/DWidget/*.h
 GEN_REPORT.md generator coverage report (skipped methods + reasons)
 TODO.md      known gaps
+ARCHITECTURE.md how the binding works: layers, type mapping, signal/lifetime design
 ```
 
 **Generated files** (regenerate, don't hand-edit): `dtk/src/widgets.rs`, `dtk-sys/src/gen_ffi.rs`, `dtk-sys/cpp/dtk_gen_shim.cpp`, `dtk-sys/include/dtk_gen_shim.h`.

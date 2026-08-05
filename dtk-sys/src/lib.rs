@@ -238,9 +238,11 @@ pub mod ffi {
         unsafe fn pixmap_delete(pm: *mut QPixmap);
         // QMargins
         unsafe fn q_margins_new(left: i32, top: i32, right: i32, bottom: i32) -> *mut QMargins;
+        unsafe fn margins_delete(m: *mut QMargins);
         // DDciIcon (dtkgui)
         unsafe fn ddci_icon_new() -> *mut DDciIcon;
         unsafe fn ddci_icon_from_file(path: &str) -> *mut DDciIcon;
+        unsafe fn ddci_icon_delete(i: *mut DDciIcon);
         unsafe fn standard_icon_pixmap(w: *mut QWidget, icon: i32, size: i32) -> *mut QPixmap;
         unsafe fn size_new(w: i32, h: i32) -> *mut QSize;
         unsafe fn size_delete(s: *mut QSize);

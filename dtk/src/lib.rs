@@ -261,7 +261,7 @@ impl DTitlebar {
 
 /// value-type wrapper: heap-allocated, owned by Rust (small leak acceptable)
 macro_rules! value_wrapper {
-    ($name:ident, $ffi:ty) => {
+    ($name:ident, $ffi:ty, $del:ident) => {
         pub struct $name {
             pub(crate) ptr: *mut $ffi,
             _not_send: PhantomData<*mut ()>,
@@ -275,18 +275,23 @@ macro_rules! value_wrapper {
                 }
             }
         }
+        impl Drop for $name {
+            fn drop(&mut self) {
+                unsafe { ffi::$del(self.ptr) }
+            }
+        }
     };
 }
 
-value_wrapper!(QColor, ffi::QColor);
-value_wrapper!(QFont, ffi::QFont);
-value_wrapper!(QPalette, ffi::QPalette);
-value_wrapper!(QPixmap, ffi::QPixmap);
-value_wrapper!(QPoint, ffi::QPoint);
-value_wrapper!(QRect, ffi::QRect);
-value_wrapper!(QSize, ffi::QSize);
-value_wrapper!(QMargins, ffi::QMargins);
-value_wrapper!(DDciIcon, ffi::DDciIcon);
+value_wrapper!(QColor, ffi::QColor, color_delete);
+value_wrapper!(QFont, ffi::QFont, font_delete);
+value_wrapper!(QPalette, ffi::QPalette, palette_delete);
+value_wrapper!(QPixmap, ffi::QPixmap, pixmap_delete);
+value_wrapper!(QPoint, ffi::QPoint, point_delete);
+value_wrapper!(QRect, ffi::QRect, rect_delete);
+value_wrapper!(QSize, ffi::QSize, size_delete);
+value_wrapper!(QMargins, ffi::QMargins, margins_delete);
+value_wrapper!(DDciIcon, ffi::DDciIcon, ddci_icon_delete);
 
 impl QColor {
     pub fn rgb(r: i32, g: i32, b: i32) -> Self {
@@ -508,6 +513,12 @@ impl QIcon {
             ptr: unsafe { ffi::icon_from_file(path) },
             _not_send: PhantomData,
         }
+    }
+}
+
+impl Drop for QIcon {
+    fn drop(&mut self) {
+        unsafe { ffi::icon_delete(self.ptr) }
     }
 }
 

@@ -381,12 +381,14 @@ void pixmap_delete(QPixmap *pm) { delete pm; }
 QMargins *q_margins_new(int32_t left, int32_t top, int32_t right, int32_t bottom) {
     return new QMargins(left, top, right, bottom);
 }
+void margins_delete(QMargins *m) { delete m; }
 
 // ---- DDciIcon (dtkgui) ----
 DDciIcon *ddci_icon_new() { return new DDciIcon; }
 DDciIcon *ddci_icon_from_file(rust::Str path) {
     return new DDciIcon(QString::fromUtf8(path.data(), static_cast<qsizetype>(path.size())));
 }
+void ddci_icon_delete(DDciIcon *i) { delete i; }
 QPixmap *standard_icon_pixmap(QWidget *w, int32_t icon, int32_t size) {
     return new QPixmap(w->style()->standardIcon(static_cast<QStyle::StandardPixmap>(icon)).pixmap(size, size));
 }

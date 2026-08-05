@@ -101,6 +101,8 @@ Full working code (with a cancel button and a headless `--smoke` self-check): [`
 
 ## Design
 
+Deep dive (layers, full binding walkthrough, signal mechanism, lifetime rules): [ARCHITECTURE.md](ARCHITECTURE.md).
+
 - **Lifetime — two wrapper kinds.** Widget wrappers are non-owning raw pointers (`!Send`, single GUI thread): Qt's parent-child tree owns the objects, children die with their parent, top-level windows die with `QApplication`. They intentionally have no `Drop`. Value-type wrappers (`QColor`, `QFont`, `QPalette`, `QPixmap`, …) own a heap copy and free it via shim `*_delete` in `Drop`.
 - **Callbacks are `'static`** — share widgets/state into them with `Rc`/`RefCell`/`Cell` (never `Arc<Mutex>`: everything runs on one thread anyway).
 - **Signals**: `DtkRelay` (Q_OBJECT + SLOT) string-connects any signal -> Rust callback id -> closure in a thread_local registry. Unregister with `dtk::unregister_callback(id)` when done; `QTimer::single_shot` self-cleans.
