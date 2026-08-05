@@ -40,7 +40,6 @@
 #include <dgraphicsclipeffect.h>
 #include <dgraphicsgloweffect.h>
 #include <dheaderline.h>
-#include <dhidpihelper.h>
 #include <diconbutton.h>
 #include <dimageviewer.h>
 #include <dindeterminateprogressbar.h>
@@ -160,7 +159,6 @@ using Dtk::Widget::DVerticalLine;
 using Dtk::Widget::DGraphicsClipEffect;
 using Dtk::Widget::DGraphicsGlowEffect;
 using Dtk::Widget::DHeaderLine;
-using Dtk::Widget::DHiDPIHelper;
 using Dtk::Widget::DIconButton;
 using Dtk::Widget::DImageViewer;
 using ::DIndeterminateProgressbar;

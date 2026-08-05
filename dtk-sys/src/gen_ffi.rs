@@ -62,7 +62,6 @@ pub mod genffi {
         type DGraphicsClipEffect;
         type DGraphicsGlowEffect;
         type DHeaderLine;
-        type DHiDPIHelper;
         type DIconButton;
         type DImageViewer;
         type DIndeterminateProgressbar;

@@ -1573,9 +1573,6 @@ impl Default for DHeaderLine {
     }
 }
 
-object_wrapper!(DHiDPIHelper, genffi::DHiDPIHelper);
-impl DHiDPIHelper {}
-
 widget_wrapper!(DIconButton, genffi::DIconButton);
 impl DIconButton {
     pub fn new() -> Self {

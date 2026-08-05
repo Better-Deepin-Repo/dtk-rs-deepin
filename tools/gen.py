@@ -23,7 +23,8 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HDR_DIR = "/usr/include/dtk6/DWidget"
 
 # classes bound by hand; the generator skips these
-HAND_BOUND = {"DApplication", "DMainWindow", "DTitlebar", "DLabel", "DSuggestButton", "DPushButton"}
+HAND_BOUND = {"DApplication", "DMainWindow", "DTitlebar", "DLabel", "DSuggestButton", "DPushButton",
+              "DHiDPIHelper"}  # ponytail: deprecated upstream, skip to silence -Wdeprecated-declarations
 # Qt opaque types already declared in the hand-written bridge (the gen bridge must redeclare its own)
 QT_CLASSES = {"QObject", "QWidget", "QLayout", "QVBoxLayout", "QHBoxLayout", "QTableWidget", "QTimer", "QIcon"}
 # Qt widget base classes (decides widget_wrapper vs object_wrapper)
