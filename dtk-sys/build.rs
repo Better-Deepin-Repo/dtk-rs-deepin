@@ -4,7 +4,12 @@ fn main() {
     // run moc on relay.h (Q_OBJECT)
     let moc = ["/usr/lib/qt6/libexec/moc", "/usr/lib/qt6/bin/moc", "moc"]
         .iter()
-        .find(|p| std::process::Command::new(p).arg("-v").output().is_ok_and(|o| o.status.success()))
+        .find(|p| {
+            std::process::Command::new(p)
+                .arg("-v")
+                .output()
+                .is_ok_and(|o| o.status.success())
+        })
         .expect("Qt6 moc not found");
     let moc_out = out_dir.join("moc_relay.cpp");
     let status = std::process::Command::new(moc)
@@ -26,7 +31,14 @@ fn main() {
         .flag_if_supported("-fPIC"); // Qt6 requires PIC
 
     // locate Qt6 + DTK6 via pkg-config; include paths go to cxx_build, link info is emitted by the pkg-config crate
-    for pkg in ["Qt6Widgets", "Qt6Gui", "Qt6Core", "dtk6widget", "dtk6gui", "dtk6core"] {
+    for pkg in [
+        "Qt6Widgets",
+        "Qt6Gui",
+        "Qt6Core",
+        "dtk6widget",
+        "dtk6gui",
+        "dtk6core",
+    ] {
         let lib = pkg_config::Config::new()
             .probe(pkg)
             .unwrap_or_else(|e| panic!("pkg-config {pkg}: {e}"));

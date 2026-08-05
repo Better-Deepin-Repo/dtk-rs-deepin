@@ -53,12 +53,25 @@ private:
     size_t m_show_id, m_close_id;
 };
 
-// generic paint delegate: forwards paint entirely to Rust
+// generic paint delegate: paints the default style background first (so the
+// cell background/selection matches DTK theme, identical to the default column),
+// then forwards overlay painting (icon + text) to Rust. Mirrors the C++
+// AppNameDelegate pattern: drawControl(CE_ItemViewItem) with icon/text cleared.
 class RustDelegate : public QStyledItemDelegate {
 public:
     RustDelegate(size_t cb_id, QObject *parent) : QStyledItemDelegate(parent), m_cb_id(cb_id) {}
 
     void paint(QPainter *p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const override {
+        // Paint the default item background/selection via the widget style so
+        // it stays consistent with the default-rendered columns (DTK theme).
+        QStyleOptionViewItem base(opt);
+        initStyleOption(&base, idx);
+        base.icon = {};
+        base.text.clear();
+        QStyle *style = base.widget ? base.widget->style() : QApplication::style();
+        style->drawControl(QStyle::CE_ItemViewItem, &base, p, base.widget);
+
+        // Rust callback draws the overlay (icon + text) on top.
         dtk_cb_paint(m_cb_id, p, const_cast<QModelIndex *>(&idx), opt.rect.x(), opt.rect.y(),
                      opt.rect.width(), opt.rect.height(), static_cast<int32_t>(opt.state));
     }
@@ -158,6 +171,9 @@ void titlebar_set_icon(DTitlebar *tb, const QIcon &icon) { tb->setIcon(icon); }
 
 // ---- QIcon ----
 QIcon *icon_from_theme(rust::Str name) { return new QIcon(QIcon::fromTheme(from_rust_str(name))); }
+QIcon *icon_from_theme_fallback(rust::Str name, QIcon *fallback) {
+    return new QIcon(QIcon::fromTheme(from_rust_str(name), *fallback));
+}
 QIcon *icon_from_file(rust::Str path) { return new QIcon(from_rust_str(path)); }
 
 // ---- DLabel ----

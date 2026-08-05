@@ -81,7 +81,10 @@ macro_rules! object_wrapper {
             #[allow(dead_code)] // not every generated class gets constructed
             pub(crate) fn from_raw(ptr: *mut $ffi) -> Self {
                 assert!(!ptr.is_null());
-                Self { ptr, _not_send: PhantomData }
+                Self {
+                    ptr,
+                    _not_send: PhantomData,
+                }
             }
             /// use as QObject* (signals)
             #[allow(dead_code)] // some classes connect no signals; kept for the generator
@@ -110,7 +113,10 @@ pub struct QWidget {
 
 impl QWidget {
     pub(crate) fn from_raw(ptr: *mut ffi::QWidget) -> Self {
-        Self { ptr, _not_send: PhantomData }
+        Self {
+            ptr,
+            _not_send: PhantomData,
+        }
     }
     pub fn new(parent: Option<&QWidget>) -> Self {
         let p = parent.map_or(std::ptr::null_mut(), |p| p.ptr);
@@ -160,14 +166,20 @@ impl DApplication {
     pub fn new(name: &str) -> Self {
         let args = env_args_joined();
         let ptr = unsafe { ffi::application_new(name, &args) };
-        Self { ptr, _not_send: PhantomData }
+        Self {
+            ptr,
+            _not_send: PhantomData,
+        }
     }
     /// with quit guard: QEvent::Quit asks the guard; false swallows the event (Rust retries itself)
     pub fn new_with_quit_guard(name: &str, guard: impl FnMut() -> bool + 'static) -> Self {
         let id = dtk_sys::register_cb_guard(guard);
         let args = env_args_joined();
         let ptr = unsafe { ffi::application_new_ex(name, &args, id) };
-        Self { ptr, _not_send: PhantomData }
+        Self {
+            ptr,
+            _not_send: PhantomData,
+        }
     }
     pub fn exec(&self) -> i32 {
         unsafe { ffi::application_exec(self.ptr) }
@@ -252,7 +264,10 @@ macro_rules! value_wrapper {
         impl $name {
             pub(crate) fn from_raw(ptr: *mut $ffi) -> Self {
                 assert!(!ptr.is_null());
-                Self { ptr, _not_send: PhantomData }
+                Self {
+                    ptr,
+                    _not_send: PhantomData,
+                }
             }
         }
     };
@@ -399,10 +414,23 @@ pub struct QIcon {
 
 impl QIcon {
     pub fn from_theme(name: &str) -> Self {
-        Self { ptr: unsafe { ffi::icon_from_theme(name) }, _not_send: PhantomData }
+        Self {
+            ptr: unsafe { ffi::icon_from_theme(name) },
+            _not_send: PhantomData,
+        }
+    }
+    /// like from_theme, but falls back to `fallback` when `name` is not in the icon theme.
+    pub fn from_theme_with_fallback(name: &str, fallback: &QIcon) -> Self {
+        Self {
+            ptr: unsafe { ffi::icon_from_theme_fallback(name, fallback.ptr) },
+            _not_send: PhantomData,
+        }
     }
     pub fn from_file(path: &str) -> Self {
-        Self { ptr: unsafe { ffi::icon_from_file(path) }, _not_send: PhantomData }
+        Self {
+            ptr: unsafe { ffi::icon_from_file(path) },
+            _not_send: PhantomData,
+        }
     }
 }
 
@@ -474,7 +502,10 @@ macro_rules! layout_wrapper {
             /// when parent is Some, the layout installs directly on the parent widget
             pub fn new(parent: Option<&QWidget>) -> Self {
                 let p = parent.map_or(std::ptr::null_mut(), |p| p.ptr);
-                Self { ptr: unsafe { ffi::$new(p) }, _not_send: PhantomData }
+                Self {
+                    ptr: unsafe { ffi::$new(p) },
+                    _not_send: PhantomData,
+                }
             }
             pub fn add_widget(&self, w: &QWidget) {
                 unsafe { ffi::layout_add_widget(self.ptr.cast(), w.ptr) }
@@ -571,7 +602,10 @@ impl QTableWidget {
         if p.is_null() {
             None
         } else {
-            Some(QTableWidgetItem { ptr: p, _not_send: PhantomData })
+            Some(QTableWidgetItem {
+                ptr: p,
+                _not_send: PhantomData,
+            })
         }
     }
     pub fn select_row(&self, row: i32) {
@@ -617,7 +651,10 @@ pub struct QTimer {
 
 impl QTimer {
     pub fn new() -> Self {
-        Self { ptr: unsafe { ffi::timer_new(std::ptr::null_mut()) }, _not_send: PhantomData }
+        Self {
+            ptr: unsafe { ffi::timer_new(std::ptr::null_mut()) },
+            _not_send: PhantomData,
+        }
     }
     pub fn start(&self, msec: i32) {
         unsafe { ffi::timer_start(self.ptr, msec) }
@@ -755,7 +792,15 @@ impl PaintDelegate {
     pub fn new(f: impl FnMut(&Painter, &ModelIndex, i32, i32, i32, i32, i32) + 'static) -> Self {
         let mut f = f;
         let id = dtk_sys::register_cb_paint(move |p, idx, x, y, w, h, state| {
-            f(&Painter { ptr: p }, &ModelIndex { ptr: idx }, x, y, w, h, state);
+            f(
+                &Painter { ptr: p },
+                &ModelIndex { ptr: idx },
+                x,
+                y,
+                w,
+                h,
+                state,
+            );
         });
         Self {
             ptr: unsafe { ffi::rust_delegate_new(id, std::ptr::null_mut()) },
@@ -774,7 +819,10 @@ pub struct QSocketNotifier {
 impl QSocketNotifier {
     /// watch an fd for readability (Read type), e.g. signalfd
     pub fn new(fd: i32) -> Self {
-        Self { ptr: unsafe { ffi::socket_notifier_new(fd) }, _not_send: PhantomData }
+        Self {
+            ptr: unsafe { ffi::socket_notifier_new(fd) },
+            _not_send: PhantomData,
+        }
     }
     pub fn on_activated(&self, f: impl FnMut() + 'static) {
         let id = dtk_sys::register_cb0(f);

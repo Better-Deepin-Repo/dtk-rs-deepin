@@ -16,6 +16,7 @@ Rules:
 """
 import os
 import re
+import subprocess
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -465,11 +466,18 @@ def emit(classes):
     write(os.path.join(REPO, "dtk/src/widgets.rs"), "".join(wrapper))
     write(os.path.join(REPO, "GEN_REPORT.md"), "".join(report))
     print(f"classes {len(classes)}, methods generated {total_ok}, skipped {total_skip}")
+    run_cargo_fmt()
 
 
 def write(path, content):
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
+
+
+def run_cargo_fmt():
+    """Format the generated Rust after writing files."""
+    subprocess.run(["cargo", "fmt"], cwd=REPO, check=True)
+    print("cargo fmt done")
 
 
 if __name__ == "__main__":

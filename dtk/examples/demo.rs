@@ -33,13 +33,20 @@ fn main() {
 
     // new binding checks: real argv, palette getter, window icon, box-layout stretch/alignment
     if std::env::args().any(|a| a == "--smoke") {
-        assert!(DApplication::has_arg("--smoke"), "real argv not passed to QApplication");
+        assert!(
+            DApplication::has_arg("--smoke"),
+            "real argv not passed to QApplication"
+        );
         assert!(!DApplication::has_arg("--hidden"));
         let pal = win.palette();
         let hl = pal.color(qt::PALETTE_ACTIVE, qt::ROLE_HIGHLIGHT);
         pal.set_color(qt::PALETTE_INACTIVE, qt::ROLE_HIGHLIGHT, &hl);
         let got = pal.color(qt::PALETTE_INACTIVE, qt::ROLE_HIGHLIGHT);
-        assert_eq!(got.rgba_u32(), hl.rgba_u32(), "palette color round-trip broken");
+        assert_eq!(
+            got.rgba_u32(),
+            hl.rgba_u32(),
+            "palette color round-trip broken"
+        );
         win.set_window_icon(&QIcon::from_theme("deepin-liferaft"));
 
         let hbox = QHBoxLayout::new(None);
@@ -67,7 +74,10 @@ fn main() {
                 p.set_clip_rect(x, y, w, h);
                 p.fill_rect(x, y, w, h, &QColor::rgb(200, 220, 255));
                 let elided = p.elided_text("a-very-long-application-name", qt::ELIDE_RIGHT, w);
-                assert!(elided.ends_with('\u{2026}') || elided.len() < 26, "elide failed: {elided}");
+                assert!(
+                    elided.ends_with('\u{2026}') || elided.len() < 26,
+                    "elide failed: {elided}"
+                );
                 p.draw_text(x, y, w, h, qt::ALIGN_CENTER, &elided);
                 painted.set(true);
             });
@@ -105,7 +115,10 @@ fn main() {
             libc_write(pipe_w, b"x".as_ptr() as _, 1);
         });
         QTimer::single_shot(500, move || {
-            assert!(clicked.get(), "clicked callback never fired (signal chain broken)");
+            assert!(
+                clicked.get(),
+                "clicked callback never fired (signal chain broken)"
+            );
             assert!(painted.get(), "PaintDelegate paint callback never fired");
             assert!(notified.get(), "QSocketNotifier activated never fired");
             println!("smoke ok");

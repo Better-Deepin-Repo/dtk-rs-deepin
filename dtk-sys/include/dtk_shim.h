@@ -118,6 +118,7 @@ void titlebar_set_icon(DTitlebar *tb, const QIcon &icon);
 
 // ---- QIcon ----
 QIcon *icon_from_theme(rust::Str name);
+QIcon *icon_from_theme_fallback(rust::Str name, QIcon *fallback);
 QIcon *icon_from_file(rust::Str path);
 
 // ---- DLabel ----

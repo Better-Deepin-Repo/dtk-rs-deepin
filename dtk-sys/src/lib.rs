@@ -41,7 +41,11 @@ pub mod ffi {
         // DApplication
         // args: '|'-separated real argv (incl. argv[0]); application_name set separately
         unsafe fn application_new(name: &str, args: &str) -> *mut DApplication;
-        unsafe fn application_new_ex(name: &str, args: &str, quit_guard_id: usize) -> *mut DApplication;
+        unsafe fn application_new_ex(
+            name: &str,
+            args: &str,
+            quit_guard_id: usize,
+        ) -> *mut DApplication;
         unsafe fn application_exec(app: *mut DApplication) -> i32;
         unsafe fn application_quit();
         unsafe fn application_set_quit_on_last_window_closed(quit: bool);
@@ -81,6 +85,7 @@ pub mod ffi {
 
         // QIcon
         unsafe fn icon_from_theme(name: &str) -> *mut QIcon;
+        unsafe fn icon_from_theme_fallback(name: &str, fallback: *mut QIcon) -> *mut QIcon;
         unsafe fn icon_from_file(path: &str) -> *mut QIcon;
 
         // DLabel
@@ -101,7 +106,12 @@ pub mod ffi {
         unsafe fn hbox_new(parent: *mut QWidget) -> *mut QHBoxLayout;
         unsafe fn widget_new(parent: *mut QWidget) -> *mut QWidget;
         unsafe fn layout_add_widget(l: *mut QLayout, w: *mut QWidget);
-        unsafe fn layout_add_widget_ex(l: *mut QLayout, w: *mut QWidget, stretch: i32, alignment: i32);
+        unsafe fn layout_add_widget_ex(
+            l: *mut QLayout,
+            w: *mut QWidget,
+            stretch: i32,
+            alignment: i32,
+        );
         unsafe fn layout_add_stretch(l: *mut QLayout, stretch: i32);
         unsafe fn layout_add_layout(l: *mut QLayout, child: *mut QLayout);
         unsafe fn layout_set_spacing(l: *mut QLayout, spacing: i32);
@@ -131,7 +141,11 @@ pub mod ffi {
         unsafe fn table_set_show_grid(t: *mut QTableWidget, show: bool);
         unsafe fn table_set_frame_shape(t: *mut QTableWidget, shape: i32);
         unsafe fn table_set_icon_size(t: *mut QTableWidget, w: i32, h: i32);
-        unsafe fn table_set_delegate_for_column(t: *mut QTableWidget, col: i32, delegate: *mut QStyledItemDelegate);
+        unsafe fn table_set_delegate_for_column(
+            t: *mut QTableWidget,
+            col: i32,
+            delegate: *mut QStyledItemDelegate,
+        );
 
         // QTableWidgetItem
         unsafe fn item_set_icon(it: *mut QTableWidgetItem, icon: *mut QIcon);
@@ -169,19 +183,56 @@ pub mod ffi {
         unsafe fn socket_notifier_new(fd: i32) -> *mut QSocketNotifier;
 
         // generic paint delegate
-        unsafe fn rust_delegate_new(paint_cb_id: usize, parent: *mut QObject) -> *mut QStyledItemDelegate;
+        unsafe fn rust_delegate_new(
+            paint_cb_id: usize,
+            parent: *mut QObject,
+        ) -> *mut QStyledItemDelegate;
 
         // QPainter primitives
         unsafe fn painter_save(p: *mut QPainter);
         unsafe fn painter_restore(p: *mut QPainter);
         unsafe fn painter_set_pen_color(p: *mut QPainter, color: *mut QColor);
         unsafe fn painter_set_font(p: *mut QPainter, font: *mut QFont);
-        unsafe fn painter_draw_text(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, flags: i32, text: &str);
-        unsafe fn painter_draw_pixmap(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, pm: *mut QPixmap);
-        unsafe fn painter_draw_icon(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, icon: *mut QIcon);
-        unsafe fn painter_fill_rect(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32, color: *mut QColor);
+        unsafe fn painter_draw_text(
+            p: *mut QPainter,
+            x: i32,
+            y: i32,
+            w: i32,
+            h: i32,
+            flags: i32,
+            text: &str,
+        );
+        unsafe fn painter_draw_pixmap(
+            p: *mut QPainter,
+            x: i32,
+            y: i32,
+            w: i32,
+            h: i32,
+            pm: *mut QPixmap,
+        );
+        unsafe fn painter_draw_icon(
+            p: *mut QPainter,
+            x: i32,
+            y: i32,
+            w: i32,
+            h: i32,
+            icon: *mut QIcon,
+        );
+        unsafe fn painter_fill_rect(
+            p: *mut QPainter,
+            x: i32,
+            y: i32,
+            w: i32,
+            h: i32,
+            color: *mut QColor,
+        );
         unsafe fn painter_set_clip_rect(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32);
-        unsafe fn painter_elided_text(p: *mut QPainter, text: &str, mode: i32, width: i32) -> String;
+        unsafe fn painter_elided_text(
+            p: *mut QPainter,
+            text: &str,
+            mode: i32,
+            width: i32,
+        ) -> String;
 
         // QModelIndex data access
         unsafe fn index_data_string(idx: *mut QModelIndex, role: i32) -> String;
@@ -203,8 +254,16 @@ pub mod ffi {
         fn dtk_cb0(id: usize);
         fn dtk_cb_i32(id: usize, v: i32);
         fn dtk_cb_guard(id: usize) -> bool;
-        unsafe fn dtk_cb_paint(id: usize, painter: *mut QPainter, index: *mut QModelIndex,
-                               x: i32, y: i32, w: i32, h: i32, state: i32);
+        unsafe fn dtk_cb_paint(
+            id: usize,
+            painter: *mut QPainter,
+            index: *mut QModelIndex,
+            x: i32,
+            y: i32,
+            w: i32,
+            h: i32,
+            state: i32,
+        );
     }
 }
 
@@ -286,8 +345,16 @@ fn dtk_cb_guard(id: usize) -> bool {
     result
 }
 
-unsafe fn dtk_cb_paint(id: usize, painter: *mut ffi::QPainter, index: *mut ffi::QModelIndex,
-                       x: i32, y: i32, w: i32, h: i32, state: i32) {
+unsafe fn dtk_cb_paint(
+    id: usize,
+    painter: *mut ffi::QPainter,
+    index: *mut ffi::QModelIndex,
+    x: i32,
+    y: i32,
+    w: i32,
+    h: i32,
+    state: i32,
+) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
     if let Some(Cb::Paint(f)) = &mut cb {
         f(painter, index, x, y, w, h, state);
