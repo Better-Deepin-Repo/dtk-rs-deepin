@@ -543,6 +543,9 @@ impl DSuggestButton {
     pub fn new(text: &str) -> Self {
         Self::from_raw(unsafe { ffi::suggest_button_new(text) })
     }
+    pub fn set_text(&self, text: &str) {
+        unsafe { ffi::button_set_text(self.ptr.cast(), text) }
+    }
     pub fn on_clicked(&self, f: impl FnMut() + 'static) {
         self.connect_signal("clicked(bool)", f);
     }
@@ -577,7 +580,13 @@ impl DMessageBox {
         Self::from_raw(unsafe { ffi::qmessagebox_new() })
     }
     /// create a pre-configured dialog; use qt::MSG_ICON_* and qt::MSG_BTN_* constants
-    pub fn with(icon: i32, title: &str, text: &str, buttons: i32, parent: Option<&QWidget>) -> Self {
+    pub fn with(
+        icon: i32,
+        title: &str,
+        text: &str,
+        buttons: i32,
+        parent: Option<&QWidget>,
+    ) -> Self {
         let p = opt_ptr(parent);
         Self::from_raw(unsafe { ffi::qmessagebox_new_with(icon, title, text, buttons, p) })
     }
@@ -621,19 +630,43 @@ impl DMessageBox {
 
     // ---- static helpers ----
     /// information dialog; returns clicked StandardButton
-    pub fn information(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+    pub fn information(
+        parent: Option<&QWidget>,
+        title: &str,
+        text: &str,
+        buttons: i32,
+        default_button: i32,
+    ) -> i32 {
         let p = opt_ptr(parent);
         unsafe { ffi::qmessagebox_information(p, title, text, buttons, default_button) }
     }
-    pub fn warning(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+    pub fn warning(
+        parent: Option<&QWidget>,
+        title: &str,
+        text: &str,
+        buttons: i32,
+        default_button: i32,
+    ) -> i32 {
         let p = opt_ptr(parent);
         unsafe { ffi::qmessagebox_warning(p, title, text, buttons, default_button) }
     }
-    pub fn critical(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+    pub fn critical(
+        parent: Option<&QWidget>,
+        title: &str,
+        text: &str,
+        buttons: i32,
+        default_button: i32,
+    ) -> i32 {
         let p = opt_ptr(parent);
         unsafe { ffi::qmessagebox_critical(p, title, text, buttons, default_button) }
     }
-    pub fn question(parent: Option<&QWidget>, title: &str, text: &str, buttons: i32, default_button: i32) -> i32 {
+    pub fn question(
+        parent: Option<&QWidget>,
+        title: &str,
+        text: &str,
+        buttons: i32,
+        default_button: i32,
+    ) -> i32 {
         let p = opt_ptr(parent);
         unsafe { ffi::qmessagebox_question(p, title, text, buttons, default_button) }
     }
@@ -986,6 +1019,21 @@ impl QSocketNotifier {
     pub fn on_activated(&self, f: impl FnMut() + 'static) {
         let id = dtk_sys::register_cb0(f);
         unsafe { ffi::relay_connect0(self.ptr.cast(), "activated(QSocketDescriptor)", id) }
+    }
+}
+
+// ---- DProgressBar: base-class QProgressBar ops (generator only scans DTK headers) ----
+
+impl widgets::DProgressBar {
+    pub fn set_value(&self, value: i32) {
+        unsafe { ffi::progressbar_set_value(self.ptr.cast(), value) }
+    }
+    /// (0, 0) = busy/indeterminate mode
+    pub fn set_range(&self, minimum: i32, maximum: i32) {
+        unsafe { ffi::progressbar_set_range(self.ptr.cast(), minimum, maximum) }
+    }
+    pub fn value(&self) -> i32 {
+        unsafe { ffi::progressbar_value(self.ptr.cast()) }
     }
 }
 

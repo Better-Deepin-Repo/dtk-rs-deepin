@@ -68,6 +68,11 @@ pub mod ffi {
         unsafe fn widget_close(w: *mut QWidget);
         unsafe fn widget_is_visible(w: *mut QWidget) -> bool;
         unsafe fn widget_set_focus_policy(w: *mut QWidget, policy: i32);
+
+        // QProgressBar common
+        unsafe fn progressbar_set_value(w: *mut QWidget, value: i32);
+        unsafe fn progressbar_set_range(w: *mut QWidget, minimum: i32, maximum: i32);
+        unsafe fn progressbar_value(w: *mut QWidget) -> i32;
         unsafe fn widget_set_font(w: *mut QWidget, font: *mut QFont);
         unsafe fn widget_palette(w: *mut QWidget) -> *mut QPalette;
         unsafe fn widget_set_palette(w: *mut QWidget, pal: *mut QPalette);
@@ -118,8 +123,15 @@ pub mod ffi {
         unsafe fn qmessagebox_set_standard_buttons(mb: *mut QMessageBox, buttons: i32);
         unsafe fn qmessagebox_set_informative_text(mb: *mut QMessageBox, text: &str);
         unsafe fn qmessagebox_set_detailed_text(mb: *mut QMessageBox, text: &str);
-        unsafe fn qmessagebox_add_button_text(mb: *mut QMessageBox, text: &str, role: i32) -> *mut DPushButton;
-        unsafe fn qmessagebox_add_button_standard(mb: *mut QMessageBox, button: i32) -> *mut DPushButton;
+        unsafe fn qmessagebox_add_button_text(
+            mb: *mut QMessageBox,
+            text: &str,
+            role: i32,
+        ) -> *mut DPushButton;
+        unsafe fn qmessagebox_add_button_standard(
+            mb: *mut QMessageBox,
+            button: i32,
+        ) -> *mut DPushButton;
         unsafe fn qmessagebox_set_default_button(mb: *mut QMessageBox, button: i32);
         unsafe fn qmessagebox_exec(mb: *mut QMessageBox) -> i32;
         unsafe fn qmessagebox_clicked_button(mb: *mut QMessageBox) -> i32;

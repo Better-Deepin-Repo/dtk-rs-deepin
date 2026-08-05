@@ -104,6 +104,11 @@ void widget_activate_window(QWidget *w);
 void widget_close(QWidget *w);
 bool widget_is_visible(QWidget *w);
 void widget_set_focus_policy(QWidget *w, int32_t policy);
+
+// ---- QProgressBar common (base-class ops; DTK headers don't redeclare them) ----
+void progressbar_set_value(QWidget *w, int32_t value);
+void progressbar_set_range(QWidget *w, int32_t minimum, int32_t maximum);
+int32_t progressbar_value(QWidget *w);
 void widget_set_font(QWidget *w, QFont *font);
 QPalette *widget_palette(QWidget *w); // heap copy, owned by the caller
 void widget_set_palette(QWidget *w, QPalette *pal);

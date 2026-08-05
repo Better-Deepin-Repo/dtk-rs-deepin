@@ -1,6 +1,6 @@
 # DTK6 widget binding coverage report
 
-classes: 147, methods generated: 842, skipped: 416
+classes: 146, methods generated: 842, skipped: 416
 
 ## DAboutDialog — 19 methods generated, 0 skipped
 
@@ -217,8 +217,6 @@ classes: 147, methods generated: 842, skipped: 416
 - `QRectF boundingRectFor(const QRectF &rect) const;` ← unsupported return type: QRectF
 
 ## DHeaderLine — 3 methods generated, 0 skipped
-
-## DHiDPIHelper — 0 methods generated, 0 skipped
 
 ## DIconButton — 12 methods generated, 1 skipped
 - `void setIcon(QStyle::StandardPixmap iconType);` ← unsupported param type: QStyle::StandardPixmap

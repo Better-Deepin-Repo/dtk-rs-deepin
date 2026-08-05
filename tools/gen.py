@@ -144,7 +144,7 @@ class Ctx:
                 return ("*mut QWidget", "QWidget *", "qtptr", base)
             return None
         # value types: heap-allocated opaque pointers
-        if base in VALUE_TYPES | EXT_VALUE_TYPES:
+        if base in VALUE_TYPES | EXT_VALUE_TYPES.keys():
             return (f"*mut {base}", f"{base} *", "val", base)
         if base in PRIM:
             r = PRIM[base]

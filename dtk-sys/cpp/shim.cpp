@@ -6,6 +6,7 @@
 #include <QGuiApplication>
 #include <QHeaderView>
 #include <QStyle>
+#include <QProgressBar>
 #include <QTableWidgetItem>
 #include <cstdio>
 #include <string>
@@ -153,6 +154,15 @@ void widget_set_font(QWidget *w, QFont *font) { w->setFont(*font); }
 QPalette *widget_palette(QWidget *w) { return new QPalette(w->palette()); }
 void widget_set_palette(QWidget *w, QPalette *pal) { w->setPalette(*pal); }
 void object_delete_later(QObject *o) { o->deleteLater(); }
+
+// ---- QProgressBar common ----
+void progressbar_set_value(QWidget *w, int32_t value) {
+    static_cast<QProgressBar *>(w)->setValue(value);
+}
+void progressbar_set_range(QWidget *w, int32_t minimum, int32_t maximum) {
+    static_cast<QProgressBar *>(w)->setRange(minimum, maximum);
+}
+int32_t progressbar_value(QWidget *w) { return static_cast<QProgressBar *>(w)->value(); }
 
 // ---- DMainWindow ----
 DMainWindow *mainwindow_new() { return new DMainWindow; }
