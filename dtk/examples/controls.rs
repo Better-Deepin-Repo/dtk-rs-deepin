@@ -8,7 +8,7 @@
 
 use dtk::widgets::*;
 use dtk::*;
-use std::cell::Cell;
+
 use std::rc::Rc;
 
 fn main() {
@@ -48,17 +48,10 @@ fn main() {
     row.add_stretch(1);
     vbox.add_layout(&row);
 
-    // DSwitchButton::checkedChanged(bool) — the arg-less relay drops the bool;
-    // track the state ourselves.
-    let on = Rc::new(Cell::new(false));
+    // DSwitchButton::checkedChanged(bool) — the bool relay delivers the arg
     {
-        let on = on.clone();
         let spinner = spinner.clone();
-        switch.connect_signal("checkedChanged(bool)", move || {
-            let now = !on.get();
-            on.set(now);
-            if now { spinner.start() } else { spinner.stop() }
-        });
+        switch.on_checked_changed(move |on| if on { spinner.start() } else { spinner.stop() });
     }
 
     // --- floating message (DDE-style toast) ---
@@ -79,11 +72,11 @@ fn main() {
     win.resize(420, 240);
     win.show();
 
-    std::mem::forget(edit);
-    std::mem::forget(search);
-    std::mem::forget(switch);
-    std::mem::forget(toast_btn);
-    std::mem::forget(row);
+    edit.leak();
+    search.leak();
+    switch.leak();
+    toast_btn.leak();
+    row.leak();
 
     std::process::exit(app.exec());
 }

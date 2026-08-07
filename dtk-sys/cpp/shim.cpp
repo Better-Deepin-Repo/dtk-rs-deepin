@@ -90,6 +90,23 @@ QString from_rust_str(rust::Str s) {
     return QString::fromUtf8(s.data(), static_cast<qsizetype>(s.size()));
 }
 
+rust::Vec<rust::String> to_rust_string_vec(const QStringList &qsl) {
+    rust::Vec<rust::String> out;
+    for (const QString &qs : qsl) {
+        QByteArray u8 = qs.toUtf8();
+        out.push_back(rust::String(u8.constData(), static_cast<size_t>(u8.size())));
+    }
+    return out;
+}
+
+QStringList to_qstringlist(rust::Vec<rust::String> v) {
+    QStringList out;
+    out.reserve(static_cast<qsizetype>(v.size()));
+    for (const auto &s : v)
+        out.append(QString::fromUtf8(s.data(), static_cast<qsizetype>(s.size())));
+    return out;
+}
+
 // ---- DApplication ----
 // QApplication requires argc AND argv to outlive the app (Qt6 stores int& argc):
 // static storage, filled on first call (QApplication is a singleton anyway)
@@ -97,7 +114,10 @@ static std::pair<int &, char **> make_argv(rust::Str name, rust::Str args) {
     static std::vector<std::string> store;
     static std::vector<char *> argv;
     static int argc;
-    for (const auto &a : from_rust_str(args).split(QLatin1Char('|'), Qt::SkipEmptyParts))
+    if (!store.empty()) // QApplication singleton: second call reuses the first argv
+        return {argc, argv.data()};
+    // args joined with U+001F (unit separator): cannot appear in real argv, unlike '|'
+    for (const auto &a : from_rust_str(args).split(QLatin1Char('\x1f'), Qt::SkipEmptyParts))
         store.push_back(a.toStdString());
     if (store.empty())
         store.emplace_back(name.data(), name.size());
@@ -158,6 +178,10 @@ void object_delete_later(QObject *o) { o->deleteLater(); }
 // ---- QProgressBar common ----
 void progressbar_set_value(QWidget *w, int32_t value) {
     static_cast<QProgressBar *>(w)->setValue(value);
+}
+
+rust::String line_edit_text(QWidget *w) {
+    return to_rust_string(static_cast<QLineEdit *>(w)->text());
 }
 void progressbar_set_range(QWidget *w, int32_t minimum, int32_t maximum) {
     static_cast<QProgressBar *>(w)->setRange(minimum, maximum);
@@ -454,12 +478,18 @@ void timer_single_shot(int32_t msec, size_t cb_id) {
 }
 
 // ---- signal callbacks ----
-void relay_connect0(QObject *sender, rust::Str signal, size_t cb_id) {
-    DtkRelay::connect0(sender, std::string(signal).c_str(), cb_id);
+bool relay_connect0(QObject *sender, rust::Str signal, size_t cb_id) {
+    return DtkRelay::connect0(sender, std::string(signal).c_str(), cb_id);
 }
 
-void relay_connect_i32(QObject *sender, rust::Str signal, size_t cb_id) {
-    DtkRelay::connectI32(sender, std::string(signal).c_str(), cb_id);
+bool relay_connect_i32(QObject *sender, rust::Str signal, size_t cb_id) {
+    return DtkRelay::connectI32(sender, std::string(signal).c_str(), cb_id);
 }
+
+bool relay_connect_bool(QObject *sender, rust::Str signal, size_t cb_id) {
+    return DtkRelay::connectBool(sender, std::string(signal).c_str(), cb_id);
+}
+
+void relay_disconnect(size_t cb_id) { DtkRelay::disconnectId(cb_id); }
 
 } // namespace dtkrs

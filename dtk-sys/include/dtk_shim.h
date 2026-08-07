@@ -9,6 +9,8 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QAbstractButton>
+#include <QStringList>
 #include <QLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -31,6 +33,8 @@
 #include <QModelIndex>
 #include <QSocketNotifier>
 #include <QMessageBox>
+#include <QLineEdit>
+#include <QProgressBar>
 #include <QEvent>
 #include <QCloseEvent>
 #include <QShowEvent>
@@ -47,6 +51,7 @@ namespace dtkrs {
 // cxx requires opaque types to live in the bridge namespace; alias the Qt classes in too
 using ::QObject;
 using ::QWidget;
+using ::QAbstractButton;
 using ::QLayout;
 using ::QVBoxLayout;
 using ::QHBoxLayout;
@@ -80,6 +85,8 @@ using QMessageBox = ::QMessageBox;
 // ---- QString <-> rust string ----
 rust::String to_rust_string(const QString &s);
 QString from_rust_str(rust::Str s);
+rust::Vec<rust::String> to_rust_string_vec(const QStringList &qsl);
+QStringList to_qstringlist(rust::Vec<rust::String> v);
 
 // ---- DApplication ----
 // args: '|'-separated argv (incl. argv[0]); ponytail: '|' can't appear in normal flags like --hidden
@@ -107,6 +114,8 @@ void widget_set_focus_policy(QWidget *w, int32_t policy);
 
 // ---- QProgressBar common (base-class ops; DTK headers don't redeclare them) ----
 void progressbar_set_value(QWidget *w, int32_t value);
+// QLineEdit base-class getter (DLineEdit etc.); cast is the caller's responsibility
+rust::String line_edit_text(QWidget *w);
 void progressbar_set_range(QWidget *w, int32_t minimum, int32_t maximum);
 int32_t progressbar_value(QWidget *w);
 void widget_set_font(QWidget *w, QFont *font);
@@ -275,8 +284,12 @@ void timer_single_shot(int32_t msec, size_t cb_id);
 
 // ---- signal callbacks ----
 // generic: runtime-connect by signal name, ignoring args. signal looks like "clicked()" or "clicked(bool)"
-void relay_connect0(QObject *sender, rust::Str signal, size_t cb_id);
+// connect fns return false on failure (Rust side rolls back registration)
+bool relay_connect0(QObject *sender, rust::Str signal, size_t cb_id);
 // common signals with args
-void relay_connect_i32(QObject *sender, rust::Str signal, size_t cb_id);
+bool relay_connect_i32(QObject *sender, rust::Str signal, size_t cb_id);
+bool relay_connect_bool(QObject *sender, rust::Str signal, size_t cb_id);
+// disconnect + deleteLater the relay for cb_id (no-op if unknown)
+void relay_disconnect(size_t cb_id);
 
 } // namespace dtkrs

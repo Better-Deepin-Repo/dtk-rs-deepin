@@ -41,6 +41,16 @@ QT_WIDGET_BASES = {
 VALUE_TYPES = {"QColor", "QSize", "QPoint", "QRect", "QFont", "QPixmap", "QIcon", "QPalette", "QMargins"}
 # cross-namespace (dtkgui) value types: name -> (fully-qualified namespace, include header)
 EXT_VALUE_TYPES = {"DDciIcon": ("Dtk::Gui", "DDciIcon")}
+# cross-namespace classes we only need enums from (include + using in the gen shim header)
+EXT_CLASSES = {"DPalette": ("Dtk::Gui", "DPalette")}
+# Qt-class enums usable as i32 (header pulled in via the DTK widget headers)
+QT_ENUMS = {"QLineEdit::EchoMode", "QTabBar::Shape", "QTabBar::ButtonPosition",
+            "QTabBar::SelectionBehavior"}
+# DTK-outer-class enums (dtkgui) usable as i32
+EXT_ENUMS = {"DPalette::ColorType", "DPalette::ColorRole"}
+# Qt pointer types allowed across the bridge (QWidget-style `as _` casts; each needs
+# `type X;` in both bridges + a hand-written wrapper in dtk/src/lib.rs)
+QT_PTRS = {"QWidget", "QAbstractButton"}
 # types that are QFlags in Qt (fromInt/toInt conversion)
 QT_QFLAGS = {"Qt::Alignment", "Qt::WindowFlags", "Qt::MouseButtons", "Qt::KeyboardModifiers",
              "Qt::Orientations", "Qt::ItemFlags", "Qt::MatchFlags", "Qt::ApplicationStates",
@@ -51,14 +61,15 @@ PRIM = {
     "qint64": "i64", "qlonglong": "i64", "long": "i64",
     "quint32": "u32", "uint": "u32", "qulonglong": "u64", "quint64": "u64", "ulong": "u64",
     "qreal": "f64", "double": "f64", "float": "f32", "qint8": "i8", "quint8": "u8",
+    "quint16": "u16",
 }
 CPP_OF_RUST = {"()": "void", "bool": "bool", "i32": "int32_t", "i16": "int16_t", "i64": "int64_t",
                "u32": "uint32_t", "u64": "uint64_t", "f64": "double", "f32": "float",
-               "i8": "int8_t", "u8": "uint8_t", "String": "rust::String"}
+               "i8": "int8_t", "u8": "uint8_t", "u16": "uint16_t", "String": "rust::String"}
 
 CLASS_RE = re.compile(r"^class\s+(?:LIBDTKWIDGETSHARED_EXPORT\s+|D_DECL_DEPRECATED\s+)*(\w+)\s*(?::\s*(.+?))?\s*$")
 METHOD_RE = re.compile(
-    r"^\s*(?:virtual\s+|Q_INVOKABLE\s+|D_DECL_DEPRECATED\s+|explicit\s+)*"
+    r"^\s*(?:virtual\s+|inline\s+|Q_SLOT\s+|Q_INVOKABLE\s+|D_DECL_DEPRECATED\s+|explicit\s+)*"
     r"(static\s+)?([\w:<>&*~ ]+?)\s*(~?\w+)\s*\((.*)\)\s*(const)?\s*(?:override\s*)?(?:=\s*\w+\s*)?;?\s*(?://.*)?$"
 )
 
@@ -128,6 +139,10 @@ class Ctx:
             return ("i32", "int32_t", "enum", f"{scope}::{base}")
         if "::" in base:
             qual = base.replace("DTK_WIDGET_NAMESPACE::", "")
+            if qual in QT_ENUMS:
+                return ("i32", "int32_t", "qtenum", qual)
+            if qual in EXT_ENUMS:
+                return ("i32", "int32_t", "enum", qual)
             if qual in self.qenums and qual.split("::")[0] in self.classes:
                 return ("i32", "int32_t", "enum", qual)
             return None  # non-exported nested-class enums etc; skip
@@ -139,9 +154,9 @@ class Ctx:
         if ptr:
             if base in self.classes:
                 return (f"*mut {base}", f"{base} *", "ptr", base)
-            # only QWidget allowed among Qt classes (cross-bridge casts for others are a pain; report)
-            if base == "QWidget":
-                return ("*mut QWidget", "QWidget *", "qtptr", base)
+            # only audited cross-bridge Qt classes (each needs `type X;` in both bridges)
+            if base in QT_PTRS:
+                return (f"*mut {base}", f"{base} *", "qtptr", base)
             return None
         # value types: heap-allocated opaque pointers
         if base in VALUE_TYPES | EXT_VALUE_TYPES.keys():
@@ -153,6 +168,9 @@ class Ctx:
             return (r, CPP_OF_RUST[r], "prim", None)
         if base == "QString":
             return ("String", CPP_OF_RUST["String"], "str", None) if is_return else ("&str", "rust::Str", "str", None)
+        if base == "QStringList":
+            # by value both ways; shim converts via to_qstringlist / to_rust_string_vec
+            return ("Vec<String>", "rust::Vec<rust::String>", "strlist", None)
         if base == "QByteArray":
             # QByteArray params need a QString->QByteArray hop; return as string via toUtf8
             return ("String", CPP_OF_RUST["String"], "qba", None) if is_return else ("&str", "rust::Str", "qba", None)
@@ -173,6 +191,8 @@ def parse_header(path, ctx):
     # DTK5-only classes/methods. Each frame is True if the region is DTK5-only (skip in DTK6).
     pp_stack = []
     ns_stack = []  # namespace scope: e.g. ["Dtk::Widget"] when inside DWIDGET_BEGIN_NAMESPACE
+    pending = None  # multi-line declaration being accumulated
+    body_depth = 0  # >0: skipping an inline method body
     def dtk5_active():
         return any(pp_stack)
     def current_ns():
@@ -210,6 +230,10 @@ def parse_header(path, ctx):
             if dtk5_active():
                 prev_was_template = this_is_template
                 continue
+            # skip inline method bodies (opened by a previous declaration line)
+            if body_depth > 0:
+                body_depth = max(0, body_depth + s.count("{") - s.count("}"))
+                continue
             # skip template classes: a `class X` immediately preceded by `template<...>` is a template
             # (cxx opaque types can't name template classes without args)
             is_template_cls = prev_was_template
@@ -246,6 +270,8 @@ def parse_header(path, ctx):
             em = ENUM_RE.match(s)
             if em and "(" not in s:
                 ctx.register_enum(cur["name"], em.group(1))
+                if "{" in s and "}" not in s:
+                    body_depth = 1  # skip enum values until closing brace
                 continue
             if re.match(r"^(public|protected|private)\s*(Q_SLOTS|slots)?:", s):
                 section = "pub" if s.startswith("public") else "other"
@@ -258,8 +284,39 @@ def parse_header(path, ctx):
                 cur["abstract"] = True
             if section != "pub" or not s:
                 continue
+            # join multi-line declarations (signatures wrapped across lines)
+            if pending is not None:
+                s = pending + " " + s
+                pending = None
+            if s.count("(") > s.count(")"):
+                pending = s
+                continue
+            if s.startswith(":"):
+                continue  # ctor init list
+            if s.startswith(("//", "/*", "*")):
+                continue  # comment line
+            # inline body on/after this line: keep only the declaration part.
+            # braces in default args (`= {}`) are not bodies: only look after the param list
+            if "{" in s:
+                depth, end = 0, -1
+                for i, ch in enumerate(s):
+                    if ch == "(":
+                        depth += 1
+                    elif ch == ")":
+                        depth -= 1
+                        if depth == 0:
+                            end = i
+                            break
+                brace = s.find("{", end + 1) if end >= 0 else s.find("{")
+                lone_brace = s == "{"  # ctor body opening on its own line
+                if (brace >= 0 and end >= 0) or lone_brace:  # body only follows a param list
+                    rest = s[brace + 1:] if brace >= 0 else ""
+                    d = 1 + rest.count("{") - rest.count("}")
+                    if d > 0:
+                        body_depth = d
+                    s = "" if lone_brace else s[:brace].rstrip() + ";"
             if s.startswith(("{", "}", "~")):
-                continue  # inline function body / destructor
+                continue  # stray brace / destructor
             # destructor: `virtual ~Class()` or `~Class()` — METHOD_RE mis-absorbs the `~`
             if re.match(rf"^(?:virtual\s+)?~{cur['name']}\b", s):
                 continue
@@ -274,7 +331,7 @@ def parse_header(path, ctx):
             if cm:
                 ps = split_params(cm.group(1))
                 if not ps or all("=" in p for p in ps):
-                    cur["ctor_new"] = True
+                    cur["all_default_ctors"] = cur.get("all_default_ctors", 0) + 1
                 continue
             m = METHOD_RE.match(s)
             if not m:
@@ -286,10 +343,8 @@ def parse_header(path, ctx):
             if name == cur["name"]:
                 # constructor
                 ps = split_params(params)
-                all_default = all("=" in p for p in ps)
-                cur.setdefault("ctor_new", False)
-                if not ps or all_default:
-                    cur["ctor_new"] = True
+                if not ps or all("=" in p for p in ps):
+                    cur["all_default_ctors"] = cur.get("all_default_ctors", 0) + 1
                 continue
             cur["methods"].append((is_static, ret, name, split_params(params), s[:80]))
     return classes
@@ -319,6 +374,9 @@ def gen_method(ctx, cls, is_static, ret, name, params):
         prs, pcpp, pkind, pcls = q
         if pkind == "str":
             args.append((f"{pname}: &str", f"rust::Str {pname}", f"from_rust_str({pname})", "str", None))
+        elif pkind == "strlist":
+            args.append((f"{pname}: Vec<String>", f"rust::Vec<rust::String> {pname}",
+                         f"to_qstringlist(std::move({pname}))", "strlist", None))
         elif pkind == "qba":
             args.append((f"{pname}: &str", f"rust::Str {pname}", f"QByteArray(from_rust_str({pname}).toUtf8())", "qba", None))
         elif pkind in ("ptr", "qtptr"):
@@ -379,7 +437,8 @@ def main():
                     gen_methods.append(g)
             classes_out.append({
                 "name": c["name"], "is_widget": is_widget, "header": c["header"], "ns": c.get("ns", ""),
-                "ctor_new": c.get("ctor_new", False) and not c.get("abstract", False), "methods": gen_methods, "skipped": skipped,
+                # exactly one all-default ctor: two would make `new X()` ambiguous
+                "ctor_new": c.get("all_default_ctors", 0) == 1 and not c.get("abstract", False), "methods": gen_methods, "skipped": skipped,
             })
 
     emit(classes_out)
@@ -389,12 +448,14 @@ def emit(classes):
     shim_h, shim_cpp, bridge, wrapper, report = [], [], [], [], []
     shim_h.append("// auto-generated by tools/gen.py, do not edit\n#pragma once\n#include \"dtk_shim.h\"\n")
     shim_cpp.append('// auto-generated by tools/gen.py, do not edit\n#include "dtk_gen_shim.h"\n\nnamespace dtkrs {\n')
-    bridge.append("// auto-generated by tools/gen.py, do not edit\n#[cxx::bridge(namespace = \"dtkrs\")]\npub mod genffi {\n    extern \"C++\" {\n        include!(\"dtk_gen_shim.h\");\n        type QWidget;\n")
+    bridge.append("// auto-generated by tools/gen.py, do not edit\n#[cxx::bridge(namespace = \"dtkrs\")]\npub mod genffi {\n    extern \"C++\" {\n        include!(\"dtk_gen_shim.h\");\n")
+    for qp in sorted(QT_PTRS):
+        bridge.append(f"        type {qp};\n")
     for vt in sorted(VALUE_TYPES):
         bridge.append(f"        type {vt};\n")
     for vt in sorted(EXT_VALUE_TYPES):
         bridge.append(f"        type {vt};\n")
-    wrapper.append("// auto-generated by tools/gen.py, do not edit\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{Signal0, SignalI32, QWidget};\nuse crate::{QColor, QFont, QIcon, QMargins, QPalette, QPixmap, QPoint, QRect, QSize};\nuse crate::DDciIcon;\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
+    wrapper.append("// auto-generated by tools/gen.py, do not edit\n#![allow(clippy::all, non_snake_case, unused_imports)]\nuse crate::{QAbstractButton, Signal0, SignalBool, SignalI32, QWidget};\nuse crate::{QColor, QFont, QIcon, QMargins, QPalette, QPixmap, QPoint, QRect, QSize};\nuse crate::DDciIcon;\nuse dtk_sys::ffi;\nuse dtk_sys::gen_ffi::genffi;\nuse std::marker::PhantomData;\n")
     report.append("# DTK6 widget binding coverage report\n")
 
     total_ok, total_skip = 0, 0
@@ -404,11 +465,17 @@ def emit(classes):
     # cross-namespace value types (e.g. dtkgui DDciIcon): include + namespaced using
     for vt, (ns, inc) in EXT_VALUE_TYPES.items():
         shim_h.append(f"#include <{inc}>\n")
+    for ec, (ns, inc) in EXT_CLASSES.items():
+        shim_h.append(f"#include <{inc}>\n")
     shim_h.append("\nnamespace dtkrs {\n")
     for vt in sorted(VALUE_TYPES):
         shim_h.append(f"using ::{vt};\n")
     for vt, (ns, _inc) in EXT_VALUE_TYPES.items():
         shim_h.append(f"using {ns}::{vt};\n")
+    for ec, (ns, inc) in EXT_CLASSES.items():
+        shim_h.append(f"using {ns}::{ec};\n")
+    for qp in sorted(QT_PTRS - {"QWidget"}):  # QWidget already via dtk_shim.h
+        shim_h.append(f"using ::{qp};\n")
     for c in classes:
         name = c["name"]
         ns = c.get("ns", "Dtk::Widget")
@@ -434,7 +501,8 @@ def emit(classes):
                 base_fn += "_"  # same rule as the wrapper side, avoids Rust keywords
             n = used_names.get(base_fn, 0)
             used_names[base_fn] = n + 1
-            fn = base_fn if n == 0 else f"{base_fn}_{n + 1}"
+            # avoid `__` (reserved in C++) when the name already ends with `_` (keyword escape)
+            fn = base_fn if n == 0 else f"{base_fn}{'' if base_fn.endswith('_') else '_'}{n + 1}"
             # shim signature
             self_arg = [] if is_static else [f"{name} *self"]
             cpp_sig = ", ".join(self_arg + [a[1] for a in args])
@@ -442,6 +510,8 @@ def emit(classes):
             call = f"{name}::{meth}({call_args})" if is_static else f"self->{meth}({call_args})"
             if ret_kind == "str":
                 call = f"to_rust_string({call})"
+            elif ret_kind == "strlist":
+                call = f"to_rust_string_vec({call})"
             elif ret_kind == "qba":
                 call = f"to_rust_string(QString({call}))"
             elif ret_kind == "val":
@@ -483,7 +553,7 @@ def emit(classes):
                 mname += "_"
             n = used.get(mname, 0)
             used[mname] = n + 1
-            mname = mname if n == 0 else f"{mname}_{n + 1}"
+            mname = mname if n == 0 else f"{mname}{'' if mname.endswith('_') else '_'}{n + 1}"
             if mname in MACRO_METHODS:
                 continue  # already provided by the macro
             fn_name = f"gen_{sname}_{mname}"  # same naming order/rule as shim/bridge
@@ -517,8 +587,8 @@ def emit(classes):
                 ret_decl = f" -> {ret_cls}"
                 expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }})"
             elif ret_kind == "qtptr":
-                ret_decl = " -> QWidget"
-                expr = f"QWidget::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"  # see qtptr audit comment above
+                ret_decl = f" -> {ret_cls}"
+                expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"  # see qtptr audit comment above
             elif ret_kind == "val":
                 ret_decl = f" -> {ret_cls}"
                 expr = f"{ret_cls}::from_raw(unsafe {{ genffi::{fn_name}({calls}) }} as _)"  # see qtptr audit comment above
@@ -527,34 +597,54 @@ def emit(classes):
                 expr = f"unsafe {{ genffi::{fn_name}({calls}) }}"
             wrapper.append(f"    pub fn {mname}({sig}){ret_decl} {{\n        {expr}\n    }}\n")
         wrapper.append("}\n\n")
-        if c["ctor_new"]:
-            wrapper.append(f"impl Default for {name} {{\n    fn default() -> Self {{ Self::new() }}\n}}\n\n")
         total_skip_n = len(c["skipped"])
         total_skip += total_skip_n
         report.append(f"\n## {name} — {len(c['methods'])} methods generated, {total_skip_n} skipped\n")
         for raw, why in c["skipped"]:
             report.append(f"- `{raw}` ← {why}\n")
 
-    report.insert(1, f"\nclasses: {len(classes)}, methods generated: {total_ok}, skipped: {total_skip}\n")
+    defaultables = [c["name"] for c in classes if c["ctor_new"]]
+    if defaultables:
+        wrapper.append(f"crate::impl_default!({', '.join(defaultables)});\n")
 
-    write(os.path.join(REPO, "dtk-sys/include/dtk_gen_shim.h"), "".join(shim_h))
-    write(os.path.join(REPO, "dtk-sys/cpp/dtk_gen_shim.cpp"), "".join(shim_cpp))
-    write(os.path.join(REPO, "dtk-sys/src/gen_ffi.rs"), "".join(bridge))
-    write(os.path.join(REPO, "dtk/src/widgets.rs"), "".join(wrapper))
-    write(os.path.join(REPO, "GEN_REPORT.md"), "".join(report))
+    report.insert(1, f"\nclasses: {len(classes)}, methods generated: {total_ok}, skipped: {total_skip}\n")
+    from collections import Counter
+    reasons = Counter(why.split(":")[0] for c in classes for _, why in c["skipped"])
+    report.insert(2, "\n## skip reasons\n" + "".join(f"- {k}: {v}\n" for k, v in reasons.most_common()))
+
+    for path, content in [
+        ("dtk-sys/include/dtk_gen_shim.h", "".join(shim_h)),
+        ("dtk-sys/cpp/dtk_gen_shim.cpp", "".join(shim_cpp)),
+        ("dtk-sys/src/gen_ffi.rs", rustfmt_text("".join(bridge))),
+        ("dtk/src/widgets.rs", rustfmt_text("".join(wrapper))),
+        ("GEN_REPORT.md", "".join(report)),
+    ]:
+        write(os.path.join(REPO, path), content)
     print(f"classes {len(classes)}, methods generated {total_ok}, skipped {total_skip}")
-    run_cargo_fmt()
 
 
 def write(path, content):
+    """write only when changed (keeps mtime stable -> no pointless cargo rebuild). Returns changed."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            if f.read() == content:
+                return False
+    except FileNotFoundError:
+        pass
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
+    return True
 
 
-def run_cargo_fmt():
-    """Format the generated Rust after writing files."""
-    subprocess.run(["cargo", "fmt"], cwd=REPO, check=True)
-    print("cargo fmt done")
+def rustfmt_text(content):
+    """format Rust source in-memory (stdin/stdout), so write() can skip unchanged files"""
+    return subprocess.run(
+        ["rustfmt", "--edition", "2024"],
+        input=content,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
 
 
 if __name__ == "__main__":

@@ -4,39 +4,45 @@
 use dtk::widgets::{DDialog, DMessageManager};
 use dtk::{DApplication, DDciIcon, DMessageBox, QIcon, QMargins, QWidget, qt};
 
-fn _ddialog_usage() {
+fn _ddialog_usage(show: bool) {
     let d = DDialog::new();
     d.set_title("Confirm");
     d.set_message("Proceed?");
     d.set_icon(&QIcon::from_theme("dialog-warning"));
     d.add_button("OK", true, 0); // ButtonNormal
     d.add_button("Cancel", false, 1); // ButtonWarning
-    let _r: i32 = d.exec();
+    if show {
+        let _r: i32 = d.exec();
+    }
 }
 
-fn _dmessagebox_usage() {
+fn _dmessagebox_usage(show: bool) {
     // static helpers (most common confirmation path)
-    let _r = DMessageBox::information(None, "Info", "Done", qt::MSG_BTN_OK, qt::MSG_BTN_OK);
-    let _r = DMessageBox::question(
-        None,
-        "Ask",
-        "Yes or no?",
-        qt::MSG_BTN_YES_NO,
-        qt::MSG_BTN_YES,
-    );
+    if show {
+        let _r = DMessageBox::information(None, "Info", "Done", qt::msg_btn::OK, qt::msg_btn::OK);
+        let _r = DMessageBox::question(
+            None,
+            "Ask",
+            "Yes or no?",
+            qt::msg_btn::YES_NO,
+            qt::msg_btn::YES,
+        );
+    }
 
     // full instance API
     let mb = DMessageBox::with(
-        qt::MSG_ICON_QUESTION,
+        qt::msg_icon::QUESTION,
         "Ask",
         "Sure?",
-        qt::MSG_BTN_YES_NO,
+        qt::msg_btn::YES_NO,
         None,
     );
     mb.set_informative_text("This cannot be undone.");
-    mb.set_default_button(qt::MSG_BTN_NO);
-    let _btn = mb.add_button("Custom", qt::MSG_ROLE_ACTION);
-    let _clicked: i32 = mb.exec();
+    mb.set_default_button(qt::msg_btn::NO);
+    let _btn = mb.add_button("Custom", qt::msg_role::ACTION);
+    if show {
+        let _clicked: i32 = mb.exec();
+    }
 }
 
 fn _messagemanager_usage() {
@@ -47,10 +53,12 @@ fn _messagemanager_usage() {
 }
 
 fn main() {
-    // smoke: methods exist + types resolve (no actual dialog shown without an event loop)
+    // smoke: methods exist + types resolve; exec() only with --show (blocks offscreen otherwise)
+    let show = std::env::args().any(|a| a == "--show");
     let _app = DApplication::new("selfcheck");
-    _ddialog_usage();
-    _dmessagebox_usage();
+    _ddialog_usage(show);
+    _dmessagebox_usage(show);
     _messagemanager_usage();
     let _w = QWidget::new(None);
+    println!("selfcheck ok");
 }

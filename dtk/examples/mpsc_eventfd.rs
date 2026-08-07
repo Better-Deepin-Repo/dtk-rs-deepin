@@ -15,7 +15,7 @@
 //!   ┌──────────────┐  mpsc::Sender<Msg>   ┌─────────────────────────┐
 //!   │ do work      │ ──────────────────▶  │ mpsc::Receiver<Msg>     │
 //!   │ tx.send(msg) │                      │ (drained with try_recv) │
-//!   │ poke eventfd │ ── eventfd byte ──▶ │ QSocketNotifier::       │
+//!   │ poke eventfd │ ── eventfd byte ──▶  │ QSocketNotifier::       │
 //!   └──────────────┘                      │   on_activated(...)     │
 //!                                         └─────────────────────────┘
 //! ```
@@ -27,6 +27,7 @@
 
 use dtk::widgets::DProgressBar;
 use dtk::*;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -109,16 +110,35 @@ fn main() {
             });
         }
         if std::env::args().any(|a| a == "--smoke") {
-            // offscreen self-check: worker must have delivered Progress by now
-            QTimer::single_shot(2500, move || {
-                assert!(bar.value() > 0, "no progress reached the GUI thread");
-                assert!(finished.get(), "worker never sent Done");
-                println!("smoke ok");
-                DApplication::quit();
+            // offscreen self-check: poll until the worker delivers Done (loaded CI is slow)
+            let tries = Rc::new(Cell::new(0));
+            let poll = Rc::new(RefCell::new(None::<Box<dyn FnMut()>>));
+            let poll2 = poll.clone();
+            *poll.borrow_mut() = Some(Box::new(move || {
+                if finished.get() {
+                    assert!(bar.value() > 0, "no progress reached the GUI thread");
+                    println!("smoke ok");
+                    DApplication::quit();
+                    return;
+                }
+                tries.set(tries.get() + 1);
+                assert!(tries.get() < 40, "worker never sent Done"); // ~20s budget
+                let poll = poll2.clone();
+                QTimer::single_shot(500, move || {
+                    if let Some(f) = &mut *poll.borrow_mut() {
+                        f();
+                    }
+                });
+            }));
+            let p = poll.clone();
+            QTimer::single_shot(500, move || {
+                if let Some(f) = &mut *p.borrow_mut() {
+                    f();
+                }
             });
         }
     }
-    std::mem::forget(notifier);
+    notifier.leak();
 
     // control channel GUI → worker: plain atomics are enough for start/cancel
     let running = Arc::new(AtomicBool::new(false));
@@ -192,7 +212,7 @@ fn main() {
         spawn_worker();
     }
 
-    std::mem::forget(btn);
+    std::mem::forget(btn); // Rc<DSuggestButton>: leak() is on the inner wrapper, forget the Rc
     let code = app.exec();
     cancel.store(true, Ordering::SeqCst); // let a running worker exit on its own
     unsafe { close(fd) };

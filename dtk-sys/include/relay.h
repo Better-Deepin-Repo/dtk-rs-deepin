@@ -1,5 +1,5 @@
 // generic signal relay: any QObject signal -> Rust callback.
-// uses string-based connect(sender, SIGNAL, relay, SLOT), working around Qt6 dropping QMetaMethod+lambda connect.
+// string-based connect(sender, SIGNAL, relay, SLOT): Qt6 dropped QMetaMethod+lambda connect.
 #pragma once
 
 #include <QObject>
@@ -11,14 +11,19 @@ class DtkRelay : public QObject {
     Q_OBJECT
 public:
     explicit DtkRelay(size_t cb_id, QObject *parent);
+    ~DtkRelay() override;
 
-    /// signal looks like "clicked()" / "timeout()"; failure logs qWarning
-    static void connect0(QObject *sender, const char *signal, size_t cb_id);
-    static void connectI32(QObject *sender, const char *signal, size_t cb_id);
+    /// signal looks like "clicked()" / "timeout()"; returns false on failure (qWarning logged)
+    static bool connect0(QObject *sender, const char *signal, size_t cb_id);
+    static bool connectI32(QObject *sender, const char *signal, size_t cb_id);
+    static bool connectBool(QObject *sender, const char *signal, size_t cb_id);
+    /// disconnect + deleteLater the relay for cb_id (no-op if unknown)
+    static void disconnectId(size_t cb_id);
 
 public Q_SLOTS:
     void fire0();
     void fireI32(int v);
+    void fireBool(bool b);
 
 private:
     size_t m_cb_id;

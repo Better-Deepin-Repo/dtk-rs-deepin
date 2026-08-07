@@ -12,6 +12,7 @@ pub mod ffi {
 
         type QObject;
         type QWidget;
+        type QAbstractButton;
         type QLayout;
         type QVBoxLayout;
         type QHBoxLayout;
@@ -71,6 +72,8 @@ pub mod ffi {
 
         // QProgressBar common
         unsafe fn progressbar_set_value(w: *mut QWidget, value: i32);
+        /// QLineEdit base-class getter (DLineEdit etc.); cast is the caller's responsibility
+        unsafe fn line_edit_text(w: *mut QWidget) -> String;
         unsafe fn progressbar_set_range(w: *mut QWidget, minimum: i32, maximum: i32);
         unsafe fn progressbar_value(w: *mut QWidget) -> i32;
         unsafe fn widget_set_font(w: *mut QWidget, font: *mut QFont);
@@ -318,14 +321,18 @@ pub mod ffi {
         unsafe fn timer_stop(t: *mut QTimer);
         unsafe fn timer_single_shot(msec: i32, cb_id: usize);
 
-        // signals
-        unsafe fn relay_connect0(sender: *mut QObject, signal: &str, cb_id: usize);
-        unsafe fn relay_connect_i32(sender: *mut QObject, signal: &str, cb_id: usize);
+        // signals; connect fns return false on failure (caller must roll back registration)
+        unsafe fn relay_connect0(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
+        unsafe fn relay_connect_i32(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
+        unsafe fn relay_connect_bool(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
+        /// disconnect + schedule deletion of the relay for cb_id (no-op if unknown)
+        unsafe fn relay_disconnect(cb_id: usize);
     }
 
     extern "Rust" {
         fn dtk_cb0(id: usize);
         fn dtk_cb_i32(id: usize, v: i32);
+        fn dtk_cb_bool(id: usize, v: bool);
         fn dtk_cb_guard(id: usize) -> bool;
         unsafe fn dtk_cb_paint(
             id: usize,
@@ -345,12 +352,16 @@ pub mod ffi {
 enum Cb {
     C0(Box<dyn FnMut()>),
     I32(Box<dyn FnMut(i32)>),
+    Bool(Box<dyn FnMut(bool)>),
     Guard(Box<dyn FnMut() -> bool>),
     Paint(Box<dyn FnMut(*mut ffi::QPainter, *mut ffi::QModelIndex, i32, i32, i32, i32, i32)>),
 }
 
 thread_local! {
     static CALLBACKS: RefCell<HashMap<usize, Cb>> = RefCell::new(HashMap::new());
+    // ids unregistered from inside their own dispatch; dispatch must not resurrect them
+    static TOMBSTONES: RefCell<std::collections::HashSet<usize>> =
+        RefCell::new(std::collections::HashSet::new());
 }
 
 fn next_id() -> usize {
@@ -371,6 +382,12 @@ pub fn register_cb_i32(f: impl FnMut(i32) + 'static) -> usize {
     id
 }
 
+pub fn register_cb_bool(f: impl FnMut(bool) + 'static) -> usize {
+    let id = next_id();
+    CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Bool(Box::new(f))));
+    id
+}
+
 pub fn register_cb_guard(f: impl FnMut() -> bool + 'static) -> usize {
     let id = next_id();
     CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Guard(Box::new(f))));
@@ -385,36 +402,73 @@ pub fn register_cb_paint(
     id
 }
 
-/// Remove a callback from the registry. Returns false if the id is unknown.
-/// Does NOT disconnect the Qt signal: the DtkRelay stays connected but becomes a no-op.
+/// Remove a callback from the registry and disconnect its Qt-side relay.
+/// Returns false if the id is unknown. Safe to call from inside the callback itself.
 pub fn unregister_cb(id: usize) -> bool {
-    CALLBACKS.with(|c| c.borrow_mut().remove(&id)).is_some()
+    let removed = CALLBACKS.with(|c| c.borrow_mut().remove(&id)).is_some();
+    if !removed {
+        // may be mid-dispatch (callback unregisters itself): block resurrection
+        TOMBSTONES.with(|t| t.borrow_mut().insert(id));
+    }
+    // no-op for ids without a relay (e.g. timer callbacks)
+    unsafe { ffi::relay_disconnect(id) };
+    removed
 }
 
-// remove-then-call so callbacks can safely register new callbacks; put back after
+/// Reinsert after dispatch unless the callback unregistered itself mid-call.
+fn finish_dispatch(id: usize, cb: Cb) {
+    let tombstoned = TOMBSTONES.with(|t| t.borrow_mut().remove(&id));
+    if !tombstoned {
+        CALLBACKS.with(|c| c.borrow_mut().insert(id, cb));
+    }
+}
+
+// remove-then-call so callbacks can safely (un)register callbacks; put back after.
+// catch_unwind: a panicking Rust callback must never unwind across the FFI boundary (UB).
 fn dtk_cb0(id: usize) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
     if let Some(Cb::C0(f)) = &mut cb {
-        f();
-        CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));
+        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(&mut *f)).is_err() {
+            eprintln!("dtk-rs: callback {id} panicked, swallowed at FFI boundary");
+        }
+        finish_dispatch(id, cb.take().unwrap());
     }
 }
 
 fn dtk_cb_i32(id: usize, v: i32) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
     if let Some(Cb::I32(f)) = &mut cb {
-        f(v);
-        CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));
+        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(v))).is_err() {
+            eprintln!("dtk-rs: callback {id} panicked, swallowed at FFI boundary");
+        }
+        finish_dispatch(id, cb.take().unwrap());
+    }
+}
+
+fn dtk_cb_bool(id: usize, v: bool) {
+    let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
+    if let Some(Cb::Bool(f)) = &mut cb {
+        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(v))).is_err() {
+            eprintln!("dtk-rs: callback {id} panicked, swallowed at FFI boundary");
+        }
+        finish_dispatch(id, cb.take().unwrap());
     }
 }
 
 fn dtk_cb_guard(id: usize) -> bool {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
-    let mut result = true; // default to allow when callback is missing
-    if let Some(Cb::Guard(f)) = &mut cb {
-        result = f();
-        CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));
-    }
+    let Some(Cb::Guard(f)) = &mut cb else {
+        eprintln!("dtk-rs: guard callback {id} missing, defaulting to allow");
+        return true;
+    };
+    let result = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(&mut *f)) {
+        Ok(r) => r,
+        Err(_) => {
+            eprintln!("dtk-rs: guard callback {id} panicked, defaulting to allow");
+            true
+        }
+    };
+    finish_dispatch(id, cb.take().unwrap());
     result
 }
 
@@ -430,7 +484,13 @@ unsafe fn dtk_cb_paint(
 ) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
     if let Some(Cb::Paint(f)) = &mut cb {
-        f(painter, index, x, y, w, h, state);
-        CALLBACKS.with(|c| c.borrow_mut().insert(id, cb.take().unwrap()));
+        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            f(painter, index, x, y, w, h, state)
+        }))
+        .is_err()
+        {
+            eprintln!("dtk-rs: paint callback {id} panicked, swallowed at FFI boundary");
+        }
+        finish_dispatch(id, cb.take().unwrap());
     }
 }

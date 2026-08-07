@@ -39,9 +39,13 @@ fn main() {
         );
         assert!(!DApplication::has_arg("--hidden"));
         let pal = win.palette();
-        let hl = pal.color(qt::PALETTE_ACTIVE, qt::ROLE_HIGHLIGHT);
-        pal.set_color(qt::PALETTE_INACTIVE, qt::ROLE_HIGHLIGHT, &hl);
-        let got = pal.color(qt::PALETTE_INACTIVE, qt::ROLE_HIGHLIGHT);
+        let hl = pal.color(qt::palette_group::ACTIVE, qt::palette_role::HIGHLIGHT);
+        pal.set_color(
+            qt::palette_group::INACTIVE,
+            qt::palette_role::HIGHLIGHT,
+            &hl,
+        );
+        let got = pal.color(qt::palette_group::INACTIVE, qt::palette_role::HIGHLIGHT);
         assert_eq!(
             got.rgba_u32(),
             hl.rgba_u32(),
@@ -52,10 +56,10 @@ fn main() {
         let hbox = QHBoxLayout::new(None);
         hbox.add_stretch(1); // pushes the button right
         let b2 = DPushButton::new("right");
-        hbox.add_widget_ex(&b2.as_widget(), 0, qt::ALIGN_TOP);
+        hbox.add_widget_ex(&b2.as_widget(), 0, qt::alignment::TOP);
         vbox.add_layout(&hbox);
-        std::mem::forget(b2);
-        std::mem::forget(hbox);
+        b2.leak();
+        hbox.leak();
     }
 
     // --smoke only: verify PaintDelegate + QSocketNotifier chains
@@ -73,19 +77,19 @@ fn main() {
                 assert_eq!(idx.data_string(0), "icon cell"); // DisplayRole
                 p.set_clip_rect(x, y, w, h);
                 p.fill_rect(x, y, w, h, &QColor::rgb(200, 220, 255));
-                let elided = p.elided_text("a-very-long-application-name", qt::ELIDE_RIGHT, w);
+                let elided = p.elided_text("a-very-long-application-name", qt::elide::RIGHT, w);
                 assert!(
                     elided.ends_with('\u{2026}') || elided.len() < 26,
                     "elide failed: {elided}"
                 );
-                p.draw_text(x, y, w, h, qt::ALIGN_CENTER, &elided);
+                p.draw_text(x, y, w, h, qt::alignment::CENTER, &elided);
                 painted.set(true);
             });
             table.set_delegate_for_column(0, &delegate);
-            std::mem::forget(delegate); // lifetime handed to the table (short-lived offscreen test)
+            delegate.leak(); // lifetime handed to the table (short-lived offscreen test)
         }
         vbox.add_widget(&table.as_widget());
-        std::mem::forget(table);
+        table.leak();
 
         // self-pipe to test QSocketNotifier
         let mut fds = [0i32; 2];
@@ -102,7 +106,7 @@ fn main() {
                 println!("notified");
             });
         }
-        std::mem::forget(notifier);
+        notifier.leak();
     }
 
     win.set_central_widget(&central);

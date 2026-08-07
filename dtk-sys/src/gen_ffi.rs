@@ -3,6 +3,7 @@
 pub mod genffi {
     extern "C++" {
         include!("dtk_gen_shim.h");
+        type QAbstractButton;
         type QWidget;
         type QColor;
         type QFont;
@@ -190,7 +191,15 @@ pub mod genffi {
         unsafe fn gen_d_abstract_dialog_new() -> *mut DAbstractDialog;
         unsafe fn gen_d_abstract_dialog_display_position(self_: *mut DAbstractDialog) -> i32;
         unsafe fn gen_d_abstract_dialog_move_(self_: *mut DAbstractDialog, pos: *mut QPoint);
+        unsafe fn gen_d_abstract_dialog_move_2(self_: *mut DAbstractDialog, x: i32, y: i32);
         unsafe fn gen_d_abstract_dialog_set_geometry(self_: *mut DAbstractDialog, rect: *mut QRect);
+        unsafe fn gen_d_abstract_dialog_set_geometry_2(
+            self_: *mut DAbstractDialog,
+            x: i32,
+            y: i32,
+            width: i32,
+            height: i32,
+        );
         unsafe fn gen_d_abstract_dialog_move_to_center(self_: *mut DAbstractDialog);
         unsafe fn gen_d_abstract_dialog_move_to_top_right(self_: *mut DAbstractDialog);
         unsafe fn gen_d_abstract_dialog_move_to_center_by_rect(
@@ -519,6 +528,14 @@ pub mod genffi {
         unsafe fn gen_d_button_box_new() -> *mut DButtonBox;
         unsafe fn gen_d_button_box_orientation(self_: *mut DButtonBox) -> i32;
         unsafe fn gen_d_button_box_set_orientation(self_: *mut DButtonBox, orientation: i32);
+        unsafe fn gen_d_button_box_checked_button(self_: *mut DButtonBox) -> *mut QAbstractButton;
+        unsafe fn gen_d_button_box_button(self_: *mut DButtonBox, id: i32) -> *mut QAbstractButton;
+        unsafe fn gen_d_button_box_set_id(
+            self_: *mut DButtonBox,
+            button: *mut QAbstractButton,
+            id: i32,
+        );
+        unsafe fn gen_d_button_box_id(self_: *mut DButtonBox, button: *mut QAbstractButton) -> i32;
         unsafe fn gen_d_button_box_checked_id(self_: *mut DButtonBox) -> i32;
         unsafe fn gen_d_circle_progress_new() -> *mut DCircleProgress;
         unsafe fn gen_d_circle_progress_value(self_: *mut DCircleProgress) -> i32;
@@ -579,6 +596,7 @@ pub mod genffi {
         ) -> bool;
         unsafe fn gen_d_crumb_edit_append_crumb(self_: *mut DCrumbEdit, text: &str) -> bool;
         unsafe fn gen_d_crumb_edit_contain_crumb(self_: *mut DCrumbEdit, text: &str) -> bool;
+        unsafe fn gen_d_crumb_edit_crumb_list(self_: *mut DCrumbEdit) -> Vec<String>;
         unsafe fn gen_d_crumb_edit_dual_click_make_crumb(self_: *mut DCrumbEdit) -> bool;
         unsafe fn gen_d_crumb_edit_crumb_read_only(self_: *mut DCrumbEdit) -> bool;
         unsafe fn gen_d_crumb_edit_crumb_radius(self_: *mut DCrumbEdit) -> i32;
@@ -591,6 +609,7 @@ pub mod genffi {
         unsafe fn gen_d_dialog_get_button_index_by_text(self_: *mut DDialog, text: &str) -> i32;
         unsafe fn gen_d_dialog_button_count(self_: *mut DDialog) -> i32;
         unsafe fn gen_d_dialog_content_count(self_: *mut DDialog) -> i32;
+        unsafe fn gen_d_dialog_get_button(self_: *mut DDialog, index: i32) -> *mut QAbstractButton;
         unsafe fn gen_d_dialog_get_content(self_: *mut DDialog, index: i32) -> *mut QWidget;
         unsafe fn gen_d_dialog_title(self_: *mut DDialog) -> String;
         unsafe fn gen_d_dialog_message(self_: *mut DDialog) -> String;
@@ -611,6 +630,7 @@ pub mod genffi {
             isDefault: bool,
             type_: i32,
         ) -> i32;
+        unsafe fn gen_d_dialog_add_buttons(self_: *mut DDialog, text: Vec<String>) -> i32;
         unsafe fn gen_d_dialog_insert_button(
             self_: *mut DDialog,
             index: i32,
@@ -618,11 +638,23 @@ pub mod genffi {
             isDefault: bool,
             type_: i32,
         );
+        unsafe fn gen_d_dialog_insert_button_2(
+            self_: *mut DDialog,
+            index: i32,
+            button: *mut QAbstractButton,
+            isDefault: bool,
+        );
+        unsafe fn gen_d_dialog_insert_buttons(self_: *mut DDialog, index: i32, text: Vec<String>);
         unsafe fn gen_d_dialog_remove_button(self_: *mut DDialog, index: i32);
+        unsafe fn gen_d_dialog_remove_button_2(self_: *mut DDialog, button: *mut QAbstractButton);
         unsafe fn gen_d_dialog_remove_button_by_text(self_: *mut DDialog, text: &str);
         unsafe fn gen_d_dialog_clear_buttons(self_: *mut DDialog);
         unsafe fn gen_d_dialog_set_default_button(self_: *mut DDialog, index: i32) -> bool;
         unsafe fn gen_d_dialog_set_default_button_2(self_: *mut DDialog, str: &str) -> bool;
+        unsafe fn gen_d_dialog_set_default_button_3(
+            self_: *mut DDialog,
+            button: *mut QAbstractButton,
+        );
         unsafe fn gen_d_dialog_add_content(
             self_: *mut DDialog,
             widget: *mut QWidget,
@@ -699,6 +731,7 @@ pub mod genffi {
             target: *mut QWidget,
         );
         unsafe fn gen_d_enhanced_widget_set_enabled(self_: *mut DEnhancedWidget, enabled: bool);
+        unsafe fn gen_d_feature_item_new() -> *mut DFeatureItem;
         unsafe fn gen_d_feature_item_icon(self_: *mut DFeatureItem) -> *mut QIcon;
         unsafe fn gen_d_feature_item_set_icon(self_: *mut DFeatureItem, icon: *mut QIcon);
         unsafe fn gen_d_feature_item_name(self_: *mut DFeatureItem) -> String;
@@ -730,6 +763,12 @@ pub mod genffi {
         unsafe fn gen_d_feature_display_dialog_show(self_: *mut DFeatureDisplayDialog);
         unsafe fn gen_d_feature_display_dialog_is_empty(self_: *mut DFeatureDisplayDialog) -> bool;
         unsafe fn gen_d_file_chooser_edit_new() -> *mut DFileChooserEdit;
+        unsafe fn gen_d_file_chooser_edit_set_name_filters(
+            self_: *mut DFileChooserEdit,
+            filters: Vec<String>,
+        );
+        unsafe fn gen_d_file_chooser_edit_name_filters(self_: *mut DFileChooserEdit)
+        -> Vec<String>;
         unsafe fn gen_d_file_chooser_edit_set_dialog_display_position(
             self_: *mut DFileChooserEdit,
             dialogDisplayPosition: i32,
@@ -738,6 +777,12 @@ pub mod genffi {
             self_: *mut DFileChooserEdit,
         ) -> i32;
         unsafe fn gen_d_file_chooser_edit_init_dialog(self_: *mut DFileChooserEdit);
+        unsafe fn gen_d_file_dialog_new() -> *mut DFileDialog;
+        unsafe fn gen_d_file_dialog_add_combo_box(
+            self_: *mut DFileDialog,
+            text: &str,
+            data: Vec<String>,
+        );
         unsafe fn gen_d_file_dialog_add_line_edit(self_: *mut DFileDialog, text: &str);
         unsafe fn gen_d_file_dialog_set_allow_mixed_selection(self_: *mut DFileDialog, on: bool);
         unsafe fn gen_d_file_dialog_get_combo_box_value(
@@ -822,6 +867,7 @@ pub mod genffi {
         unsafe fn gen_d_font_combo_box_set_current_font(self_: *mut DFontComboBox, f: *mut QFont);
         unsafe fn gen_d_frame_new() -> *mut DFrame;
         unsafe fn gen_d_frame_set_frame_rounded(self_: *mut DFrame, on: bool);
+        unsafe fn gen_d_frame_set_background_role(self_: *mut DFrame, type_: i32);
         unsafe fn gen_d_horizontal_line_new() -> *mut DHorizontalLine;
         unsafe fn gen_d_vertical_line_new() -> *mut DVerticalLine;
         unsafe fn gen_d_graphics_clip_effect_new() -> *mut DGraphicsClipEffect;
@@ -833,6 +879,35 @@ pub mod genffi {
             margins: *mut QMargins,
         );
         unsafe fn gen_d_graphics_glow_effect_new() -> *mut DGraphicsGlowEffect;
+        unsafe fn gen_d_graphics_glow_effect_set_offset(
+            self_: *mut DGraphicsGlowEffect,
+            dx: f64,
+            dy: f64,
+        );
+        unsafe fn gen_d_graphics_glow_effect_set_x_offset(self_: *mut DGraphicsGlowEffect, dx: f64);
+        unsafe fn gen_d_graphics_glow_effect_x_offset(self_: *mut DGraphicsGlowEffect) -> f64;
+        unsafe fn gen_d_graphics_glow_effect_set_y_offset(self_: *mut DGraphicsGlowEffect, dy: f64);
+        unsafe fn gen_d_graphics_glow_effect_y_offset(self_: *mut DGraphicsGlowEffect) -> f64;
+        unsafe fn gen_d_graphics_glow_effect_set_distance(
+            self_: *mut DGraphicsGlowEffect,
+            distance: f64,
+        );
+        unsafe fn gen_d_graphics_glow_effect_distance(self_: *mut DGraphicsGlowEffect) -> f64;
+        unsafe fn gen_d_graphics_glow_effect_set_blur_radius(
+            self_: *mut DGraphicsGlowEffect,
+            blurRadius: f64,
+        );
+        unsafe fn gen_d_graphics_glow_effect_blur_radius(self_: *mut DGraphicsGlowEffect) -> f64;
+        unsafe fn gen_d_graphics_glow_effect_set_color(
+            self_: *mut DGraphicsGlowEffect,
+            color: *mut QColor,
+        );
+        unsafe fn gen_d_graphics_glow_effect_color(self_: *mut DGraphicsGlowEffect) -> *mut QColor;
+        unsafe fn gen_d_graphics_glow_effect_opacity(self_: *mut DGraphicsGlowEffect) -> f64;
+        unsafe fn gen_d_graphics_glow_effect_set_opacity(
+            self_: *mut DGraphicsGlowEffect,
+            opacity: f64,
+        );
         unsafe fn gen_d_header_line_new() -> *mut DHeaderLine;
         unsafe fn gen_d_header_line_set_title(self_: *mut DHeaderLine, title: &str);
         unsafe fn gen_d_header_line_set_content(self_: *mut DHeaderLine, content: *mut QWidget);
@@ -866,6 +941,11 @@ pub mod genffi {
         unsafe fn gen_d_image_viewer_clear(self_: *mut DImageViewer);
         unsafe fn gen_d_image_viewer_center_on(self_: *mut DImageViewer, x: f64, y: f64);
         unsafe fn gen_d_image_viewer_visible_image_rect(self_: *mut DImageViewer) -> *mut QRect;
+        unsafe fn gen_d_image_viewer_scale_at_point(
+            self_: *mut DImageViewer,
+            pos: *mut QPoint,
+            factor: f64,
+        );
         unsafe fn gen_d_image_viewer_begin_crop_image(self_: *mut DImageViewer);
         unsafe fn gen_d_image_viewer_end_crop_image(self_: *mut DImageViewer);
         unsafe fn gen_d_image_viewer_reset_crop_image(self_: *mut DImageViewer);
@@ -877,21 +957,52 @@ pub mod genffi {
         unsafe fn gen_d_image_viewer_crop_image_rect(self_: *mut DImageViewer) -> *mut QRect;
         unsafe fn gen_d_indeterminate_progressbar_new() -> *mut DIndeterminateProgressbar;
         unsafe fn gen_d_input_dialog_new() -> *mut DInputDialog;
+        unsafe fn gen_d_input_dialog_set_input_mode(self_: *mut DInputDialog, mode: i32);
         unsafe fn gen_d_input_dialog_input_mode(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_text_value(self_: *mut DInputDialog, text: &str);
         unsafe fn gen_d_input_dialog_text_value(self_: *mut DInputDialog) -> String;
+        unsafe fn gen_d_input_dialog_set_text_echo_mode(self_: *mut DInputDialog, mode: i32);
+        unsafe fn gen_d_input_dialog_text_echo_mode(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_combo_box_editable(
+            self_: *mut DInputDialog,
+            editable: bool,
+        );
         unsafe fn gen_d_input_dialog_is_combo_box_editable(self_: *mut DInputDialog) -> bool;
+        unsafe fn gen_d_input_dialog_set_combo_box_items(
+            self_: *mut DInputDialog,
+            items: Vec<String>,
+        );
+        unsafe fn gen_d_input_dialog_combo_box_items(self_: *mut DInputDialog) -> Vec<String>;
+        unsafe fn gen_d_input_dialog_set_combo_box_current_index(
+            self_: *mut DInputDialog,
+            comboBoxCurrentIndex: i32,
+        );
         unsafe fn gen_d_input_dialog_combo_box_current_index(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_int_value(self_: *mut DInputDialog, value: i32);
         unsafe fn gen_d_input_dialog_int_value(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_int_minimum(self_: *mut DInputDialog, min: i32);
         unsafe fn gen_d_input_dialog_int_minimum(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_int_maximum(self_: *mut DInputDialog, max: i32);
         unsafe fn gen_d_input_dialog_int_maximum(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_int_range(self_: *mut DInputDialog, min: i32, max: i32);
+        unsafe fn gen_d_input_dialog_set_int_step(self_: *mut DInputDialog, step: i32);
         unsafe fn gen_d_input_dialog_int_step(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_double_value(self_: *mut DInputDialog, value: f64);
         unsafe fn gen_d_input_dialog_double_value(self_: *mut DInputDialog) -> f64;
+        unsafe fn gen_d_input_dialog_set_double_minimum(self_: *mut DInputDialog, min: f64);
         unsafe fn gen_d_input_dialog_double_minimum(self_: *mut DInputDialog) -> f64;
+        unsafe fn gen_d_input_dialog_set_double_maximum(self_: *mut DInputDialog, max: f64);
         unsafe fn gen_d_input_dialog_double_maximum(self_: *mut DInputDialog) -> f64;
+        unsafe fn gen_d_input_dialog_set_double_range(self_: *mut DInputDialog, min: f64, max: f64);
+        unsafe fn gen_d_input_dialog_set_double_decimals(self_: *mut DInputDialog, decimals: i32);
         unsafe fn gen_d_input_dialog_double_decimals(self_: *mut DInputDialog) -> i32;
+        unsafe fn gen_d_input_dialog_set_ok_button_text(self_: *mut DInputDialog, text: &str);
         unsafe fn gen_d_input_dialog_ok_button_text(self_: *mut DInputDialog) -> String;
+        unsafe fn gen_d_input_dialog_set_ok_button_enabled(self_: *mut DInputDialog, enable: bool);
         unsafe fn gen_d_input_dialog_ok_button_is_enabled(self_: *mut DInputDialog) -> bool;
+        unsafe fn gen_d_input_dialog_set_cancel_button_text(self_: *mut DInputDialog, text: &str);
         unsafe fn gen_d_input_dialog_cancel_button_text(self_: *mut DInputDialog) -> String;
+        unsafe fn gen_d_input_dialog_set_text_alert(self_: *mut DInputDialog, textAlert: bool);
         unsafe fn gen_d_input_dialog_is_text_alert(self_: *mut DInputDialog) -> bool;
         unsafe fn gen_d_ipv4_line_edit_new() -> *mut DIpv4LineEdit;
         unsafe fn gen_d_ipv4_line_edit_display_text(self_: *mut DIpv4LineEdit) -> String;
@@ -953,6 +1064,8 @@ pub mod genffi {
         unsafe fn gen_d_line_edit_set_text(self_: *mut DLineEdit, text: &str);
         unsafe fn gen_d_line_edit_text(self_: *mut DLineEdit) -> String;
         unsafe fn gen_d_line_edit_clear(self_: *mut DLineEdit);
+        unsafe fn gen_d_line_edit_echo_mode(self_: *mut DLineEdit) -> i32;
+        unsafe fn gen_d_line_edit_set_echo_mode(self_: *mut DLineEdit, mode: i32);
         unsafe fn gen_d_line_edit_set_context_menu_policy(self_: *mut DLineEdit, policy: i32);
         unsafe fn gen_d_line_edit_speech_to_text_is_enabled(self_: *mut DLineEdit) -> bool;
         unsafe fn gen_d_line_edit_set_speech_to_text_enabled(self_: *mut DLineEdit, enable: bool);
@@ -1130,12 +1243,18 @@ pub mod genffi {
         );
         unsafe fn gen_d_password_edit_new() -> *mut DPasswordEdit;
         unsafe fn gen_d_password_edit_is_echo_mode(self_: *mut DPasswordEdit) -> bool;
+        unsafe fn gen_d_password_edit_set_echo_mode(self_: *mut DPasswordEdit, mode: i32);
         unsafe fn gen_d_password_edit_set_echo_button_is_visible(
             self_: *mut DPasswordEdit,
             visible: bool,
         );
         unsafe fn gen_d_password_edit_echo_button_is_visible(self_: *mut DPasswordEdit) -> bool;
         unsafe fn gen_d_picture_sequence_view_new() -> *mut DPictureSequenceView;
+        unsafe fn gen_d_picture_sequence_view_set_picture_sequence(
+            self_: *mut DPictureSequenceView,
+            sequence: Vec<String>,
+            autoScale: bool,
+        );
         unsafe fn gen_d_picture_sequence_view_play(self_: *mut DPictureSequenceView);
         unsafe fn gen_d_picture_sequence_view_pause(self_: *mut DPictureSequenceView);
         unsafe fn gen_d_picture_sequence_view_stop(self_: *mut DPictureSequenceView);
@@ -1197,6 +1316,7 @@ pub mod genffi {
         unsafe fn gen_d_print_preview_dialog_new() -> *mut DPrintPreviewDialog;
         unsafe fn gen_d_print_preview_dialog_set_current_plugin(pluginName: &str) -> bool;
         unsafe fn gen_d_print_preview_dialog_current_plugin() -> String;
+        unsafe fn gen_d_print_preview_dialog_available_plugins() -> Vec<String>;
         unsafe fn gen_d_print_preview_dialog_set_doc_name(
             self_: *mut DPrintPreviewDialog,
             arg0: &str,
@@ -1224,6 +1344,9 @@ pub mod genffi {
             self_: *mut DPrintPreviewDialog,
             info: *mut DPrintPreviewSettingInfo,
         );
+        unsafe fn gen_d_print_preview_setting_info_type_(
+            self_: *mut DPrintPreviewSettingInfo,
+        ) -> i32;
         unsafe fn gen_d_print_preview_printer_info_new() -> *mut DPrintPreviewPrinterInfo;
         unsafe fn gen_d_print_preview_copies_info_new() -> *mut DPrintPreviewCopiesInfo;
         unsafe fn gen_d_print_preview_page_range_info_new() -> *mut DPrintPreviewPageRangeInfo;
@@ -1467,6 +1590,10 @@ pub mod genffi {
         unsafe fn gen_d_slider_page_step(self_: *mut DSlider) -> i32;
         unsafe fn gen_d_slider_set_maximum(self_: *mut DSlider, max: i32);
         unsafe fn gen_d_slider_maximum(self_: *mut DSlider) -> i32;
+        unsafe fn gen_d_slider_set_left_ticks(self_: *mut DSlider, info: Vec<String>);
+        unsafe fn gen_d_slider_set_right_ticks(self_: *mut DSlider, info: Vec<String>);
+        unsafe fn gen_d_slider_set_above_ticks(self_: *mut DSlider, info: Vec<String>);
+        unsafe fn gen_d_slider_set_below_ticks(self_: *mut DSlider, info: Vec<String>);
         unsafe fn gen_d_slider_set_mouse_wheel_enabled(self_: *mut DSlider, enabled: bool);
         unsafe fn gen_d_slider_set_tip_value(self_: *mut DSlider, value: &str);
         unsafe fn gen_d_slider_size_hint(self_: *mut DSlider) -> *mut QSize;
@@ -1532,6 +1659,13 @@ pub mod genffi {
             widget: *mut QWidget,
             enableTransition: bool,
         );
+        unsafe fn gen_d_stack_widget_pop_widget(
+            self_: *mut DStackWidget,
+            widget: *mut QWidget,
+            isDelete: bool,
+            count: i32,
+            enableTransition: bool,
+        );
         unsafe fn gen_d_stack_widget_clear(self_: *mut DStackWidget);
         unsafe fn gen_d_stack_widget_index_of(
             self_: *mut DStackWidget,
@@ -1550,6 +1684,16 @@ pub mod genffi {
             animationDuration: i32,
         );
         unsafe fn gen_d_style_new() -> *mut DStyle;
+        unsafe fn gen_d_style_adjust_color(
+            base: *mut QColor,
+            hueFloat: i8,
+            saturationFloat: i8,
+            lightnessFloat: i8,
+            redFloat: i8,
+            greenFloat: i8,
+            blueFloat: i8,
+            alphaFloat: i8,
+        ) -> *mut QColor;
         unsafe fn gen_d_style_blend_color(
             substrate: *mut QColor,
             superstratum: *mut QColor,
@@ -1565,7 +1709,16 @@ pub mod genffi {
         unsafe fn gen_d_style_set_menu_keyboard_search_disabled(disabled: bool);
         unsafe fn gen_d_style_is_menu_keyboard_search_disabled() -> bool;
         unsafe fn gen_d_style_standard_palette(self_: *mut DStyle) -> *mut QPalette;
+        unsafe fn gen_d_style_helper_dstyle(self_: *mut DStyleHelper) -> *mut DStyle;
+        unsafe fn gen_d_style_painter_begin(self_: *mut DStylePainter, w: *mut QWidget) -> bool;
+        unsafe fn gen_d_style_painter_draw_item_pixmap(
+            self_: *mut DStylePainter,
+            r: *mut QRect,
+            flags: i32,
+            pixmap: *mut QPixmap,
+        );
         unsafe fn gen_d_styled_icon_engine_set_icon_name(self_: *mut DStyledIconEngine, name: &str);
+        unsafe fn gen_d_view_item_action_new() -> *mut DViewItemAction;
         unsafe fn gen_d_view_item_action_alignment(self_: *mut DViewItemAction) -> i32;
         unsafe fn gen_d_view_item_action_icon_size(self_: *mut DViewItemAction) -> *mut QSize;
         unsafe fn gen_d_view_item_action_maximum_size(self_: *mut DViewItemAction) -> *mut QSize;
@@ -1576,6 +1729,16 @@ pub mod genffi {
             self_: *mut DViewItemAction,
             margins: *mut QMargins,
         );
+        unsafe fn gen_d_view_item_action_set_text_color_role(
+            self_: *mut DViewItemAction,
+            role: i32,
+        );
+        unsafe fn gen_d_view_item_action_set_text_color_role_2(
+            self_: *mut DViewItemAction,
+            role: i32,
+        );
+        unsafe fn gen_d_view_item_action_text_color_type(self_: *mut DViewItemAction) -> i32;
+        unsafe fn gen_d_view_item_action_text_color_role(self_: *mut DViewItemAction) -> i32;
         unsafe fn gen_d_view_item_action_set_font_size(self_: *mut DViewItemAction, size: i32);
         unsafe fn gen_d_view_item_action_font(self_: *mut DViewItemAction) -> *mut QFont;
         unsafe fn gen_d_view_item_action_is_clickable(self_: *mut DViewItemAction) -> bool;
@@ -1616,6 +1779,14 @@ pub mod genffi {
             self_: *mut DStyledItemDelegate,
             spacing: i32,
         );
+        unsafe fn gen_d_standard_item_set_text_color_role(self_: *mut DStandardItem, role: i32);
+        unsafe fn gen_d_standard_item_set_text_color_role_2(self_: *mut DStandardItem, role: i32);
+        unsafe fn gen_d_standard_item_text_color_type(self_: *mut DStandardItem) -> i32;
+        unsafe fn gen_d_standard_item_text_color_role(self_: *mut DStandardItem) -> i32;
+        unsafe fn gen_d_standard_item_set_background_role(self_: *mut DStandardItem, role: i32);
+        unsafe fn gen_d_standard_item_set_background_role_2(self_: *mut DStandardItem, role: i32);
+        unsafe fn gen_d_standard_item_background_type(self_: *mut DStandardItem) -> i32;
+        unsafe fn gen_d_standard_item_background_role(self_: *mut DStandardItem) -> i32;
         unsafe fn gen_d_standard_item_set_font_size(self_: *mut DStandardItem, size: i32);
         unsafe fn gen_d_standard_item_font(self_: *mut DStandardItem) -> *mut QFont;
         unsafe fn gen_d_standard_item_set_dci_icon(
@@ -1654,6 +1825,19 @@ pub mod genffi {
             self_: *mut DFontSizeManager,
             widget: *mut QWidget,
         );
+        unsafe fn gen_d_font_size_manager_font_pixel_size(
+            self_: *mut DFontSizeManager,
+            type_: i32,
+        ) -> u16;
+        unsafe fn gen_d_font_size_manager_set_font_pixel_size(
+            self_: *mut DFontSizeManager,
+            type_: i32,
+            size: u16,
+        );
+        unsafe fn gen_d_font_size_manager_set_font_generic_pixel_size(
+            self_: *mut DFontSizeManager,
+            size: u16,
+        );
         unsafe fn gen_d_font_size_manager_get(
             self_: *mut DFontSizeManager,
             type_: i32,
@@ -1665,7 +1849,51 @@ pub mod genffi {
             weight: i32,
             base: *mut QFont,
         ) -> *mut QFont;
-        unsafe fn gen_d_font_size_manager_font_pixel_size(font: *mut QFont) -> i32;
+        unsafe fn gen_d_font_size_manager_t1(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t2(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t3(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t4(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t5(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t6(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t7(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t8(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t9(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t10(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_t11(
+            self_: *mut DFontSizeManager,
+            base: *mut QFont,
+        ) -> *mut QFont;
+        unsafe fn gen_d_font_size_manager_font_pixel_size_2(font: *mut QFont) -> i32;
         unsafe fn gen_d_switch_button_new() -> *mut DSwitchButton;
         unsafe fn gen_d_switch_button_size_hint(self_: *mut DSwitchButton) -> *mut QSize;
         unsafe fn gen_d_switch_header_line_new() -> *mut DSwitchHeaderLine;
@@ -1686,6 +1914,8 @@ pub mod genffi {
             size: *mut QSize,
         );
         unsafe fn gen_d_tab_bar_visible_add_button(self_: *mut DTabBar) -> bool;
+        unsafe fn gen_d_tab_bar_shape(self_: *mut DTabBar) -> i32;
+        unsafe fn gen_d_tab_bar_set_shape(self_: *mut DTabBar, shape: i32);
         unsafe fn gen_d_tab_bar_add_tab(self_: *mut DTabBar, text: &str) -> i32;
         unsafe fn gen_d_tab_bar_add_tab_2(self_: *mut DTabBar, icon: *mut QIcon, text: &str)
         -> i32;
@@ -1722,6 +1952,22 @@ pub mod genffi {
         unsafe fn gen_d_tab_bar_set_uses_scroll_buttons(self_: *mut DTabBar, useButtons: bool);
         unsafe fn gen_d_tab_bar_tabs_closable(self_: *mut DTabBar) -> bool;
         unsafe fn gen_d_tab_bar_set_tabs_closable(self_: *mut DTabBar, closable: bool);
+        unsafe fn gen_d_tab_bar_set_tab_button(
+            self_: *mut DTabBar,
+            index: i32,
+            position: i32,
+            widget: *mut QWidget,
+        );
+        unsafe fn gen_d_tab_bar_tab_button(
+            self_: *mut DTabBar,
+            index: i32,
+            position: i32,
+        ) -> *mut QWidget;
+        unsafe fn gen_d_tab_bar_selection_behavior_on_remove(self_: *mut DTabBar) -> i32;
+        unsafe fn gen_d_tab_bar_set_selection_behavior_on_remove(
+            self_: *mut DTabBar,
+            behavior: i32,
+        );
         unsafe fn gen_d_tab_bar_expanding(self_: *mut DTabBar) -> bool;
         unsafe fn gen_d_tab_bar_set_expanding(self_: *mut DTabBar, enabled: bool);
         unsafe fn gen_d_tab_bar_is_movable(self_: *mut DTabBar) -> bool;
@@ -1771,6 +2017,7 @@ pub mod genffi {
         unsafe fn gen_d_tick_effect_set_fixed_pixel_move(self_: *mut DTickEffect, pixel: i32);
         unsafe fn gen_d_tip_label_new() -> *mut DTipLabel;
         unsafe fn gen_d_tip_label_show(self_: *mut DTipLabel, pos: *mut QPoint);
+        unsafe fn gen_d_tip_label_set_foreground_role(self_: *mut DTipLabel, color: i32);
         unsafe fn gen_d_titlebar_tool_base_interface_id(
             self_: *mut DTitlebarToolBaseInterface,
         ) -> String;

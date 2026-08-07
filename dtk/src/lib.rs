@@ -12,6 +12,18 @@ fn opt_ptr(w: Option<&QWidget>) -> *mut ffi::QWidget {
     w.map_or(std::ptr::null_mut(), |w| w.ptr)
 }
 
+/// `impl Default` for wrappers whose `new()` is the default ctor
+macro_rules! impl_default {
+    ($($name:ident),* $(,)?) => {
+        $(impl Default for $name {
+            fn default() -> Self {
+                Self::new()
+            }
+        })*
+    };
+}
+pub(crate) use impl_default;
+
 macro_rules! widget_wrapper {
     ($name:ident, $ffi:ty) => {
         object_wrapper!($name, $ffi);
@@ -50,7 +62,7 @@ macro_rules! widget_wrapper {
             pub fn is_visible(&self) -> bool {
                 unsafe { ffi::widget_is_visible(self.ptr.cast()) }
             }
-            /// use qt::NO_FOCUS etc. for policy
+            /// use qt::focus::NO_FOCUS etc. for policy
             pub fn set_focus_policy(&self, policy: i32) {
                 unsafe { ffi::widget_set_focus_policy(self.ptr.cast(), policy) }
             }
@@ -64,13 +76,18 @@ macro_rules! widget_wrapper {
             pub fn set_palette(&self, pal: &QPalette) {
                 unsafe { ffi::widget_set_palette(self.ptr.cast(), pal.ptr) }
             }
-            /// use qt::SP_* constants for icon
+            /// use qt::standard_pixmap::* constants for icon
             pub fn standard_icon_pixmap(&self, icon: i32, size: i32) -> QPixmap {
                 QPixmap::from_raw(unsafe { ffi::standard_icon_pixmap(self.ptr.cast(), icon, size) })
             }
             /// deferred delete (next event-loop turn)
             pub fn delete_later(&self) {
                 unsafe { ffi::object_delete_later(self.ptr.cast()) }
+            }
+            /// leak the Rust handle; Qt parent-child still owns the object.
+            /// kills `std::mem::forget` boilerplate for top-level widgets.
+            pub fn leak(self) {
+                std::mem::forget(self);
             }
         }
     };
@@ -107,6 +124,16 @@ macro_rules! object_wrapper {
                 self.as_qobject()
             }
         }
+        impl SignalBool for $name {
+            fn qobject_ptr(&self) -> *mut ffi::QObject {
+                self.as_qobject()
+            }
+        }
+        impl std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, concat!(stringify!($name), "({:p})"), self.ptr)
+            }
+        }
     };
 }
 
@@ -136,24 +163,79 @@ impl QWidget {
     }
 }
 
+impl Signal0 for QWidget {
+    fn qobject_ptr(&self) -> *mut ffi::QObject {
+        self.ptr.cast()
+    }
+}
+impl SignalI32 for QWidget {
+    fn qobject_ptr(&self) -> *mut ffi::QObject {
+        self.ptr.cast()
+    }
+}
+impl SignalBool for QWidget {
+    fn qobject_ptr(&self) -> *mut ffi::QObject {
+        self.ptr.cast()
+    }
+}
+
+impl std::fmt::Debug for QWidget {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "QWidget({:p})", self.ptr)
+    }
+}
+
+// Qt button base handle (returned by e.g. DDialog button accessors)
+widget_wrapper!(QAbstractButton, ffi::QAbstractButton);
+
 /// connect an arg-less signal on any widget (e.g. clicked, timeout)
 pub trait Signal0 {
     fn qobject_ptr(&self) -> *mut ffi::QObject;
-    /// signal looks like "clicked()" / "windowRadiusChanged()"
-    fn connect_signal(&self, signal: &str, f: impl FnMut() + 'static) {
+    /// Full Qt signature, e.g. "clicked(bool)" / "timeout()"; signal args are ignored.
+    /// Returns the callback id for [`unregister_callback`]; 0 = connect failed.
+    fn connect_signal(&self, signal: &str, f: impl FnMut() + 'static) -> usize {
         let id = dtk_sys::register_cb0(f);
-        unsafe { ffi::relay_connect0(self.qobject_ptr(), signal, id) }
+        if unsafe { ffi::relay_connect0(self.qobject_ptr(), signal, id) } {
+            id
+        } else {
+            dtk_sys::unregister_cb(id); // roll back registration
+            0
+        }
     }
 }
 
 /// signal with one i32 arg (e.g. currentRowChanged(int))
 pub trait SignalI32 {
     fn qobject_ptr(&self) -> *mut ffi::QObject;
-    fn connect_signal_i32(&self, signal: &str, f: impl FnMut(i32) + 'static) {
+    /// Returns the callback id for [`unregister_callback`]; 0 = connect failed.
+    fn connect_signal_i32(&self, signal: &str, f: impl FnMut(i32) + 'static) -> usize {
         let id = dtk_sys::register_cb_i32(f);
-        unsafe { ffi::relay_connect_i32(self.qobject_ptr(), signal, id) }
+        if unsafe { ffi::relay_connect_i32(self.qobject_ptr(), signal, id) } {
+            id
+        } else {
+            dtk_sys::unregister_cb(id);
+            0
+        }
     }
 }
+
+/// signal with one bool arg (e.g. checkedChanged(bool))
+pub trait SignalBool {
+    fn qobject_ptr(&self) -> *mut ffi::QObject;
+    /// Returns the callback id for [`unregister_callback`]; 0 = connect failed.
+    fn connect_signal_bool(&self, signal: &str, f: impl FnMut(bool) + 'static) -> usize {
+        let id = dtk_sys::register_cb_bool(f);
+        if unsafe { ffi::relay_connect_bool(self.qobject_ptr(), signal, id) } {
+            id
+        } else {
+            dtk_sys::unregister_cb(id);
+            0
+        }
+    }
+}
+
+/// disconnect + unregister a connected signal callback (id from connect_signal*)
+pub use dtk_sys::unregister_cb as unregister_callback;
 
 // ---- DApplication ----
 
@@ -162,9 +244,9 @@ pub struct DApplication {
     _not_send: PhantomData<*mut ()>,
 }
 
-/// real process argv for QApplication; ponytail: '|' separator, can't appear in normal flags
+/// real process argv for QApplication; U+001F separator: cannot appear in a real argv entry
 fn env_args_joined() -> String {
-    std::env::args().collect::<Vec<_>>().join("|")
+    std::env::args().collect::<Vec<_>>().join("\u{1f}")
 }
 
 impl DApplication {
@@ -242,12 +324,6 @@ impl DMainWindow {
     }
 }
 
-impl Default for DMainWindow {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl DTitlebar {
     pub fn set_title(&self, title: &str) {
         unsafe { ffi::titlebar_set_title(self.ptr, title) }
@@ -257,7 +333,7 @@ impl DTitlebar {
     }
 }
 
-// ---- QIcon ----
+// ---- value types ----
 
 /// value-type wrapper: heap-allocated, owned by Rust (small leak acceptable)
 macro_rules! value_wrapper {
@@ -278,6 +354,11 @@ macro_rules! value_wrapper {
         impl Drop for $name {
             fn drop(&mut self) {
                 unsafe { ffi::$del(self.ptr) }
+            }
+        }
+        impl std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, concat!(stringify!($name), "({:p})"), self.ptr)
             }
         }
     };
@@ -318,29 +399,17 @@ impl QFont {
     }
 }
 
-impl Default for QFont {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl QPalette {
     pub fn new() -> Self {
         Self::from_raw(unsafe { ffi::palette_new() })
     }
-    /// use qt module constants for group/role
+    /// use qt::palette_group / qt::palette_role constants
     pub fn set_color(&self, group: i32, role: i32, color: &QColor) {
         unsafe { ffi::palette_set_color(self.ptr, group, role, color.ptr) }
     }
     /// read a color (e.g. copy Active Highlight into the Inactive group)
     pub fn color(&self, group: i32, role: i32) -> QColor {
         QColor::from_raw(unsafe { ffi::palette_color(self.ptr, group, role) })
-    }
-}
-
-impl Default for QPalette {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -385,140 +454,137 @@ impl DDciIcon {
     }
 }
 
-impl Default for DDciIcon {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-/// Qt enum/QFlags constants (for params mapped to i32)
+/// Qt enum/QFlags constants (for params mapped to i32), grouped by enum
 pub mod qt {
-    // Qt::Alignment
-    pub const ALIGN_LEFT: i32 = 0x1;
-    pub const ALIGN_RIGHT: i32 = 0x2;
-    pub const ALIGN_HCENTER: i32 = 0x4;
-    pub const ALIGN_TOP: i32 = 0x20;
-    pub const ALIGN_BOTTOM: i32 = 0x40;
-    pub const ALIGN_VCENTER: i32 = 0x80;
-    pub const ALIGN_CENTER: i32 = 0x84;
-    // Qt::FocusPolicy
-    pub const NO_FOCUS: i32 = 0;
-    // Qt::ItemDataRole
-    pub const USER_ROLE: i32 = 0x0100;
-    // Qt::Orientation
-    pub const HORIZONTAL: i32 = 1;
-    pub const VERTICAL: i32 = 2;
-    // QFrame::Shape
-    pub const FRAME_STYLED_PANEL: i32 = 0x6;
-    // QStyle::StandardPixmap
-    pub const SP_MESSAGE_BOX_WARNING: i32 = 10;
-    // QHeaderView::ResizeMode
-    pub const HEADER_INTERACTIVE: i32 = 0;
-    pub const HEADER_STRETCH: i32 = 1;
-    pub const HEADER_RESIZE_TO_CONTENTS: i32 = 3;
-    // QPalette::ColorGroup
-    pub const PALETTE_ACTIVE: i32 = 0;
-    pub const PALETTE_DISABLED: i32 = 1;
-    pub const PALETTE_INACTIVE: i32 = 2;
-    pub const PALETTE_CURRENT: i32 = 3;
-    pub const PALETTE_ALL: i32 = 5;
-    // QPalette::ColorRole
-    pub const ROLE_WINDOW_TEXT: i32 = 0;
-    pub const ROLE_TEXT: i32 = 6;
-    pub const ROLE_BASE: i32 = 9;
-    pub const ROLE_WINDOW: i32 = 10;
-    pub const ROLE_HIGHLIGHT: i32 = 12;
-    pub const ROLE_HIGHLIGHTED_TEXT: i32 = 13;
-    // Qt::TextElideMode
-    pub const ELIDE_LEFT: i32 = 0;
-    pub const ELIDE_RIGHT: i32 = 1;
-    pub const ELIDE_MIDDLE: i32 = 2;
-    pub const ELIDE_NONE: i32 = 3;
-    // QStyleOption::State
-    pub const STATE_SELECTED: i32 = 0x8000;
-    pub const STATE_MOUSE_OVER: i32 = 0x2000;
-    // QMessageBox::Icon
-    pub const MSG_ICON_NO_ICON: i32 = 0;
-    pub const MSG_ICON_INFORMATION: i32 = 1;
-    pub const MSG_ICON_WARNING: i32 = 2;
-    pub const MSG_ICON_CRITICAL: i32 = 3;
-    pub const MSG_ICON_QUESTION: i32 = 4;
-    // QMessageBox::ButtonRole
-    pub const MSG_ROLE_INVALID: i32 = -1;
-    pub const MSG_ROLE_ACCEPT: i32 = 0;
-    pub const MSG_ROLE_REJECT: i32 = 1;
-    pub const MSG_ROLE_DESTRUCTIVE: i32 = 2;
-    pub const MSG_ROLE_ACTION: i32 = 3;
-    pub const MSG_ROLE_HELP: i32 = 4;
-    pub const MSG_ROLE_YES: i32 = 5;
-    pub const MSG_ROLE_NO: i32 = 6;
-    pub const MSG_ROLE_RESET: i32 = 7;
-    pub const MSG_ROLE_APPLY: i32 = 8;
-    // QMessageBox::StandardButton (QFlags-compatible bitmask)
-    pub const MSG_BTN_NO_BUTTON: i32 = 0x00000000;
-    pub const MSG_BTN_OK: i32 = 0x00000400;
-    pub const MSG_BTN_SAVE: i32 = 0x00000800;
-    pub const MSG_BTN_SAVE_ALL: i32 = 0x00001000;
-    pub const MSG_BTN_OPEN: i32 = 0x00002000;
-    pub const MSG_BTN_YES: i32 = 0x00004000;
-    pub const MSG_BTN_YES_TO_ALL: i32 = 0x00008000;
-    pub const MSG_BTN_NO: i32 = 0x00010000;
-    pub const MSG_BTN_NO_TO_ALL: i32 = 0x00020000;
-    pub const MSG_BTN_ABORT: i32 = 0x00040000;
-    pub const MSG_BTN_RETRY: i32 = 0x00080000;
-    pub const MSG_BTN_IGNORE: i32 = 0x00100000;
-    pub const MSG_BTN_CLOSE: i32 = 0x00200000;
-    pub const MSG_BTN_CANCEL: i32 = 0x00400000;
-    pub const MSG_BTN_DISCARD: i32 = 0x00800000;
-    pub const MSG_BTN_HELP: i32 = 0x01000000;
-    pub const MSG_BTN_APPLY: i32 = 0x02000000;
-    pub const MSG_BTN_RESET: i32 = 0x04000000;
-    pub const MSG_BTN_RESTORE_DEFAULTS: i32 = 0x08000000;
-    /// convenience: standard Yes|No button set
-    pub const MSG_BTN_YES_NO: i32 = 0x00014000;
-    /// convenience: standard Ok|Cancel button set
-    pub const MSG_BTN_OK_CANCEL: i32 = 0x00400400;
+    /// Qt::Alignment
+    pub mod alignment {
+        pub const LEFT: i32 = 0x1;
+        pub const RIGHT: i32 = 0x2;
+        pub const HCENTER: i32 = 0x4;
+        pub const TOP: i32 = 0x20;
+        pub const BOTTOM: i32 = 0x40;
+        pub const VCENTER: i32 = 0x80;
+        pub const CENTER: i32 = 0x84;
+    }
+    /// Qt::FocusPolicy
+    pub mod focus {
+        pub const NO_FOCUS: i32 = 0;
+    }
+    /// Qt::ItemDataRole
+    pub mod item_role {
+        pub const USER_ROLE: i32 = 0x0100;
+    }
+    /// Qt::Orientation
+    pub mod orientation {
+        pub const HORIZONTAL: i32 = 1;
+        pub const VERTICAL: i32 = 2;
+    }
+    /// QFrame::Shape
+    pub mod frame {
+        pub const STYLED_PANEL: i32 = 0x6;
+    }
+    /// QStyle::StandardPixmap
+    pub mod standard_pixmap {
+        pub const MESSAGE_BOX_WARNING: i32 = 10;
+    }
+    /// QHeaderView::ResizeMode
+    pub mod header_resize {
+        pub const INTERACTIVE: i32 = 0;
+        pub const STRETCH: i32 = 1;
+        pub const RESIZE_TO_CONTENTS: i32 = 3;
+    }
+    /// QPalette::ColorGroup
+    pub mod palette_group {
+        pub const ACTIVE: i32 = 0;
+        pub const DISABLED: i32 = 1;
+        pub const INACTIVE: i32 = 2;
+        pub const CURRENT: i32 = 3;
+        pub const ALL: i32 = 5;
+    }
+    /// QPalette::ColorRole
+    pub mod palette_role {
+        pub const WINDOW_TEXT: i32 = 0;
+        pub const TEXT: i32 = 6;
+        pub const BASE: i32 = 9;
+        pub const WINDOW: i32 = 10;
+        pub const HIGHLIGHT: i32 = 12;
+        pub const HIGHLIGHTED_TEXT: i32 = 13;
+    }
+    /// Qt::TextElideMode
+    pub mod elide {
+        pub const LEFT: i32 = 0;
+        pub const RIGHT: i32 = 1;
+        pub const MIDDLE: i32 = 2;
+        pub const NONE: i32 = 3;
+    }
+    /// QStyleOption::State
+    pub mod state {
+        pub const SELECTED: i32 = 0x8000;
+        pub const MOUSE_OVER: i32 = 0x2000;
+    }
+    /// QMessageBox::Icon
+    pub mod msg_icon {
+        pub const NO_ICON: i32 = 0;
+        pub const INFORMATION: i32 = 1;
+        pub const WARNING: i32 = 2;
+        pub const CRITICAL: i32 = 3;
+        pub const QUESTION: i32 = 4;
+    }
+    /// QMessageBox::ButtonRole
+    pub mod msg_role {
+        pub const INVALID: i32 = -1;
+        pub const ACCEPT: i32 = 0;
+        pub const REJECT: i32 = 1;
+        pub const DESTRUCTIVE: i32 = 2;
+        pub const ACTION: i32 = 3;
+        pub const HELP: i32 = 4;
+        pub const YES: i32 = 5;
+        pub const NO: i32 = 6;
+        pub const RESET: i32 = 7;
+        pub const APPLY: i32 = 8;
+    }
+    /// QMessageBox::StandardButton (QFlags-compatible bitmask)
+    pub mod msg_btn {
+        pub const NO_BUTTON: i32 = 0x00000000;
+        pub const OK: i32 = 0x00000400;
+        pub const SAVE: i32 = 0x00000800;
+        pub const SAVE_ALL: i32 = 0x00001000;
+        pub const OPEN: i32 = 0x00002000;
+        pub const YES: i32 = 0x00004000;
+        pub const YES_TO_ALL: i32 = 0x00008000;
+        pub const NO: i32 = 0x00010000;
+        pub const NO_TO_ALL: i32 = 0x00020000;
+        pub const ABORT: i32 = 0x00040000;
+        pub const RETRY: i32 = 0x00080000;
+        pub const IGNORE: i32 = 0x00100000;
+        pub const CLOSE: i32 = 0x00200000;
+        pub const CANCEL: i32 = 0x00400000;
+        pub const DISCARD: i32 = 0x00800000;
+        pub const HELP: i32 = 0x01000000;
+        pub const APPLY: i32 = 0x02000000;
+        pub const RESET: i32 = 0x04000000;
+        pub const RESTORE_DEFAULTS: i32 = 0x08000000;
+        /// convenience: standard Yes|No button set
+        pub const YES_NO: i32 = 0x00014000;
+        /// convenience: standard Ok|Cancel button set
+        pub const OK_CANCEL: i32 = 0x00400400;
+    }
 }
 
 // ---- QIcon ----
 
-pub struct QIcon {
-    ptr: *mut ffi::QIcon,
-    _not_send: PhantomData<*mut ()>,
-}
+value_wrapper!(QIcon, ffi::QIcon, icon_delete);
 
 impl QIcon {
-    pub(crate) fn from_raw(ptr: *mut ffi::QIcon) -> Self {
-        assert!(!ptr.is_null());
-        Self {
-            ptr,
-            _not_send: PhantomData,
-        }
-    }
     pub fn from_theme(name: &str) -> Self {
-        Self {
-            ptr: unsafe { ffi::icon_from_theme(name) },
-            _not_send: PhantomData,
-        }
+        Self::from_raw(unsafe { ffi::icon_from_theme(name) })
     }
     /// like from_theme, but falls back to `fallback` when `name` is not in the icon theme.
     pub fn from_theme_with_fallback(name: &str, fallback: &QIcon) -> Self {
-        Self {
-            ptr: unsafe { ffi::icon_from_theme_fallback(name, fallback.ptr) },
-            _not_send: PhantomData,
-        }
+        Self::from_raw(unsafe { ffi::icon_from_theme_fallback(name, fallback.ptr) })
     }
     pub fn from_file(path: &str) -> Self {
-        Self {
-            ptr: unsafe { ffi::icon_from_file(path) },
-            _not_send: PhantomData,
-        }
-    }
-}
-
-impl Drop for QIcon {
-    fn drop(&mut self) {
-        unsafe { ffi::icon_delete(self.ptr) }
+        Self::from_raw(unsafe { ffi::icon_from_file(path) })
     }
 }
 
@@ -536,7 +602,7 @@ impl DLabel {
     pub fn set_word_wrap(&self, wrap: bool) {
         unsafe { ffi::label_set_word_wrap(self.ptr, wrap) }
     }
-    /// use qt::ALIGN_* constants for alignment
+    /// use qt::alignment::* constants for alignment
     pub fn set_alignment(&self, alignment: i32) {
         unsafe { ffi::label_set_alignment(self.ptr, alignment) }
     }
@@ -557,8 +623,8 @@ impl DSuggestButton {
     pub fn set_text(&self, text: &str) {
         unsafe { ffi::button_set_text(self.ptr.cast(), text) }
     }
-    pub fn on_clicked(&self, f: impl FnMut() + 'static) {
-        self.connect_signal("clicked(bool)", f);
+    pub fn on_clicked(&self, f: impl FnMut() + 'static) -> usize {
+        self.connect_signal("clicked(bool)", f)
     }
     /// programmatic click (emits clicked; useful for tests)
     pub fn click(&self) {
@@ -576,8 +642,8 @@ impl DPushButton {
     pub fn click(&self) {
         unsafe { ffi::button_click(self.ptr) }
     }
-    pub fn on_clicked(&self, f: impl FnMut() + 'static) {
-        self.connect_signal("clicked(bool)", f);
+    pub fn on_clicked(&self, f: impl FnMut() + 'static) -> usize {
+        self.connect_signal("clicked(bool)", f)
     }
 }
 
@@ -590,7 +656,7 @@ impl DMessageBox {
     pub fn new() -> Self {
         Self::from_raw(unsafe { ffi::qmessagebox_new() })
     }
-    /// create a pre-configured dialog; use qt::MSG_ICON_* and qt::MSG_BTN_* constants
+    /// create a pre-configured dialog; use qt::msg_icon::* and qt::msg_btn::* constants
     pub fn with(
         icon: i32,
         title: &str,
@@ -620,14 +686,14 @@ impl DMessageBox {
     pub fn add_button(&self, text: &str, role: i32) -> DPushButton {
         DPushButton::from_raw(unsafe { ffi::qmessagebox_add_button_text(self.ptr, text, role) })
     }
-    /// add a standard button (qt::MSG_BTN_*); returns the button handle
+    /// add a standard button (qt::msg_btn::*); returns the button handle
     pub fn add_standard_button(&self, button: i32) -> DPushButton {
         DPushButton::from_raw(unsafe { ffi::qmessagebox_add_button_standard(self.ptr, button) })
     }
     pub fn set_default_button(&self, button: i32) {
         unsafe { ffi::qmessagebox_set_default_button(self.ptr, button) }
     }
-    /// exec the dialog (blocking); returns the clicked StandardButton (qt::MSG_BTN_*)
+    /// exec the dialog (blocking); returns the clicked StandardButton (qt::msg_btn::*)
     pub fn exec(&self) -> i32 {
         unsafe { ffi::qmessagebox_exec(self.ptr) }
     }
@@ -687,12 +753,6 @@ impl DMessageBox {
     }
 }
 
-impl Default for DMessageBox {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 // ---- layouts ----
 
 macro_rules! layout_wrapper {
@@ -713,7 +773,7 @@ macro_rules! layout_wrapper {
             pub fn add_widget(&self, w: &QWidget) {
                 unsafe { ffi::layout_add_widget(self.ptr.cast(), w.ptr) }
             }
-            /// box layouts only: stretch factor + qt::ALIGN_* alignment
+            /// box layouts only: stretch factor + qt::alignment::* alignment
             pub fn add_widget_ex(&self, w: &QWidget, stretch: i32, alignment: i32) {
                 unsafe { ffi::layout_add_widget_ex(self.ptr.cast(), w.ptr, stretch, alignment) }
             }
@@ -729,6 +789,10 @@ macro_rules! layout_wrapper {
             }
             pub fn set_contents_margins(&self, l: i32, t: i32, r: i32, b: i32) {
                 unsafe { ffi::layout_set_contents_margins(self.ptr.cast(), l, t, r, b) }
+            }
+            /// leak the Rust handle; Qt parent-child still owns the layout
+            pub fn leak(self) {
+                std::mem::forget(self);
             }
         }
     };
@@ -817,7 +881,7 @@ impl QTableWidget {
     pub fn hide_headers(&self, horizontal: bool, vertical: bool) {
         unsafe { ffi::table_hide_headers(self.ptr, horizontal, vertical) }
     }
-    /// use qt::HEADER_* constants for mode
+    /// use qt::header_resize::* constants for mode
     pub fn set_section_resize_mode(&self, col: i32, mode: i32) {
         unsafe { ffi::table_set_section_resize_mode(self.ptr, col, mode) }
     }
@@ -827,7 +891,7 @@ impl QTableWidget {
     pub fn set_show_grid(&self, show: bool) {
         unsafe { ffi::table_set_show_grid(self.ptr, show) }
     }
-    /// use qt::FRAME_* constants for shape
+    /// use qt::frame::* constants for shape
     pub fn set_frame_shape(&self, shape: i32) {
         unsafe { ffi::table_set_frame_shape(self.ptr, shape) }
     }
@@ -865,9 +929,15 @@ impl QTimer {
     pub fn stop(&self) {
         unsafe { ffi::timer_stop(self.ptr) }
     }
-    pub fn on_timeout(&self, f: impl FnMut() + 'static) {
+    /// Returns the callback id for [`unregister_callback`]; 0 = connect failed.
+    pub fn on_timeout(&self, f: impl FnMut() + 'static) -> usize {
         let id = dtk_sys::register_cb0(f);
-        unsafe { ffi::relay_connect0(self.ptr.cast(), "timeout()", id) }
+        if unsafe { ffi::relay_connect0(self.ptr.cast(), "timeout()", id) } {
+            id
+        } else {
+            dtk_sys::unregister_cb(id);
+            0
+        }
     }
     /// one-shot timer; the callback entry is removed from the registry after firing
     pub fn single_shot(msec: i32, f: impl FnMut() + 'static) {
@@ -887,12 +957,6 @@ impl QTimer {
     }
 }
 
-impl Default for QTimer {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 // ---- QTableWidgetItem ----
 
 pub struct QTableWidgetItem {
@@ -904,14 +968,14 @@ impl QTableWidgetItem {
     pub fn set_icon(&self, icon: &QIcon) {
         unsafe { ffi::item_set_icon(self.ptr, icon.ptr) }
     }
-    /// use qt::ALIGN_* constants for alignment
+    /// use qt::alignment::* constants for alignment
     pub fn set_text_alignment(&self, alignment: i32) {
         unsafe { ffi::item_set_text_alignment(self.ptr, alignment) }
     }
     pub fn set_foreground(&self, color: &QColor) {
         unsafe { ffi::item_set_foreground(self.ptr, color.ptr) }
     }
-    /// use qt::USER_ROLE + n for role
+    /// use qt::item_role::USER_ROLE + n for role
     pub fn set_data_string(&self, role: i32, value: &str) {
         unsafe { ffi::item_set_data_string(self.ptr, role, value) }
     }
@@ -951,7 +1015,7 @@ impl Painter {
     pub fn set_font(&self, font: &QFont) {
         unsafe { ffi::painter_set_font(self.ptr, font.ptr) }
     }
-    /// combine qt::ALIGN_* for flags
+    /// combine qt::alignment::* for flags
     pub fn draw_text(&self, x: i32, y: i32, w: i32, h: i32, flags: i32, text: &str) {
         unsafe { ffi::painter_draw_text(self.ptr, x, y, w, h, flags, text) }
     }
@@ -967,7 +1031,7 @@ impl Painter {
     pub fn set_clip_rect(&self, x: i32, y: i32, w: i32, h: i32) {
         unsafe { ffi::painter_set_clip_rect(self.ptr, x, y, w, h) }
     }
-    /// elide text to width using the painter's current font; use qt::ELIDE_* for mode
+    /// elide text to width using the painter's current font; use qt::elide::* for mode
     pub fn elided_text(&self, text: &str, mode: i32, width: i32) -> String {
         unsafe { ffi::painter_elided_text(self.ptr, text, mode, width) }
     }
@@ -991,7 +1055,7 @@ impl ModelIndex {
 }
 
 impl PaintDelegate {
-    /// f: (painter, index, x, y, w, h, state). test state against qt::STATE_*
+    /// f: (painter, index, x, y, w, h, state). test state against qt::state::*
     pub fn new(f: impl FnMut(&Painter, &ModelIndex, i32, i32, i32, i32, i32) + 'static) -> Self {
         let mut f = f;
         let id = dtk_sys::register_cb_paint(move |p, idx, x, y, w, h, state| {
@@ -1027,9 +1091,14 @@ impl QSocketNotifier {
             _not_send: PhantomData,
         }
     }
-    pub fn on_activated(&self, f: impl FnMut() + 'static) {
+    pub fn on_activated(&self, f: impl FnMut() + 'static) -> usize {
         let id = dtk_sys::register_cb0(f);
-        unsafe { ffi::relay_connect0(self.ptr.cast(), "activated(QSocketDescriptor)", id) }
+        if unsafe { ffi::relay_connect0(self.ptr.cast(), "activated(QSocketDescriptor)", id) } {
+            id
+        } else {
+            dtk_sys::unregister_cb(id);
+            0
+        }
     }
 }
 
@@ -1045,6 +1114,51 @@ impl widgets::DProgressBar {
     }
     pub fn value(&self) -> i32 {
         unsafe { ffi::progressbar_value(self.ptr.cast()) }
+    }
+}
+
+impl_default!(DMainWindow, QFont, QPalette, DDciIcon, DMessageBox, QTimer);
+
+/// leak() for the hand-rolled non-macro wrappers (same semantics as object_wrapper::leak)
+macro_rules! impl_leak {
+    ($($name:ident),* $(,)?) => {
+        $(impl $name {
+            /// leak the Rust handle; Qt parent-child still owns the object
+            pub fn leak(self) {
+                std::mem::forget(self);
+            }
+        })*
+    };
+}
+impl_leak!(QTimer, QSocketNotifier, PaintDelegate);
+
+// ---- typed signal helpers + base-class getters for generated widgets ----
+
+impl widgets::DLineEdit {
+    /// Returns the callback id for [`unregister_callback`]; 0 = connect failed.
+    pub fn on_return_pressed(&self, f: impl FnMut() + 'static) -> usize {
+        self.connect_signal("returnPressed()", f)
+    }
+}
+
+impl widgets::DSwitchButton {
+    /// checkedChanged(bool) with the bool delivered. Returns id; 0 = connect failed.
+    pub fn on_checked_changed(&self, f: impl FnMut(bool) + 'static) -> usize {
+        self.connect_signal_bool("checkedChanged(bool)", f)
+    }
+}
+
+impl widgets::DSearchEdit {
+    /// QLineEdit base-class getter, via the DLineEdit ancestry
+    pub fn text(&self) -> String {
+        unsafe { ffi::line_edit_text(self.ptr.cast()) }
+    }
+}
+
+impl widgets::DComboBox {
+    /// currentIndexChanged(int). Returns id; 0 = connect failed.
+    pub fn on_current_index_changed(&self, f: impl FnMut(i32) + 'static) -> usize {
+        self.connect_signal_i32("currentIndexChanged(int)", f)
     }
 }
 

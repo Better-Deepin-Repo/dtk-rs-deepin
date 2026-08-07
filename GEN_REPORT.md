@@ -1,12 +1,15 @@
 # DTK6 widget binding coverage report
 
-classes: 146, methods generated: 842, skipped: 416
+classes: 146, methods generated: 943, skipped: 245
+
+## skip reasons
+- unsupported param type: 164
+- unsupported return type: 77
+- signature parse failed: 4
 
 ## DAboutDialog — 19 methods generated, 0 skipped
 
-## DAbstractDialog — 8 methods generated, 2 skipped
-- `inline void move(int x, int y)` ← unsupported return type: inline void
-- `inline void setGeometry(int x, int y, int width, int height)` ← unsupported return type: inline void
+## DAbstractDialog — 10 methods generated, 0 skipped
 
 ## DAccessibilityChecker — 4 methods generated, 0 skipped
 
@@ -67,20 +70,12 @@ classes: 146, methods generated: 842, skipped: 416
 
 ## DVBoxWidget — 0 methods generated, 0 skipped
 
-## DButtonBoxButton — 7 methods generated, 5 skipped
-- `DButtonBoxButton(QStyle::StandardPixmap iconType = static_cast<QStyle::StandardP` ← signature parse failed
-- `const QString &text = QString(), QWidget *parent = nullptr);` ← signature parse failed
-- `DButtonBoxButton(DStyle::StandardPixmap iconType = static_cast<DStyle::StandardP` ← signature parse failed
-- `const QString &text = QString(), QWidget *parent = nullptr);` ← signature parse failed
+## DButtonBoxButton — 7 methods generated, 1 skipped
 - `void setIcon(QStyle::StandardPixmap iconType);` ← unsupported param type: QStyle::StandardPixmap
 
-## DButtonBox — 3 methods generated, 6 skipped
+## DButtonBox — 7 methods generated, 2 skipped
 - `void setButtonList(const QList<DButtonBoxButton*> &list, bool checkable);` ← unsupported param type: const QList<DButtonBoxButton*> &
 - `QList<QAbstractButton*> buttonList() const;` ← unsupported return type: QList<QAbstractButton*>
-- `QAbstractButton * checkedButton() const;` ← unsupported return type: QAbstractButton *
-- `QAbstractButton *button(int id) const;` ← unsupported return type: QAbstractButton *
-- `void setId(QAbstractButton *button, int id);` ← unsupported param type: QAbstractButton *
-- `int id(QAbstractButton *button) const;` ← unsupported param type: QAbstractButton *
 
 ## DCircleProgress — 10 methods generated, 2 skipped
 - `QLabel *topLabel();` ← unsupported return type: QLabel *
@@ -103,23 +98,16 @@ classes: 146, methods generated: 842, skipped: 416
 - `QBrush background() const;` ← unsupported return type: QBrush
 - `void setBackground(const QBrush &background);` ← unsupported param type: const QBrush &
 
-## DCrumbEdit — 11 methods generated, 6 skipped
+## DCrumbEdit — 12 methods generated, 5 skipped
 - `bool insertCrumb(const DCrumbTextFormat &format, int pos = -1);` ← unsupported param type: const DCrumbTextFormat &
 - `bool appendCrumb(const DCrumbTextFormat &format);` ← unsupported param type: const DCrumbTextFormat &
-- `QStringList crumbList() const;` ← unsupported return type: QStringList
 - `DCrumbTextFormat crumbTextFormat(const QString &text) const;` ← unsupported return type: DCrumbTextFormat
 - `DCrumbTextFormat makeTextFormat() const;` ← unsupported return type: DCrumbTextFormat
 - `DCrumbTextFormat makeTextFormat(CrumbType type) const;` ← unsupported return type: DCrumbTextFormat
 
-## DDialog — 38 methods generated, 8 skipped
+## DDialog — 44 methods generated, 2 skipped
 - `QList<QAbstractButton*> getButtons() const;` ← unsupported return type: QList<QAbstractButton*>
 - `QList<QWidget*> getContents() const;` ← unsupported return type: QList<QWidget*>
-- `QAbstractButton* getButton(int index) const;` ← unsupported return type: QAbstractButton*
-- `int addButtons(const QStringList &text);` ← unsupported param type: const QStringList &
-- `void insertButton(int index, QAbstractButton* button, bool isDefault = false);` ← unsupported param type: QAbstractButton*
-- `void insertButtons(int index, const QStringList &text);` ← unsupported param type: const QStringList &
-- `void removeButton(QAbstractButton *button);` ← unsupported param type: QAbstractButton *
-- `void setDefaultButton(QAbstractButton *button);` ← unsupported param type: QAbstractButton *
 
 ## DDialogCloseButton — 0 methods generated, 0 skipped
 
@@ -131,29 +119,20 @@ classes: 146, methods generated: 842, skipped: 416
 
 ## DEnhancedWidget — 4 methods generated, 0 skipped
 
-## DFeatureItem — 6 methods generated, 2 skipped
-- `explicit DFeatureItem(const QIcon &icon = QIcon(), const QString &name = QString` ← signature parse failed
-- `const QString &description = QString(), QObject *parent = nullptr);` ← signature parse failed
+## DFeatureItem — 6 methods generated, 0 skipped
 
 ## DFeatureDisplayDialog — 8 methods generated, 1 skipped
 - `void addItems(QList<DFeatureItem*> items);` ← unsupported param type: QList<DFeatureItem*>
 
-## DFileChooserEdit — 3 methods generated, 8 skipped
+## DFileChooserEdit — 5 methods generated, 6 skipped
 - `void setFileMode(QFileDialog::FileMode mode);` ← unsupported param type: QFileDialog::FileMode
 - `QFileDialog::FileMode fileMode() const;` ← unsupported return type: QFileDialog::FileMode
-- `void setNameFilters(const QStringList &filters);` ← unsupported param type: const QStringList &
-- `QStringList nameFilters() const;` ← unsupported return type: QStringList
 - `void setDirectoryUrl(const QUrl &directory);` ← unsupported param type: const QUrl &
 - `QUrl directoryUrl();` ← unsupported return type: QUrl
 - `void setFileDialog(QFileDialog *fileDialog);` ← unsupported param type: QFileDialog *
 - `QFileDialog *fileDialog() const;` ← unsupported return type: QFileDialog *
 
-## DFileDialog — 5 methods generated, 7 skipped
-- `explicit DFileDialog(QWidget *parent = Q_NULLPTR,` ← signature parse failed
-- `const QString &caption = QString(),` ← signature parse failed
-- `const QString &directory = QString(),` ← signature parse failed
-- `const QString &filter = QString());` ← signature parse failed
-- `void addComboBox(const QString &text, const QStringList &data);` ← unsupported param type: const QStringList &
+## DFileDialog — 6 methods generated, 2 skipped
 - `void addComboBox(const QString &text, const DComboBoxOptions &options);` ← unsupported param type: const DComboBoxOptions &
 - `void addLineEdit(const QString &text, const DLineEditOptions &options);` ← unsupported param type: const DLineEditOptions &
 
@@ -184,35 +163,17 @@ classes: 146, methods generated: 842, skipped: 416
 - `void setFontFilters(QFontComboBox::FontFilters filters);` ← unsupported param type: QFontComboBox::FontFilters
 - `QFontComboBox::FontFilters fontFilters() const;` ← unsupported return type: QFontComboBox::FontFilters
 
-## DFrame — 1 methods generated, 1 skipped
-- `void setBackgroundRole(DGUI_NAMESPACE::DPalette::ColorType type);` ← unsupported param type: DGUI_NAMESPACE::DPalette::ColorType
+## DFrame — 2 methods generated, 0 skipped
 
-## DHorizontalLine — 0 methods generated, 2 skipped
-- `: QFrame(parent, f)` ← unsupported return type: :
-- `setFrameShape(HLine);` ← unsupported return type: s
+## DHorizontalLine — 0 methods generated, 0 skipped
 
-## DVerticalLine — 0 methods generated, 2 skipped
-- `: QFrame(parent, f)` ← unsupported return type: :
-- `setFrameShape(VLine);` ← unsupported return type: s
+## DVerticalLine — 0 methods generated, 0 skipped
 
 ## DGraphicsClipEffect — 2 methods generated, 2 skipped
 - `QPainterPath clipPath() const;` ← unsupported return type: QPainterPath
 - `void setClipPath(const QPainterPath &clipPath);` ← unsupported param type: const QPainterPath &
 
-## DGraphicsGlowEffect — 0 methods generated, 15 skipped
-- `inline void setOffset(qreal dx, qreal dy) {m_xOffset = dx; m_yOffset = dy;}` ← signature parse failed
-- `inline void setXOffset(qreal dx) {m_xOffset = dx;}` ← signature parse failed
-- `inline qreal xOffset() const {return m_xOffset;}` ← signature parse failed
-- `inline void setYOffset(qreal dy) {m_yOffset = dy;}` ← signature parse failed
-- `inline qreal yOffset() const {return m_yOffset;}` ← signature parse failed
-- `inline void setDistance(qreal distance) { m_distance = distance; updateBoundingR` ← signature parse failed
-- `inline qreal distance() const { return m_distance; }` ← signature parse failed
-- `inline void setBlurRadius(qreal blurRadius) { m_blurRadius = blurRadius; updateB` ← signature parse failed
-- `inline qreal blurRadius() const { return m_blurRadius; }` ← signature parse failed
-- `inline void setColor(const QColor &color) { m_color = color; }` ← signature parse failed
-- `inline QColor color() const { return m_color; }` ← signature parse failed
-- `inline qreal opacity() const { return m_opacity; }` ← signature parse failed
-- `inline void setOpacity(qreal opacity) { m_opacity = opacity; }` ← signature parse failed
+## DGraphicsGlowEffect — 13 methods generated, 2 skipped
 - `void draw(QPainter *painter);` ← unsupported param type: QPainter *
 - `QRectF boundingRectFor(const QRectF &rect) const;` ← unsupported return type: QRectF
 
@@ -221,41 +182,17 @@ classes: 146, methods generated: 842, skipped: 416
 ## DIconButton — 12 methods generated, 1 skipped
 - `void setIcon(QStyle::StandardPixmap iconType);` ← unsupported param type: QStyle::StandardPixmap
 
-## DImageViewer — 20 methods generated, 3 skipped
+## DImageViewer — 21 methods generated, 2 skipped
 - `QImage image() const;` ← unsupported return type: QImage
 - `void setImage(const QImage &image);` ← unsupported param type: const QImage &
-- `Q_SLOT void scaleAtPoint(QPoint pos, qreal factor);` ← unsupported return type: Q_SLOT void
 
 ## DIndeterminateProgressbar — 0 methods generated, 0 skipped
 
-## DInputDialog — 16 methods generated, 27 skipped
-- `static QString getText(QWidget *parent, const QString &title, const QString &mes` ← signature parse failed
-- `const QString &text = QString(), bool *ok = 0, Qt::WindowFlags flags = {},` ← signature parse failed
-- `static QString getItem(QWidget *parent, const QString &title, const QString &mes` ← signature parse failed
-- `static int getInt(QWidget *parent, const QString &title, const QString &message,` ← signature parse failed
-- `static double getDouble(QWidget *parent, const QString &title, const QString &me` ← signature parse failed
-- `Q_SLOT void setInputMode(InputMode mode);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setTextValue(const QString &text);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setTextEchoMode(QLineEdit::EchoMode mode);` ← unsupported return type: Q_SLOT void
-- `QLineEdit::EchoMode textEchoMode() const;` ← unsupported return type: QLineEdit::EchoMode
-- `Q_SLOT void setComboBoxEditable(bool editable);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setComboBoxItems(const QStringList &items);` ← unsupported return type: Q_SLOT void
-- `QStringList comboBoxItems() const;` ← unsupported return type: QStringList
-- `Q_SLOT void setComboBoxCurrentIndex(int comboBoxCurrentIndex);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setIntValue(int value);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setIntMinimum(int min);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setIntMaximum(int max);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setIntRange(int min, int max);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setIntStep(int step);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setDoubleValue(double value);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setDoubleMinimum(double min);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setDoubleMaximum(double max);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setDoubleRange(double min, double max);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setDoubleDecimals(int decimals);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setOkButtonText(const QString &text);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setOkButtonEnabled(const bool enable);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setCancelButtonText(const QString &text);` ← unsupported return type: Q_SLOT void
-- `Q_SLOT void setTextAlert(bool textAlert);` ← unsupported return type: Q_SLOT void
+## DInputDialog — 38 methods generated, 4 skipped
+- `static QString getText(QWidget *parent, const QString &title, const QString &mes` ← unsupported param type: bool *
+- `static QString getItem(QWidget *parent, const QString &title, const QString &mes` ← unsupported param type: bool *
+- `static int getInt(QWidget *parent, const QString &title, const QString &message,` ← unsupported param type: bool *
+- `static double getDouble(QWidget *parent, const QString &title, const QString &me` ← unsupported param type: bool *
 
 ## DIpv4LineEdit — 9 methods generated, 0 skipped
 
@@ -266,12 +203,10 @@ classes: 146, methods generated: 842, skipped: 416
 
 ## DLicenseDialog — 5 methods generated, 0 skipped
 
-## DLineEdit — 28 methods generated, 5 skipped
+## DLineEdit — 30 methods generated, 3 skipped
 - `QLineEdit *lineEdit() const;` ← unsupported return type: QLineEdit *
 - `void setLeftWidgets(const QList<QWidget *> &list);` ← unsupported param type: const QList<QWidget *> &
 - `void setRightWidgets(const QList<QWidget *> &list);` ← unsupported param type: const QList<QWidget *> &
-- `QLineEdit::EchoMode echoMode() const;` ← unsupported return type: QLineEdit::EchoMode
-- `void setEchoMode(QLineEdit::EchoMode mode);` ← unsupported param type: QLineEdit::EchoMode
 
 ## DVariantListModel — 0 methods generated, 5 skipped
 - `int rowCount(const QModelIndex &parent = QModelIndex()) const;` ← unsupported param type: const QModelIndex &
@@ -280,8 +215,7 @@ classes: 146, methods generated: 842, skipped: 416
 - `bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex());` ← unsupported param type: const QModelIndex &
 - `bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());` ← unsupported param type: const QModelIndex &
 
-## DListView — 23 methods generated, 9 skipped
-- `/// return true if rect intersects contentsVisualRect+qMax(cacheBuffer,cacheCoun` ← signature parse failed
+## DListView — 23 methods generated, 8 skipped
 - `State state() const;` ← unsupported return type: State
 - `void setModel(QAbstractItemModel *model);` ← unsupported param type: QAbstractItemModel *
 - `bool addItem(const QVariant &data);` ← unsupported param type: const QVariant &
@@ -307,12 +241,10 @@ classes: 146, methods generated: 842, skipped: 416
 - `DPalette palette(const QWidget *widget, const QPalette &base = QPalette()) const` ← unsupported return type: DPalette
 - `void setPalette(QWidget *widget, const DPalette &palette);` ← unsupported param type: const DPalette &
 
-## DPasswordEdit — 3 methods generated, 1 skipped
-- `void setEchoMode(QLineEdit::EchoMode mode);` ← unsupported param type: QLineEdit::EchoMode
+## DPasswordEdit — 4 methods generated, 0 skipped
 
-## DPictureSequenceView — 7 methods generated, 3 skipped
+## DPictureSequenceView — 8 methods generated, 2 skipped
 - `void setPictureSequence(const QString &srcFormat, const QPair<int, int> &range, ` ← unsupported param type: const QPair<int, int> &
-- `void setPictureSequence(const QStringList &sequence, const bool autoScale = fals` ← unsupported param type: const QStringList &
 - `void setPictureSequence(const QList<QPixmap> &sequence, const bool autoScale = f` ← unsupported param type: const QList<QPixmap> &
 
 ## DPlatformWindowHandle — 4 methods generated, 3 skipped
@@ -322,69 +254,48 @@ classes: 146, methods generated: 842, skipped: 416
 
 ## ColorButton — 0 methods generated, 0 skipped
 
-## ColorLabel — 3 methods generated, 2 skipped
-- `//h∈(0, 360), s∈(0, 1), v∈(0, 1)` ← signature parse failed
+## ColorLabel — 3 methods generated, 1 skipped
 - `QCursor pickColorCursor();` ← unsupported return type: QCursor
 
-## ColorSlider — 1 methods generated, 1 skipped
-- `//h∈(0, 360), s∈(0, 1), v∈(0, 1)` ← signature parse failed
+## ColorSlider — 1 methods generated, 0 skipped
 
 ## DPrintPickColorWidget — 6 methods generated, 0 skipped
 
-## DPrintPreviewDialog — 10 methods generated, 5 skipped
+## DPrintPreviewDialog — 11 methods generated, 4 skipped
 - `static void setPluginMimeData(const QVariant &mimeData);` ← unsupported param type: const QVariant &
 - `static QVariant pluginMimeData();` ← unsupported return type: QVariant
-- `static QStringList availablePlugins();` ← unsupported return type: QStringList
 - `virtual bool event(QEvent *event) override;` ← unsupported param type: QEvent *
 - `bool eventFilter(QObject *watched, QEvent *event) override;` ← unsupported param type: QObject *
 
-## DPrintPreviewSettingInfo — 0 methods generated, 2 skipped
-- `inline SettingType type() const {` ← signature parse failed
-- `return static_cast<SettingType>(t);` ← signature parse failed
+## DPrintPreviewSettingInfo — 1 methods generated, 0 skipped
 
-## DPrintPreviewPrinterInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_Printer)` ← unsupported return type: :
+## DPrintPreviewPrinterInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewCopiesInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_Copies)` ← unsupported return type: :
+## DPrintPreviewCopiesInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewPageRangeInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_PageRange)` ← unsupported return type: :
+## DPrintPreviewPageRangeInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewOrientationInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_Orientation)` ← unsupported return type: :
+## DPrintPreviewOrientationInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewPaperSizeInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_PaperSize)` ← unsupported return type: :
+## DPrintPreviewPaperSizeInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewPrintDuplexInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_PrintDuplex)` ← unsupported return type: :
+## DPrintPreviewPrintDuplexInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewNUpPrintInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_NUpPrinting)` ← unsupported return type: :
+## DPrintPreviewNUpPrintInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewPageOrderInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_PageOrder)` ← unsupported return type: :
+## DPrintPreviewPageOrderInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewColorModeInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_ColorMode)` ← unsupported return type: :
+## DPrintPreviewColorModeInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewPaperMarginsInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_PaperMargins)` ← unsupported return type: :
+## DPrintPreviewPaperMarginsInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewScalingInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_Scaling)` ← unsupported return type: :
+## DPrintPreviewScalingInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewWatermarkInfo — 0 methods generated, 1 skipped
-- `: DPrintPreviewSettingInfo(PS_Watermark)` ← unsupported return type: :
+## DPrintPreviewWatermarkInfo — 0 methods generated, 0 skipped
 
-## DPrintPreviewSettingInterface — 1 methods generated, 6 skipped
-- `inline virtual bool settingFilter(const QVariant &mimeData, DPrintPreviewSetting` ← unsupported return type: inline virtual bool
-- `Q_UNUSED(mimeData);` ← unsupported return type: Q
-- `Q_UNUSED(info);` ← unsupported return type: Q
-- `inline virtual SettingStatus settingStatus(const QVariant &mimeData, SettingSubC` ← unsupported return type: inline virtual SettingStatus
-- `Q_UNUSED(mimeData);` ← unsupported return type: Q
-- `Q_UNUSED(control);` ← unsupported return type: Q
+## DPrintPreviewSettingInterface — 1 methods generated, 2 skipped
+- `inline virtual bool settingFilter(const QVariant &mimeData, DPrintPreviewSetting` ← unsupported param type: const QVariant &
+- `inline virtual SettingStatus settingStatus(const QVariant &mimeData, SettingSubC` ← unsupported param type: const QVariant &
 
 ## DPrinter — 1 methods generated, 1 skipped
 - `QList<const QPicture *> getPrinterPages();` ← unsupported return type: QList<const QPicture *>
@@ -423,9 +334,7 @@ classes: 146, methods generated: 842, skipped: 416
 - `virtual void drawBackground(QRect rect, QPainter *painter, int index, bool isSel` ← unsupported param type: QPainter *
 - `virtual void drawForeground(QRect rect, QPainter *painter, int column, int index` ← unsupported param type: QPainter *
 
-## DSimpleListView — 25 methods generated, 10 skipped
-- `* \algorithms a list of SortAlgorithm, SortAlgorithm is function pointer, it's t` ← signature parse failed
-- `* \algorithm the search algorithm, it's type is: 'bool (*) (const DSimpleListIte` ← signature parse failed
+## DSimpleListView — 25 methods generated, 8 skipped
 - `void setColumnTitleInfo(QList<QString> titles, QList<int> widths, int height);` ← unsupported param type: QList<QString>
 - `void setColumnHideFlags(QList<bool> toggleHideFlags, int alwaysVisibleColumn=-1)` ← unsupported param type: QList<bool>
 - `void setColumnSortingAlgorithms(QList<SortAlgorithm> *algorithms, int sortColumn` ← unsupported param type: QList<SortAlgorithm> *
@@ -435,29 +344,16 @@ classes: 146, methods generated: 842, skipped: 416
 - `QList<DSimpleListItem*> getSelections();` ← unsupported return type: QList<DSimpleListItem*>
 - `void refreshItems(QList<DSimpleListItem*> items);` ← unsupported param type: QList<DSimpleListItem*>
 
-## DSizeModeHelper — 0 methods generated, 2 skipped
-- `return DGUI_NAMESPACE::DGuiApplicationHelper::isCompactMode() ? t1 : t2;` ← signature parse failed
+## DSizeModeHelper — 0 methods generated, 1 skipped
 - `static inline T element(const T &t1, const T &t2)` ← unsupported return type: inline T
 
-## DSlider — 18 methods generated, 7 skipped
+## DSlider — 22 methods generated, 3 skipped
 - `QSlider *slider();` ← unsupported return type: QSlider *
-- `void setLeftTicks(const QStringList &info);` ← unsupported param type: const QStringList &
-- `void setRightTicks(const QStringList &info);` ← unsupported param type: const QStringList &
-- `void setAboveTicks(const QStringList &info);` ← unsupported param type: const QStringList &
-- `void setBelowTicks(const QStringList &info);` ← unsupported param type: const QStringList &
 - `void setMarkPositions(QList<int> list);` ← unsupported param type: QList<int>
 - `QSlider::TickPosition tickPosition() const;` ← unsupported return type: QSlider::TickPosition
 
-## SpecialSlider — 0 methods generated, 9 skipped
-- `SpecialSlider(Qt::Orientation orientation, QWidget *parent = nullptr) : QSlider(` ← signature parse failed
-- `void paintEvent(QPaintEvent *ev) {` ← signature parse failed
-- `DSlider* dSlider = qobject_cast<DSlider *>(this->parent());` ← signature parse failed
-- `Q_UNUSED(ev)` ← unsupported return type: Q
-- `QPainter p(this);` ← unsupported return type: QPainter
-- `initStyleOption(&opt);` ← unsupported return type: i
-- `if (!dSlider)` ← unsupported return type: i
-- `if (dSlider->handleVisible())` ← unsupported return type: i
-- `style()->drawComplexControl(QStyle::CC_Slider, &opt, &p, parentWidget());` ← unsupported return type: s
+## SpecialSlider — 0 methods generated, 1 skipped
+- `void paintEvent(QPaintEvent *ev);` ← unsupported param type: QPaintEvent *
 
 ## DSpinBox — 5 methods generated, 1 skipped
 - `QLineEdit *lineEdit() const;` ← unsupported return type: QLineEdit *
@@ -474,29 +370,12 @@ classes: 146, methods generated: 842, skipped: 416
 ## DSlideStackWidgetTransition — 0 methods generated, 1 skipped
 - `void beginTransition(const TransitionInfo &info);` ← unsupported param type: const TransitionInfo &
 
-## DStackWidget — 13 methods generated, 4 skipped
-- `/// If not specified, all widgets up to the depthOf(widget)+count widgets will b` ← signature parse failed
-- `void popWidget(QWidget *widget = nullptr, bool isDelete = true,` ← signature parse failed
+## DStackWidget — 14 methods generated, 2 skipped
 - `QEasingCurve::Type animationType() const;` ← unsupported return type: QEasingCurve::Type
 - `void setAnimationType(QEasingCurve::Type animationType);` ← unsupported param type: QEasingCurve::Type
 
-## DStyle — 9 methods generated, 44 skipped
-- `PM_FloatingWidgetRadius,                                //(基类)的圆角半径:控件内容-Radius ` ← signature parse failed
-- `PM_FloatingWidgetShadowRadius,                          //(基类)的阴影Radius区域:控件内容 <` ← signature parse failed
-- `PM_FloatingWidgetShadowMargins,                         //(基类)阴影的宽度 = 控件显示大小 - 阴` ← signature parse failed
-- `PM_FloatingWidgetShadowHOffset,                         //(基类)的阴影水平偏移` ← signature parse failed
-- `PM_FloatingWidgetShadowVOffset,                         //(基类)的阴影竖直偏移` ← signature parse failed
-- `SP_TitleQuitFullButton,                     //标题栏(「」)` ← signature parse failed
-- `static QColor adjustColor(const QColor &base,` ← signature parse failed
+## DStyle — 10 methods generated, 37 skipped
 - `static QPair<QIcon::Mode, QIcon::State> toIconModeState(const QStyleOption *opti` ← signature parse failed
-- `QBrush generatedBrush(const QStyleOption *option, const QBrush &base,` ← signature parse failed
-- `QBrush generatedBrush(StyleState state, const QStyleOption *option, const QBrush` ← signature parse failed
-- `virtual QBrush generatedBrush(StateFlags flags, const QBrush &base,` ← signature parse failed
-- `QBrush generatedBrush(const QStyleOption *option, const QBrush &base,` ← signature parse failed
-- `QBrush generatedBrush(StyleState state, const QStyleOption *option, const QBrush` ← signature parse failed
-- `virtual QBrush generatedBrush(StateFlags flags, const QBrush &base,` ← signature parse failed
-- `static void viewItemLayout(const QStyle *style, const QStyleOptionViewItem *opt,` ← signature parse failed
-- `virtual void viewItemLayout(const QStyleOptionViewItem *opt, QRect *pixmapRect,` ← signature parse failed
 - `static DDciIcon::Mode toDciIconMode(const QStyleOption *option);` ← unsupported return type: DDciIcon::Mode
 - `static DStyle::StyleState getState(const QStyleOption *option);` ← unsupported param type: const QStyleOption *
 - `static void setRedPointVisible(QObject *object, bool visible);` ← unsupported param type: QObject *
@@ -507,12 +386,12 @@ classes: 146, methods generated: 842, skipped: 416
 - `static QRect subElementRect(const QStyle *style, DStyle::SubElement r, const QSt` ← unsupported param type: const QStyle *
 - `static QSize sizeFromContents(const QStyle *style, DStyle::ContentsType ct, cons` ← unsupported param type: const QStyle *
 - `static QIcon standardIcon(const QStyle *style, StandardPixmap st, const QStyleOp` ← unsupported param type: const QStyle *
-- `inline void drawPrimitive(DStyle::PrimitiveElement pe, const QStyleOption *opt, ` ← unsupported return type: inline void
-- `inline void drawControl(DStyle::ControlElement ce, const QStyleOption *opt, QPai` ← unsupported return type: inline void
-- `inline int pixelMetric(DStyle::PixelMetric m, const QStyleOption *opt = nullptr,` ← unsupported return type: inline int
-- `inline QRect subElementRect(DStyle::SubElement r, const QStyleOption *opt, const` ← unsupported return type: inline QRect
-- `inline QSize sizeFromContents(DStyle::ContentsType ct, const QStyleOption *opt, ` ← unsupported return type: inline QSize
-- `inline QIcon standardIcon(DStyle::StandardPixmap st, const QStyleOption *opt = n` ← unsupported return type: inline QIcon
+- `inline void drawPrimitive(DStyle::PrimitiveElement pe, const QStyleOption *opt, ` ← unsupported param type: const QStyleOption *
+- `inline void drawControl(DStyle::ControlElement ce, const QStyleOption *opt, QPai` ← unsupported param type: const QStyleOption *
+- `inline int pixelMetric(DStyle::PixelMetric m, const QStyleOption *opt = nullptr,` ← unsupported param type: const QStyleOption *
+- `inline QRect subElementRect(DStyle::SubElement r, const QStyleOption *opt, const` ← unsupported param type: const QStyleOption *
+- `inline QSize sizeFromContents(DStyle::ContentsType ct, const QStyleOption *opt, ` ← unsupported param type: const QStyleOption *
+- `inline QIcon standardIcon(DStyle::StandardPixmap st, const QStyleOption *opt = n` ← unsupported param type: const QStyleOption *
 - `void drawPrimitive(QStyle::PrimitiveElement pe, const QStyleOption *opt, QPainte` ← unsupported param type: QStyle::PrimitiveElement
 - `void drawControl(QStyle::ControlElement ce, const QStyleOption *opt, QPainter *p` ← unsupported param type: QStyle::ControlElement
 - `int pixelMetric(QStyle::PixelMetric m, const QStyleOption *opt = nullptr, const ` ← unsupported param type: QStyle::PixelMetric
@@ -521,48 +400,47 @@ classes: 146, methods generated: 842, skipped: 416
 - `QSize sizeFromContents(QStyle::ContentsType ct, const QStyleOption *opt, const Q` ← unsupported param type: QStyle::ContentsType
 - `QIcon standardIcon(QStyle::StandardPixmap st, const QStyleOption *opt = nullptr,` ← unsupported param type: QStyle::StandardPixmap
 - `QPixmap generatedIconPixmap(QIcon::Mode iconMode, const QPixmap &pixmap, const Q` ← unsupported param type: QIcon::Mode
+- `QBrush generatedBrush(const QStyleOption *option, const QBrush &base, QPalette::` ← unsupported return type: QBrush
+- `QBrush generatedBrush(StyleState state, const QStyleOption *option, const QBrush` ← unsupported return type: QBrush
+- `virtual QBrush generatedBrush(StateFlags flags, const QBrush &base, QPalette::Co` ← unsupported return type: QBrush
+- `QBrush generatedBrush(const QStyleOption *option, const QBrush &base, DPalette::` ← unsupported return type: QBrush
+- `QBrush generatedBrush(StyleState state, const QStyleOption *option, const QBrush` ← unsupported return type: QBrush
+- `virtual QBrush generatedBrush(StateFlags flags, const QBrush &base, DPalette::Co` ← unsupported return type: QBrush
 - `static QSizeF viewItemTextLayout(QTextLayout &textLayout, int lineWidth);` ← unsupported return type: QSizeF
 - `static QSize viewItemSize(const QStyle *style, const QStyleOptionViewItem *optio` ← unsupported param type: const QStyle *
+- `static void viewItemLayout(const QStyle *style, const QStyleOptionViewItem *opt,` ← unsupported param type: const QStyle *
+- `virtual void viewItemLayout(const QStyleOptionViewItem *opt, QRect *pixmapRect, ` ← unsupported param type: const QStyleOptionViewItem *
 - `static QRect viewItemDrawText(const QStyle *style, QPainter *p, const QStyleOpti` ← unsupported param type: const QStyle *
 - `virtual QRect viewItemDrawText(QPainter *p, const QStyleOptionViewItem *option, ` ← unsupported param type: QPainter *
 
-## DStyleHelper — 0 methods generated, 17 skipped
-- `inline DStyleHelper(const QStyle *style = QApplication::style()) {` ← signature parse failed
-- `inline void setStyle(const QStyle *style) {` ← signature parse failed
-- `m_dstyle = qobject_cast<const DStyle*>(style);` ← signature parse failed
-- `inline QBrush generatedBrush(const QStyleOption *option, const QBrush &base,` ← signature parse failed
-- `inline QBrush generatedBrush(const QStyleOption *option, const QBrush &base,` ← signature parse failed
-- `setStyle(style);` ← unsupported return type: s
-- `inline const QStyle *style() const` ← unsupported return type: inline const QStyle *
-- `inline const DStyle *dstyle() const` ← unsupported return type: inline const DStyle *
-- `inline QColor getColor(const QStyleOption *option, QPalette::ColorRole role) con` ← unsupported return type: inline QColor
-- `inline QColor getColor(const QStyleOption *option, const DPalette &palette, DPal` ← unsupported return type: inline QColor
-- `inline QColor getColor(const T *option, DPalette::ColorType type) const` ← unsupported return type: inline QColor
-- `inline void drawPrimitive(DStyle::PrimitiveElement pe, const QStyleOption *opt, ` ← unsupported return type: inline void
-- `inline void drawControl(DStyle::ControlElement ce, const QStyleOption *opt, QPai` ← unsupported return type: inline void
-- `inline int pixelMetric(DStyle::PixelMetric m, const QStyleOption *opt = nullptr,` ← unsupported return type: inline int
-- `inline QRect subElementRect(DStyle::SubElement r, const QStyleOption *opt, const` ← unsupported return type: inline QRect
-- `inline QSize sizeFromContents(DStyle::ContentsType ct, const QStyleOption *opt, ` ← unsupported return type: inline QSize
-- `inline QIcon standardIcon(DStyle::StandardPixmap standardIcon, const QStyleOptio` ← unsupported return type: inline QIcon
+## DStyleHelper — 1 methods generated, 14 skipped
+- `inline DStyleHelper(const QStyle *style = QApplication::style());` ← unsupported return type: D
+- `inline void setStyle(const QStyle *style);` ← unsupported param type: const QStyle *
+- `inline const QStyle *style() const` ← unsupported return type: const QStyle *
+- `inline QBrush generatedBrush(const QStyleOption *option, const QBrush &base, QPa` ← unsupported return type: QBrush
+- `inline QBrush generatedBrush(const QStyleOption *option, const QBrush &base, QPa` ← unsupported return type: QBrush
+- `inline QColor getColor(const QStyleOption *option, QPalette::ColorRole role) con` ← unsupported param type: const QStyleOption *
+- `inline QColor getColor(const QStyleOption *option, const DPalette &palette, DPal` ← unsupported param type: const QStyleOption *
+- `inline QColor getColor(const T *option, DPalette::ColorType type) const` ← unsupported param type: const T *
+- `inline void drawPrimitive(DStyle::PrimitiveElement pe, const QStyleOption *opt, ` ← unsupported param type: const QStyleOption *
+- `inline void drawControl(DStyle::ControlElement ce, const QStyleOption *opt, QPai` ← unsupported param type: const QStyleOption *
+- `inline int pixelMetric(DStyle::PixelMetric m, const QStyleOption *opt = nullptr,` ← unsupported param type: const QStyleOption *
+- `inline QRect subElementRect(DStyle::SubElement r, const QStyleOption *opt, const` ← unsupported param type: const QStyleOption *
+- `inline QSize sizeFromContents(DStyle::ContentsType ct, const QStyleOption *opt, ` ← unsupported param type: const QStyleOption *
+- `inline QIcon standardIcon(DStyle::StandardPixmap standardIcon, const QStyleOptio` ← unsupported param type: const QStyleOption *
 
-## DStylePainter — 0 methods generated, 17 skipped
-- `inline DStylePainter() : QPainter(), widget(nullptr), wstyle(nullptr) {}` ← signature parse failed
-- `inline explicit DStylePainter(QWidget *w) { begin(w, w); }` ← signature parse failed
-- `inline DStylePainter(QPaintDevice *pd, QWidget *w) { begin(pd, w); }` ← signature parse failed
-- `inline bool begin(QWidget *w) { return begin(w, w); }` ← signature parse failed
-- `inline bool begin(QPaintDevice *pd, QWidget *w) {` ← signature parse failed
-- `wstyle = w->style();` ← signature parse failed
-- `dstyle.setStyle(wstyle);` ← signature parse failed
-- `inline void drawItemText(const QRect &r, int flags, const QPalette &pal, bool en` ← signature parse failed
-- `inline QStyle *style() const { return wstyle; }` ← signature parse failed
-- `Q_ASSERT_X(w, "DStylePainter::DStylePainter", "Widget must be non-zero");` ← unsupported return type: Q
-- `return QPainter::begin(pd);` ← unsupported return type: return QPainter::
-- `inline void drawPrimitive(QStyle::PrimitiveElement pe, const QStyleOption &opt);` ← unsupported return type: inline void
-- `inline void drawPrimitive(DStyle::PrimitiveElement pe, const QStyleOption &opt);` ← unsupported return type: inline void
-- `inline void drawControl(QStyle::ControlElement ce, const QStyleOption &opt);` ← unsupported return type: inline void
-- `inline void drawControl(DStyle::ControlElement ce, const QStyleOption &opt);` ← unsupported return type: inline void
-- `inline void drawComplexControl(QStyle::ComplexControl cc, const QStyleOptionComp` ← unsupported return type: inline void
-- `inline void drawItemPixmap(const QRect &r, int flags, const QPixmap &pixmap);` ← unsupported return type: inline void
+## DStylePainter — 2 methods generated, 11 skipped
+- `inline DStylePainter() : QPainter(), widget(nullptr), wstyle(nullptr);` ← unsupported return type: D
+- `inline explicit DStylePainter(QWidget *w);` ← unsupported return type: D
+- `inline DStylePainter(QPaintDevice *pd, QWidget *w);` ← unsupported return type: D
+- `inline bool begin(QPaintDevice *pd, QWidget *w);` ← unsupported param type: QPaintDevice *
+- `inline void drawPrimitive(QStyle::PrimitiveElement pe, const QStyleOption &opt);` ← unsupported param type: QStyle::PrimitiveElement
+- `inline void drawPrimitive(DStyle::PrimitiveElement pe, const QStyleOption &opt);` ← unsupported param type: const QStyleOption &
+- `inline void drawControl(QStyle::ControlElement ce, const QStyleOption &opt);` ← unsupported param type: QStyle::ControlElement
+- `inline void drawControl(DStyle::ControlElement ce, const QStyleOption &opt);` ← unsupported param type: const QStyleOption &
+- `inline void drawComplexControl(QStyle::ComplexControl cc, const QStyleOptionComp` ← unsupported param type: QStyle::ComplexControl
+- `inline void drawItemText(const QRect &r, int flags, const QPalette &pal, bool en` ← unsupported param type: QPalette::ColorRole
+- `inline QStyle *style() const;` ← unsupported return type: QStyle *
 
 ## DStyledIconEngine — 1 methods generated, 7 skipped
 - `static void drawIcon(const QIcon &icon, QPainter *pa, const QRectF &rect);` ← unsupported param type: QPainter *
@@ -573,43 +451,23 @@ classes: 146, methods generated: 842, skipped: 416
 - `QIconEngine *clone() const override;` ← unsupported return type: QIconEngine *
 - `void setFrontRole(const QWidget* widget, QPalette::ColorRole role);` ← unsupported param type: QPalette::ColorRole
 
-## DViewItemAction — 12 methods generated, 6 skipped
-- `explicit DViewItemAction(Qt::Alignment alignment = Qt::Alignment(), const QSize ` ← signature parse failed
-- `const QSize &maxSize = QSize(), bool clickable = false);` ← signature parse failed
-- `void setTextColorRole(DPalette::ColorType role);` ← unsupported param type: DPalette::ColorType
-- `void setTextColorRole(DPalette::ColorRole role);` ← unsupported param type: DPalette::ColorRole
-- `DPalette::ColorType textColorType() const;` ← unsupported return type: DPalette::ColorType
-- `DPalette::ColorRole textColorRole() const;` ← unsupported return type: DPalette::ColorRole
+## DViewItemAction — 16 methods generated, 0 skipped
 
 ## DStyledItemDelegate — 8 methods generated, 3 skipped
-- `void updateEditorGeometry(QWidget *editor,` ← signature parse failed
 - `void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIn` ← unsupported param type: QPainter *
 - `QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) con` ← unsupported param type: const QStyleOptionViewItem &
+- `void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, c` ← unsupported param type: const QStyleOptionViewItem &
 
-## DStandardItem — 4 methods generated, 13 skipped
+## DStandardItem — 12 methods generated, 5 skipped
 - `void setActionList(Qt::Edge edge, const DViewItemActionList &list);` ← unsupported param type: const DViewItemActionList &
 - `DViewItemActionList actionList(Qt::Edge edge) const;` ← unsupported return type: DViewItemActionList
 - `void setTextActionList(const DViewItemActionList &list);` ← unsupported param type: const DViewItemActionList &
 - `DViewItemActionList textActionList() const;` ← unsupported return type: DViewItemActionList
-- `void setTextColorRole(DPalette::ColorType role);` ← unsupported param type: DPalette::ColorType
-- `void setTextColorRole(DPalette::ColorRole role);` ← unsupported param type: DPalette::ColorRole
-- `DPalette::ColorType textColorType() const;` ← unsupported return type: DPalette::ColorType
-- `DPalette::ColorRole textColorRole() const;` ← unsupported return type: DPalette::ColorRole
-- `void setBackgroundRole(DPalette::ColorType role);` ← unsupported param type: DPalette::ColorType
-- `void setBackgroundRole(DPalette::ColorRole role);` ← unsupported param type: DPalette::ColorRole
-- `DPalette::ColorType backgroundType() const;` ← unsupported return type: DPalette::ColorType
-- `DPalette::ColorRole backgroundRole() const;` ← unsupported return type: DPalette::ColorRole
 - `virtual QStandardItem *clone() const override;` ← unsupported return type: QStandardItem *
 
 ## DStyleOption — 2 methods generated, 0 skipped
 
-## DStyleOptionButton — 1 methods generated, 6 skipped
-- `SuggestButton = (CommandLinkButton << 1),` ← signature parse failed
-- `WarningButton = (SuggestButton << 1),` ← signature parse failed
-- `FloatingButton = (WarningButton << 1),` ← signature parse failed
-- `TitleBarButton = (FloatingButton << 1),` ← signature parse failed
-- `CircleButton = (TitleBarButton << 1),` ← signature parse failed
-- `HasDciIcon = (CircleButton << 1)` ← signature parse failed
+## DStyleOptionButton — 1 methods generated, 0 skipped
 
 ## DStyleOptionButtonBoxButton — 0 methods generated, 0 skipped
 
@@ -625,21 +483,7 @@ classes: 146, methods generated: 842, skipped: 416
 
 ## DStyleOptionFloatingWidget — 0 methods generated, 0 skipped
 
-## DFontSizeManager — 7 methods generated, 14 skipped
-- `quint16 fontPixelSize(SizeType type) const;` ← unsupported return type: quint16
-- `void setFontPixelSize(SizeType type, quint16 size);` ← unsupported param type: quint16
-- `void setFontGenericPixelSize(quint16 size);` ← unsupported param type: quint16
-- `inline const QFont t1(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t2(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t3(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t4(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t5(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t6(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t7(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t8(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t9(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t10(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
-- `inline const QFont t11(const QFont &base = QFont()) const` ← unsupported return type: inline const QFont
+## DFontSizeManager — 21 methods generated, 0 skipped
 
 ## DSwitchButton — 1 methods generated, 0 skipped
 
@@ -647,15 +491,9 @@ classes: 146, methods generated: 842, skipped: 416
 
 ## DSwitchLineExpand — 3 methods generated, 0 skipped
 
-## DTabBar — 57 methods generated, 9 skipped
-- `QTabBar::Shape shape() const;` ← unsupported return type: QTabBar::Shape
-- `void setShape(QTabBar::Shape shape);` ← unsupported param type: QTabBar::Shape
+## DTabBar — 63 methods generated, 3 skipped
 - `void setTabData(int index, const QVariant &data);` ← unsupported param type: const QVariant &
 - `QVariant tabData(int index) const;` ← unsupported return type: QVariant
-- `void setTabButton(int index, QTabBar::ButtonPosition position, QWidget *widget);` ← unsupported param type: QTabBar::ButtonPosition
-- `QWidget *tabButton(int index, QTabBar::ButtonPosition position) const;` ← unsupported param type: QTabBar::ButtonPosition
-- `QTabBar::SelectionBehavior selectionBehaviorOnRemove() const;` ← unsupported return type: QTabBar::SelectionBehavior
-- `void setSelectionBehaviorOnRemove(QTabBar::SelectionBehavior behavior);` ← unsupported param type: QTabBar::SelectionBehavior
 - `QWindow *dragIconWindow() const;` ← unsupported return type: QWindow *
 
 ## DTabletWindowOptionButton — 1 methods generated, 0 skipped
@@ -664,17 +502,13 @@ classes: 146, methods generated: 842, skipped: 416
 
 ## DTickEffect — 6 methods generated, 0 skipped
 
-## DTipLabel — 1 methods generated, 1 skipped
-- `void setForegroundRole(DPalette::ColorType color);` ← unsupported param type: DPalette::ColorType
+## DTipLabel — 2 methods generated, 0 skipped
 
-## DTitlebarToolBaseInterface — 3 methods generated, 1 skipped
-- `explicit DTitlebarToolBaseInterface(QObject *parent = nullptr) : QObject(parent)` ← signature parse failed
+## DTitlebarToolBaseInterface — 3 methods generated, 0 skipped
 
-## DTitleBarToolInterface — 1 methods generated, 1 skipped
-- `explicit DTitleBarToolInterface(QObject *parent = nullptr) : DTitlebarToolBaseIn` ← signature parse failed
+## DTitleBarToolInterface — 1 methods generated, 0 skipped
 
-## DTitleBarSpacerInterface — 2 methods generated, 1 skipped
-- `explicit DTitleBarSpacerInterface(QObject *parent = nullptr) : DTitlebarToolBase` ← signature parse failed
+## DTitleBarSpacerInterface — 2 methods generated, 0 skipped
 
 ## DTitlebarSettings — 1 methods generated, 1 skipped
 - `bool initilize(QList<DTitlebarToolBaseInterface *> &tools, const QString &path);` ← unsupported param type: QList<DTitlebarToolBaseInterface *> &

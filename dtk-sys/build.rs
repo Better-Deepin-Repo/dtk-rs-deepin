@@ -60,4 +60,5 @@ fn main() {
     println!("cargo:rerun-if-changed=include/dtk_shim.h");
     println!("cargo:rerun-if-changed=include/dtk_gen_shim.h");
     println!("cargo:rerun-if-changed=include/relay.h");
+    println!("cargo:rerun-if-changed=compat"); // alias headers, recursive watch
 }

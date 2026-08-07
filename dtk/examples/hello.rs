@@ -28,7 +28,7 @@ fn main() {
     vbox.set_spacing(12);
 
     let label = Rc::new(DLabel::new("Not clicked yet."));
-    label.set_alignment(qt::ALIGN_CENTER);
+    label.set_alignment(qt::alignment::CENTER);
     vbox.add_widget(&label.as_widget());
 
     let btn = DSuggestButton::new("Click me");
@@ -58,8 +58,8 @@ fn main() {
     win.show();
 
     // handles now only reachable via callbacks; Qt frees the real objects
-    std::mem::forget(btn);
-    std::mem::forget(about_btn);
+    btn.leak();
+    about_btn.leak();
 
     std::process::exit(app.exec());
 }
