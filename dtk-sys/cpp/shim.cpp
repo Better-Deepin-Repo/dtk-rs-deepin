@@ -242,6 +242,10 @@ void widget_set_focus(QWidget *w) { w->setFocus(); }
 bool app_popup_active() {
     return QApplication::activeModalWidget() != nullptr || QApplication::activePopupWidget() != nullptr;
 }
+uint32_t app_palette_window_rgb() {
+    const QColor c = QApplication::palette().color(QPalette::Window);
+    return static_cast<uint32_t>((c.red() << 16) | (c.green() << 8) | c.blue());
+}
 void widget_activate_window(QWidget *w) { w->activateWindow(); }
 void widget_close(QWidget *w) { w->close(); }
 bool widget_is_visible(QWidget *w) { return w->isVisible(); }
@@ -475,6 +479,7 @@ void font_set_monospace(QFont *f) {
     f->setStyleHint(QFont::TypeWriter);
     f->setFamily(QStringLiteral("monospace"));
 }
+void font_set_family(QFont *f, rust::Str name) { f->setFamily(from_rust_str(name)); }
 void font_delete(QFont *f) { delete f; }
 QPalette *palette_new() { return new QPalette; }
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color) {

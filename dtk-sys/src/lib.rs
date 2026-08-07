@@ -68,6 +68,7 @@ pub mod ffi {
         unsafe fn widget_update(w: *mut QWidget);
         unsafe fn widget_set_focus(w: *mut QWidget);
         unsafe fn app_popup_active() -> bool;
+        unsafe fn app_palette_window_rgb() -> u32;
         unsafe fn widget_activate_window(w: *mut QWidget);
         unsafe fn widget_close(w: *mut QWidget);
         unsafe fn widget_is_visible(w: *mut QWidget) -> bool;
@@ -239,6 +240,7 @@ pub mod ffi {
         unsafe fn fontmetrics_ascent(f: *mut QFont) -> i32;
         unsafe fn fontmetrics_max_width(f: *mut QFont) -> i32;
         unsafe fn font_set_monospace(f: *mut QFont);
+        unsafe fn font_set_family(f: *mut QFont, name: &str);
         unsafe fn font_delete(f: *mut QFont);
         unsafe fn palette_new() -> *mut QPalette;
         unsafe fn palette_set_color(pal: *mut QPalette, group: i32, role: i32, color: *mut QColor);

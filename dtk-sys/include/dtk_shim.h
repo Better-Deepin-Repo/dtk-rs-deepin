@@ -113,6 +113,8 @@ void widget_update(QWidget *w);
 void widget_set_focus(QWidget *w);
 // true while a modal dialog or popup (menu) is active — don't yank focus back then
 bool app_popup_active();
+// QPalette::Window as 0xRRGGBB (theme detection)
+uint32_t app_palette_window_rgb();
 void widget_activate_window(QWidget *w);
 void widget_close(QWidget *w);
 bool widget_is_visible(QWidget *w);
@@ -240,6 +242,7 @@ int32_t fontmetrics_ascent(QFont *f);
 int32_t fontmetrics_max_width(QFont *f);
 // generic monospace family (fontconfig "monospace" alias)
 void font_set_monospace(QFont *f);
+void font_set_family(QFont *f, rust::Str name);
 void font_delete(QFont *f);
 QPalette *palette_new();
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color);

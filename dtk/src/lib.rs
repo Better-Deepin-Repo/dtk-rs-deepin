@@ -437,6 +437,11 @@ impl DApplication {
     pub fn popup_active() -> bool {
         unsafe { ffi::app_popup_active() }
     }
+    /// QPalette::Window as (r, g, b) — use to detect light vs dark DTK theme
+    pub fn palette_window_rgb() -> (u8, u8, u8) {
+        let rgb = unsafe { ffi::app_palette_window_rgb() };
+        ((rgb >> 16) as u8, (rgb >> 8) as u8, rgb as u8)
+    }
 }
 
 // ---- DMainWindow / DTitlebar ----
@@ -550,6 +555,10 @@ impl QFont {
     /// generic monospace family (terminals, code)
     pub fn set_monospace(&self) {
         unsafe { ffi::font_set_monospace(self.ptr) }
+    }
+    /// set the font family by name (e.g. "Fira Code")
+    pub fn set_family(&self, name: &str) {
+        unsafe { ffi::font_set_family(self.ptr, name) }
     }
     /// cell geometry for grid rendering: (max char width, line height, ascent)
     pub fn metrics(&self) -> (i32, i32, i32) {
