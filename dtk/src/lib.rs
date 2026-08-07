@@ -173,6 +173,10 @@ impl QWidget {
     pub fn set_focus(&self) {
         unsafe { ffi::widget_set_focus(self.ptr) }
     }
+    /// set the titlebar icon (DMainWindow only; no-op otherwise)
+    pub fn set_titlebar_icon(&self, icon: &QIcon) {
+        unsafe { ffi::widget_set_titlebar_icon(self.ptr, icon.ptr) }
+    }
     pub fn resize(&self, w: i32, h: i32) {
         unsafe { ffi::widget_resize(self.ptr, w, h) }
     }

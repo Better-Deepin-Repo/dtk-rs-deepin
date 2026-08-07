@@ -239,6 +239,13 @@ void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixed
 void widget_raise(QWidget *w) { w->raise(); }
 void widget_update(QWidget *w) { w->update(); }
 void widget_set_focus(QWidget *w) { w->setFocus(); }
+void widget_set_titlebar_icon(QWidget *w, QIcon *icon) {
+    if (auto *mw = qobject_cast<DMainWindow *>(w)) {
+        if (auto *tb = mw->titlebar()) {
+            tb->setIcon(*icon);
+        }
+    }
+}
 bool app_popup_active() {
     return QApplication::activeModalWidget() != nullptr || QApplication::activePopupWidget() != nullptr;
 }

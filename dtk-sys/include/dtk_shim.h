@@ -111,6 +111,8 @@ void widget_raise(QWidget *w);
 // schedule a repaint (thread-safe-ish: call from GUI thread)
 void widget_update(QWidget *w);
 void widget_set_focus(QWidget *w);
+// set the DMainWindow titlebar icon (no-op for other widgets)
+void widget_set_titlebar_icon(QWidget *w, QIcon *icon);
 // true while a modal dialog or popup (menu) is active — don't yank focus back then
 bool app_popup_active();
 // QPalette::Window as 0xRRGGBB (theme detection)
