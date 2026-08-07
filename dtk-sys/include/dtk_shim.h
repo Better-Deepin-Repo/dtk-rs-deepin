@@ -111,6 +111,8 @@ void widget_raise(QWidget *w);
 // schedule a repaint (thread-safe-ish: call from GUI thread)
 void widget_update(QWidget *w);
 void widget_set_focus(QWidget *w);
+// true while a modal dialog or popup (menu) is active — don't yank focus back then
+bool app_popup_active();
 void widget_activate_window(QWidget *w);
 void widget_close(QWidget *w);
 bool widget_is_visible(QWidget *w);

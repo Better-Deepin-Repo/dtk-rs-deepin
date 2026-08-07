@@ -239,6 +239,9 @@ void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixed
 void widget_raise(QWidget *w) { w->raise(); }
 void widget_update(QWidget *w) { w->update(); }
 void widget_set_focus(QWidget *w) { w->setFocus(); }
+bool app_popup_active() {
+    return QApplication::activeModalWidget() != nullptr || QApplication::activePopupWidget() != nullptr;
+}
 void widget_activate_window(QWidget *w) { w->activateWindow(); }
 void widget_close(QWidget *w) { w->close(); }
 bool widget_is_visible(QWidget *w) { return w->isVisible(); }

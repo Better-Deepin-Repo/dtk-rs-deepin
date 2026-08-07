@@ -433,6 +433,10 @@ impl DApplication {
     pub fn has_arg(arg: &str) -> bool {
         unsafe { ffi::application_has_arg(arg) }
     }
+    /// true while a modal dialog or popup menu is active
+    pub fn popup_active() -> bool {
+        unsafe { ffi::app_popup_active() }
+    }
 }
 
 // ---- DMainWindow / DTitlebar ----
