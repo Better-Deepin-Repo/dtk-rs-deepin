@@ -53,6 +53,10 @@ macro_rules! widget_wrapper {
             pub fn raise(&self) {
                 unsafe { ffi::widget_raise(self.ptr.cast()) }
             }
+            /// schedule a repaint
+            pub fn update(&self) {
+                unsafe { ffi::widget_update(self.ptr.cast()) }
+            }
             pub fn activate_window(&self) {
                 unsafe { ffi::widget_activate_window(self.ptr.cast()) }
             }
@@ -157,9 +161,20 @@ impl QWidget {
     pub fn show(&self) {
         unsafe { ffi::widget_show(self.ptr) }
     }
+    /// schedule a repaint
+    pub fn update(&self) {
+        unsafe { ffi::widget_update(self.ptr) }
+    }
     /// deferred delete (next event-loop turn)
     pub fn delete_later(&self) {
         unsafe { ffi::object_delete_later(self.ptr.cast()) }
+    }
+    /// key sequence like "Ctrl+Shift+C"; fires while the widget lives.
+    /// Returns the callback id for [`unregister_callback`].
+    pub fn add_shortcut(&self, key: &str, f: impl FnMut() + 'static) -> usize {
+        let id = dtk_sys::register_cb0(f);
+        unsafe { ffi::shortcut_new(self.ptr, key, id) };
+        id
     }
 }
 
@@ -187,6 +202,126 @@ impl std::fmt::Debug for QWidget {
 
 // Qt button base handle (returned by e.g. DDialog button accessors)
 widget_wrapper!(QAbstractButton, ffi::QAbstractButton);
+
+// fully user-drawn widget: every paint/input event goes to the Rust handler
+widget_wrapper!(PaintWidget, ffi::QWidget);
+
+/// key event (key = qt::key::*, mods = qt::modifier::*)
+#[derive(Debug, Clone)]
+pub struct KeyEvent {
+    pub key: i32,
+    pub mods: i32,
+    pub text: String,
+    pub press: bool,
+    pub autorepeat: bool,
+}
+
+/// mouse event (kind = qt::mouse_kind::*, button = qt::mouse_button::*)
+#[derive(Debug, Clone)]
+pub struct MouseEvent {
+    pub kind: i32,
+    pub button: i32,
+    pub x: i32,
+    pub y: i32,
+    pub mods: i32,
+}
+
+/// events delivered to a [`PaintWidget`] handler
+pub enum PaintWidgetEvent {
+    /// painter valid only inside the callback; w/h = widget size
+    Paint(Painter, i32, i32),
+    Key(KeyEvent),
+    Mouse(MouseEvent),
+    Wheel {
+        dy: i32,
+        x: i32,
+        y: i32,
+        mods: i32,
+    },
+    /// input method: committed text + in-progress preedit
+    Ime {
+        commit: String,
+        preedit: String,
+    },
+    Resize {
+        w: i32,
+        h: i32,
+    },
+    Focus(bool),
+}
+
+impl PaintWidget {
+    /// handler receives every event; register nothing else
+    pub fn new(parent: Option<&QWidget>, handler: impl FnMut(PaintWidgetEvent) + 'static) -> Self {
+        let mut handler = handler;
+        let id = dtk_sys::register_cb_pw(move |ev| {
+            let ev = match ev {
+                dtk_sys::PwEvent::Paint(p, w, h) => {
+                    PaintWidgetEvent::Paint(Painter { ptr: p }, w, h)
+                }
+                dtk_sys::PwEvent::Key {
+                    key,
+                    mods,
+                    text,
+                    press,
+                    autorepeat,
+                } => PaintWidgetEvent::Key(KeyEvent {
+                    key,
+                    mods,
+                    text,
+                    press,
+                    autorepeat,
+                }),
+                dtk_sys::PwEvent::Mouse {
+                    kind,
+                    button,
+                    x,
+                    y,
+                    mods,
+                } => PaintWidgetEvent::Mouse(MouseEvent {
+                    kind,
+                    button,
+                    x,
+                    y,
+                    mods,
+                }),
+                dtk_sys::PwEvent::Wheel { dy, x, y, mods } => {
+                    PaintWidgetEvent::Wheel { dy, x, y, mods }
+                }
+                dtk_sys::PwEvent::Ime { commit, preedit } => {
+                    PaintWidgetEvent::Ime { commit, preedit }
+                }
+                dtk_sys::PwEvent::Resize { w, h } => PaintWidgetEvent::Resize { w, h },
+                dtk_sys::PwEvent::Focus(gained) => PaintWidgetEvent::Focus(gained),
+            };
+            handler(ev);
+        });
+        Self::from_raw(unsafe { ffi::paint_widget_new(id, opt_ptr(parent)) })
+    }
+    /// test/helper: synchronously deliver a key-press (bypasses the OS event source)
+    pub fn inject_key(&self, key: i32, mods: i32, text: &str) {
+        unsafe { ffi::paint_widget_inject_key(self.ptr, key, mods, text) }
+    }
+}
+
+/// system clipboard (QGuiApplication::clipboard)
+pub struct Clipboard;
+
+impl Clipboard {
+    pub fn set_text(text: &str) {
+        unsafe { ffi::clipboard_set_text(text, 0) }
+    }
+    pub fn text() -> String {
+        unsafe { ffi::clipboard_text(0) }
+    }
+    /// X11 primary selection (copy-on-select)
+    pub fn set_selection(text: &str) {
+        unsafe { ffi::clipboard_set_text(text, 1) }
+    }
+    pub fn selection() -> String {
+        unsafe { ffi::clipboard_text(1) }
+    }
+}
 
 /// connect an arg-less signal on any widget (e.g. clicked, timeout)
 pub trait Signal0 {
@@ -397,6 +532,20 @@ impl QFont {
     pub fn set_bold(&self, bold: bool) {
         unsafe { ffi::font_set_bold(self.ptr, bold) }
     }
+    /// generic monospace family (terminals, code)
+    pub fn set_monospace(&self) {
+        unsafe { ffi::font_set_monospace(self.ptr) }
+    }
+    /// cell geometry for grid rendering: (max char width, line height, ascent)
+    pub fn metrics(&self) -> (i32, i32, i32) {
+        unsafe {
+            (
+                ffi::fontmetrics_max_width(self.ptr),
+                ffi::fontmetrics_height(self.ptr),
+                ffi::fontmetrics_ascent(self.ptr),
+            )
+        }
+    }
 }
 
 impl QPalette {
@@ -473,6 +622,70 @@ pub mod qt {
     /// Qt::ItemDataRole
     pub mod item_role {
         pub const USER_ROLE: i32 = 0x0100;
+    }
+    /// Qt::KeyboardModifier
+    pub mod modifier {
+        pub const SHIFT: i32 = 0x02000000;
+        pub const CONTROL: i32 = 0x04000000;
+        pub const ALT: i32 = 0x08000000;
+        pub const META: i32 = 0x10000000;
+        pub const KEYPAD: i32 = 0x20000000;
+    }
+    /// Qt::MouseButton
+    pub mod mouse_button {
+        pub const LEFT: i32 = 1;
+        pub const RIGHT: i32 = 2;
+        pub const MIDDLE: i32 = 4;
+        pub const BACK: i32 = 8;
+        pub const FORWARD: i32 = 16;
+    }
+    /// PaintWidget mouse event kinds
+    pub mod mouse_kind {
+        pub const PRESS: i32 = 0;
+        pub const RELEASE: i32 = 1;
+        pub const MOVE: i32 = 2;
+        pub const DOUBLE_CLICK: i32 = 3;
+    }
+    /// Qt::Key (letters/digits are ASCII); common subset for terminal input
+    pub mod key {
+        pub const ESCAPE: i32 = 0x01000000;
+        pub const TAB: i32 = 0x01000001;
+        pub const BACKTAB: i32 = 0x01000002;
+        pub const BACKSPACE: i32 = 0x01000003;
+        pub const RETURN: i32 = 0x01000004;
+        pub const ENTER: i32 = 0x01000005; // keypad
+        pub const INSERT: i32 = 0x01000006;
+        pub const DELETE: i32 = 0x01000007;
+        pub const PAUSE: i32 = 0x01000008;
+        pub const PRINT: i32 = 0x01000009;
+        pub const CLEAR: i32 = 0x0100000b;
+        pub const HOME: i32 = 0x01000010;
+        pub const END: i32 = 0x01000011;
+        pub const LEFT: i32 = 0x01000012;
+        pub const UP: i32 = 0x01000013;
+        pub const RIGHT: i32 = 0x01000014;
+        pub const DOWN: i32 = 0x01000015;
+        pub const PAGE_UP: i32 = 0x01000016;
+        pub const PAGE_DOWN: i32 = 0x01000017;
+        pub const SHIFT: i32 = 0x01000020;
+        pub const CONTROL: i32 = 0x01000021;
+        pub const META: i32 = 0x01000022;
+        pub const ALT: i32 = 0x01000023;
+        pub const CAPS_LOCK: i32 = 0x01000024;
+        pub const NUM_LOCK: i32 = 0x01000025;
+        pub const SCROLL_LOCK: i32 = 0x01000026;
+        pub const F1: i32 = 0x01000030;
+        pub const F2: i32 = 0x01000031;
+        pub const F3: i32 = 0x01000032;
+        pub const F4: i32 = 0x01000033;
+        pub const F5: i32 = 0x01000034;
+        pub const F6: i32 = 0x01000035;
+        pub const F7: i32 = 0x01000036;
+        pub const F8: i32 = 0x01000037;
+        pub const F9: i32 = 0x01000038;
+        pub const F10: i32 = 0x01000039;
+        pub const F11: i32 = 0x0100003a;
+        pub const F12: i32 = 0x0100003b;
     }
     /// Qt::Orientation
     pub mod orientation {
@@ -1003,6 +1216,10 @@ pub struct Painter {
 }
 
 impl Painter {
+    /// draw text with the baseline at (x, y) — for cell-grid rendering
+    pub fn draw_text_at(&self, x: i32, y: i32, text: &str) {
+        unsafe { ffi::painter_draw_text_at(self.ptr, x, y, text) }
+    }
     pub fn save(&self) {
         unsafe { ffi::painter_save(self.ptr) }
     }

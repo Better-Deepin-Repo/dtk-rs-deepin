@@ -65,6 +65,7 @@ pub mod ffi {
         unsafe fn widget_set_window_icon(w: *mut QWidget, icon: *mut QIcon);
         unsafe fn widget_set_fixed_size(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_raise(w: *mut QWidget);
+        unsafe fn widget_update(w: *mut QWidget);
         unsafe fn widget_activate_window(w: *mut QWidget);
         unsafe fn widget_close(w: *mut QWidget);
         unsafe fn widget_is_visible(w: *mut QWidget) -> bool;
@@ -232,6 +233,10 @@ pub mod ffi {
         unsafe fn font_new() -> *mut QFont;
         unsafe fn font_set_point_size(f: *mut QFont, size: i32);
         unsafe fn font_set_bold(f: *mut QFont, bold: bool);
+        unsafe fn fontmetrics_height(f: *mut QFont) -> i32;
+        unsafe fn fontmetrics_ascent(f: *mut QFont) -> i32;
+        unsafe fn fontmetrics_max_width(f: *mut QFont) -> i32;
+        unsafe fn font_set_monospace(f: *mut QFont);
         unsafe fn font_delete(f: *mut QFont);
         unsafe fn palette_new() -> *mut QPalette;
         unsafe fn palette_set_color(pal: *mut QPalette, group: i32, role: i32, color: *mut QColor);
@@ -265,6 +270,7 @@ pub mod ffi {
         ) -> *mut QStyledItemDelegate;
 
         // QPainter primitives
+        unsafe fn painter_draw_text_at(p: *mut QPainter, x: i32, y: i32, text: &str);
         unsafe fn painter_save(p: *mut QPainter);
         unsafe fn painter_restore(p: *mut QPainter);
         unsafe fn painter_set_pen_color(p: *mut QPainter, color: *mut QColor);
@@ -327,6 +333,13 @@ pub mod ffi {
         unsafe fn relay_connect_bool(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
         /// disconnect + schedule deletion of the relay for cb_id (no-op if unknown)
         unsafe fn relay_disconnect(cb_id: usize);
+
+        // user-drawn widget + clipboard + shortcuts
+        unsafe fn paint_widget_new(cb_id: usize, parent: *mut QWidget) -> *mut QWidget;
+        unsafe fn paint_widget_inject_key(w: *mut QWidget, key: i32, mods: i32, text: &str);
+        unsafe fn clipboard_set_text(text: &str, mode: i32);
+        unsafe fn clipboard_text(mode: i32) -> String;
+        unsafe fn shortcut_new(parent: *mut QWidget, key: &str, cb_id: usize);
     }
 
     extern "Rust" {
@@ -334,6 +347,21 @@ pub mod ffi {
         fn dtk_cb_i32(id: usize, v: i32);
         fn dtk_cb_bool(id: usize, v: bool);
         fn dtk_cb_guard(id: usize) -> bool;
+        // DtkPaintWidget event callbacks
+        unsafe fn dtk_cb_pw_paint(id: usize, painter: *mut QPainter, w: i32, h: i32);
+        fn dtk_cb_pw_key(
+            id: usize,
+            key: i32,
+            mods: i32,
+            text: String,
+            press: bool,
+            autorepeat: bool,
+        );
+        fn dtk_cb_pw_mouse(id: usize, kind: i32, button: i32, x: i32, y: i32, mods: i32);
+        fn dtk_cb_pw_wheel(id: usize, dy: i32, x: i32, y: i32, mods: i32);
+        fn dtk_cb_pw_ime(id: usize, commit: String, preedit: String);
+        fn dtk_cb_pw_resize(id: usize, w: i32, h: i32);
+        fn dtk_cb_pw_focus(id: usize, focus_in: bool);
         unsafe fn dtk_cb_paint(
             id: usize,
             painter: *mut QPainter,
@@ -349,12 +377,47 @@ pub mod ffi {
 
 // ---- callback registry: Qt signals -> Rust closures ----
 // ponytail: callbacks only fire on the Qt main thread; thread_local is enough, no locks
+/// events delivered to a PaintWidget callback (QPainter valid only during Paint)
+pub enum PwEvent {
+    Paint(*mut ffi::QPainter, i32, i32),
+    Key {
+        key: i32,
+        mods: i32,
+        text: String,
+        press: bool,
+        autorepeat: bool,
+    },
+    Mouse {
+        kind: i32,
+        button: i32,
+        x: i32,
+        y: i32,
+        mods: i32,
+    },
+    Wheel {
+        dy: i32,
+        x: i32,
+        y: i32,
+        mods: i32,
+    },
+    Ime {
+        commit: String,
+        preedit: String,
+    },
+    Resize {
+        w: i32,
+        h: i32,
+    },
+    Focus(bool),
+}
+
 enum Cb {
     C0(Box<dyn FnMut()>),
     I32(Box<dyn FnMut(i32)>),
     Bool(Box<dyn FnMut(bool)>),
     Guard(Box<dyn FnMut() -> bool>),
     Paint(Box<dyn FnMut(*mut ffi::QPainter, *mut ffi::QModelIndex, i32, i32, i32, i32, i32)>),
+    Pw(Box<dyn FnMut(PwEvent)>),
 }
 
 thread_local! {
@@ -385,6 +448,12 @@ pub fn register_cb_i32(f: impl FnMut(i32) + 'static) -> usize {
 pub fn register_cb_bool(f: impl FnMut(bool) + 'static) -> usize {
     let id = next_id();
     CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Bool(Box::new(f))));
+    id
+}
+
+pub fn register_cb_pw(f: impl FnMut(PwEvent) + 'static) -> usize {
+    let id = next_id();
+    CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Pw(Box::new(f))));
     id
 }
 
@@ -443,6 +512,62 @@ fn dtk_cb_i32(id: usize, v: i32) {
         }
         finish_dispatch(id, cb.take().unwrap());
     }
+}
+
+fn dispatch_pw(id: usize, ev: PwEvent) {
+    let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
+    if let Some(Cb::Pw(f)) = &mut cb {
+        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(ev))).is_err() {
+            eprintln!("dtk-rs: paint-widget callback {id} panicked, swallowed at FFI boundary");
+        }
+        finish_dispatch(id, cb.take().unwrap());
+    }
+}
+
+unsafe fn dtk_cb_pw_paint(id: usize, painter: *mut ffi::QPainter, w: i32, h: i32) {
+    dispatch_pw(id, PwEvent::Paint(painter, w, h));
+}
+
+fn dtk_cb_pw_key(id: usize, key: i32, mods: i32, text: String, press: bool, autorepeat: bool) {
+    dispatch_pw(
+        id,
+        PwEvent::Key {
+            key,
+            mods,
+            text,
+            press,
+            autorepeat,
+        },
+    );
+}
+
+fn dtk_cb_pw_mouse(id: usize, kind: i32, button: i32, x: i32, y: i32, mods: i32) {
+    dispatch_pw(
+        id,
+        PwEvent::Mouse {
+            kind,
+            button,
+            x,
+            y,
+            mods,
+        },
+    );
+}
+
+fn dtk_cb_pw_wheel(id: usize, dy: i32, x: i32, y: i32, mods: i32) {
+    dispatch_pw(id, PwEvent::Wheel { dy, x, y, mods });
+}
+
+fn dtk_cb_pw_ime(id: usize, commit: String, preedit: String) {
+    dispatch_pw(id, PwEvent::Ime { commit, preedit });
+}
+
+fn dtk_cb_pw_resize(id: usize, w: i32, h: i32) {
+    dispatch_pw(id, PwEvent::Resize { w, h });
+}
+
+fn dtk_cb_pw_focus(id: usize, focus_in: bool) {
+    dispatch_pw(id, PwEvent::Focus(focus_in));
 }
 
 fn dtk_cb_bool(id: usize, v: bool) {

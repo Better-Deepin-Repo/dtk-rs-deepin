@@ -21,6 +21,7 @@
 #include <QString>
 #include <QColor>
 #include <QFont>
+#include <QFontMetrics>
 #include <QPalette>
 #include <QPixmap>
 #include <QMargins>
@@ -107,6 +108,8 @@ void widget_set_window_title(QWidget *w, rust::Str title);
 void widget_set_window_icon(QWidget *w, QIcon *icon);
 void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px);
 void widget_raise(QWidget *w);
+// schedule a repaint (thread-safe-ish: call from GUI thread)
+void widget_update(QWidget *w);
 void widget_activate_window(QWidget *w);
 void widget_close(QWidget *w);
 bool widget_is_visible(QWidget *w);
@@ -228,6 +231,12 @@ void color_delete(QColor *c);
 QFont *font_new();
 void font_set_point_size(QFont *f, int32_t size);
 void font_set_bold(QFont *f, bool bold);
+// QFontMetrics for grid sizing (terminal cell geometry)
+int32_t fontmetrics_height(QFont *f);
+int32_t fontmetrics_ascent(QFont *f);
+int32_t fontmetrics_max_width(QFont *f);
+// generic monospace family (fontconfig "monospace" alias)
+void font_set_monospace(QFont *f);
 void font_delete(QFont *f);
 QPalette *palette_new();
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color);
@@ -260,6 +269,8 @@ QSocketNotifier *socket_notifier_new(int32_t fd); // Read type; activated goes t
 QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent);
 
 // ---- QPainter primitives ----
+// draw text at baseline origin (x, y) — for cell-grid rendering
+void painter_draw_text_at(QPainter *p, int32_t x, int32_t y, rust::Str text);
 void painter_save(QPainter *p);
 void painter_restore(QPainter *p);
 void painter_set_pen_color(QPainter *p, QColor *color);
@@ -281,6 +292,17 @@ QTimer *timer_new(QObject *parent);
 void timer_start(QTimer *t, int32_t msec);
 void timer_stop(QTimer *t);
 void timer_single_shot(int32_t msec, size_t cb_id);
+
+// ---- DtkPaintWidget + clipboard + shortcuts ----
+// fully user-drawn widget; every paint/input event forwards to the registered Rust callback
+QWidget *paint_widget_new(size_t cb_id, QWidget *parent);
+// test helper: synchronously deliver a key-press event to the widget
+void paint_widget_inject_key(QWidget *w, int32_t key, int32_t mods, rust::Str text);
+// mode: 0 = Clipboard, 1 = Selection (X11 primary)
+void clipboard_set_text(rust::Str text, int32_t mode);
+rust::String clipboard_text(int32_t mode);
+// key like "Ctrl+Shift+C"; parented shortcut, fires cb_id on activation
+void shortcut_new(QWidget *parent, rust::Str key, size_t cb_id);
 
 // ---- signal callbacks ----
 // generic: runtime-connect by signal name, ignoring args. signal looks like "clicked()" or "clicked(bool)"

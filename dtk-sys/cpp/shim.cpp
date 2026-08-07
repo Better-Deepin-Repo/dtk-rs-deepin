@@ -4,6 +4,13 @@
 
 #include <QCoreApplication>
 #include <QGuiApplication>
+#include <QClipboard>
+#include <QShortcut>
+#include <QKeySequence>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QWheelEvent>
+#include <QInputMethodEvent>
 #include <QHeaderView>
 #include <QStyle>
 #include <QProgressBar>
@@ -107,6 +114,72 @@ QStringList to_qstringlist(rust::Vec<rust::String> v) {
     return out;
 }
 
+// ---- DtkPaintWidget: user-drawn widget; paint + all input events forward to Rust ----
+class DtkPaintWidget : public QWidget {
+public:
+    DtkPaintWidget(size_t cb_id, QWidget *parent) : QWidget(parent), m_cb_id(cb_id) {
+        setFocusPolicy(Qt::StrongFocus);
+        setAttribute(Qt::WA_InputMethodEnabled);
+        setMouseTracking(true);
+    }
+
+    // Tab/Backtab are eaten by the focus framework before keyPressEvent; intercept here
+    bool event(QEvent *e) override {
+        if (e->type() == QEvent::KeyPress) {
+            auto *ke = static_cast<QKeyEvent *>(e);
+            if (ke->key() == Qt::Key_Tab || ke->key() == Qt::Key_Backtab) {
+                keyPressEvent(ke);
+                return true;
+            }
+        }
+        return QWidget::event(e);
+    }
+
+protected:
+    void paintEvent(QPaintEvent *) override {
+        QPainter p(this);
+        dtk_cb_pw_paint(m_cb_id, &p, width(), height());
+    }
+    void keyPressEvent(QKeyEvent *e) override {
+        dtk_cb_pw_key(m_cb_id, e->key(), static_cast<int32_t>(e->modifiers()),
+                      to_rust_string(e->text()), true, e->isAutoRepeat());
+    }
+    void keyReleaseEvent(QKeyEvent *e) override {
+        dtk_cb_pw_key(m_cb_id, e->key(), static_cast<int32_t>(e->modifiers()),
+                      to_rust_string(e->text()), false, e->isAutoRepeat());
+    }
+    void mousePressEvent(QMouseEvent *e) override { forward_mouse(e, 0); }
+    void mouseReleaseEvent(QMouseEvent *e) override { forward_mouse(e, 1); }
+    void mouseMoveEvent(QMouseEvent *e) override { forward_mouse(e, 2); }
+    void mouseDoubleClickEvent(QMouseEvent *e) override { forward_mouse(e, 3); }
+    void wheelEvent(QWheelEvent *e) override {
+        auto pos = e->position();
+        dtk_cb_pw_wheel(m_cb_id, e->angleDelta().y(), static_cast<int32_t>(pos.x()),
+                        static_cast<int32_t>(pos.y()), static_cast<int32_t>(e->modifiers()));
+    }
+    void inputMethodEvent(QInputMethodEvent *e) override {
+        dtk_cb_pw_ime(m_cb_id, to_rust_string(e->commitString()),
+                      to_rust_string(e->preeditString()));
+        e->accept();
+    }
+    QVariant inputMethodQuery(Qt::InputMethodQuery) const override {
+        return {}; // ponytail: no micro-focus reporting; IME candidate window position untracked
+    }
+    void resizeEvent(QResizeEvent *e) override {
+        dtk_cb_pw_resize(m_cb_id, e->size().width(), e->size().height());
+    }
+    void focusInEvent(QFocusEvent *) override { dtk_cb_pw_focus(m_cb_id, true); }
+    void focusOutEvent(QFocusEvent *) override { dtk_cb_pw_focus(m_cb_id, false); }
+
+private:
+    void forward_mouse(QMouseEvent *e, int32_t kind) {
+        dtk_cb_pw_mouse(m_cb_id, kind, static_cast<int32_t>(e->button()),
+                        static_cast<int32_t>(e->pos().x()), static_cast<int32_t>(e->pos().y()),
+                        static_cast<int32_t>(e->modifiers()));
+    }
+    size_t m_cb_id;
+};
+
 // ---- DApplication ----
 // QApplication requires argc AND argv to outlive the app (Qt6 stores int& argc):
 // static storage, filled on first call (QApplication is a singleton anyway)
@@ -164,6 +237,7 @@ void widget_set_window_title(QWidget *w, rust::Str title) { w->setWindowTitle(fr
 void widget_set_window_icon(QWidget *w, QIcon *icon) { w->setWindowIcon(*icon); }
 void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixedSize(w_px, h_px); }
 void widget_raise(QWidget *w) { w->raise(); }
+void widget_update(QWidget *w) { w->update(); }
 void widget_activate_window(QWidget *w) { w->activateWindow(); }
 void widget_close(QWidget *w) { w->close(); }
 bool widget_is_visible(QWidget *w) { return w->isVisible(); }
@@ -388,6 +462,15 @@ void color_delete(QColor *c) { delete c; }
 QFont *font_new() { return new QFont; }
 void font_set_point_size(QFont *f, int32_t size) { f->setPointSize(size); }
 void font_set_bold(QFont *f, bool bold) { f->setBold(bold); }
+
+int32_t fontmetrics_height(QFont *f) { return QFontMetrics(*f).height(); }
+int32_t fontmetrics_ascent(QFont *f) { return QFontMetrics(*f).ascent(); }
+int32_t fontmetrics_max_width(QFont *f) { return QFontMetrics(*f).horizontalAdvance(QLatin1Char('M')); }
+
+void font_set_monospace(QFont *f) {
+    f->setStyleHint(QFont::TypeWriter);
+    f->setFamily(QStringLiteral("monospace"));
+}
 void font_delete(QFont *f) { delete f; }
 QPalette *palette_new() { return new QPalette; }
 void palette_set_color(QPalette *pal, int32_t group, int32_t role, QColor *color) {
@@ -435,6 +518,10 @@ QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent) {
 }
 
 // ---- QPainter primitives ----
+void painter_draw_text_at(QPainter *p, int32_t x, int32_t y, rust::Str text) {
+    p->drawText(x, y, from_rust_str(text));
+}
+
 void painter_save(QPainter *p) { p->save(); }
 void painter_restore(QPainter *p) { p->restore(); }
 void painter_set_pen_color(QPainter *p, QColor *color) { p->setPen(*color); }
@@ -475,6 +562,32 @@ void timer_start(QTimer *t, int32_t msec) { t->start(msec); }
 void timer_stop(QTimer *t) { t->stop(); }
 void timer_single_shot(int32_t msec, size_t cb_id) {
     QTimer::singleShot(msec, QCoreApplication::instance(), [cb_id] { dtk_cb0(cb_id); });
+}
+
+// ---- DtkPaintWidget factory + clipboard + shortcuts ----
+QWidget *paint_widget_new(size_t cb_id, QWidget *parent) {
+    return new DtkPaintWidget(cb_id, parent);
+}
+
+void paint_widget_inject_key(QWidget *w, int32_t key, int32_t mods, rust::Str text) {
+    QKeyEvent ev(QEvent::KeyPress, key, static_cast<Qt::KeyboardModifiers>(mods),
+                 from_rust_str(text));
+    QCoreApplication::sendEvent(w, &ev);
+}
+
+void clipboard_set_text(rust::Str text, int32_t mode) {
+    QGuiApplication::clipboard()->setText(from_rust_str(text),
+                                          mode == 1 ? QClipboard::Selection : QClipboard::Clipboard);
+}
+
+rust::String clipboard_text(int32_t mode) {
+    return to_rust_string(QGuiApplication::clipboard()->text(
+        mode == 1 ? QClipboard::Selection : QClipboard::Clipboard));
+}
+
+void shortcut_new(QWidget *parent, rust::Str key, size_t cb_id) {
+    auto *sc = new QShortcut(QKeySequence(from_rust_str(key)), parent);
+    QObject::connect(sc, &QShortcut::activated, sc, [cb_id] { dtk_cb0(cb_id); });
 }
 
 // ---- signal callbacks ----
