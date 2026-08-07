@@ -110,6 +110,7 @@ void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px);
 void widget_raise(QWidget *w);
 // schedule a repaint (thread-safe-ish: call from GUI thread)
 void widget_update(QWidget *w);
+void widget_set_focus(QWidget *w);
 void widget_activate_window(QWidget *w);
 void widget_close(QWidget *w);
 bool widget_is_visible(QWidget *w);

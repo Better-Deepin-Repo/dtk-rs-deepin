@@ -238,6 +238,7 @@ void widget_set_window_icon(QWidget *w, QIcon *icon) { w->setWindowIcon(*icon); 
 void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixedSize(w_px, h_px); }
 void widget_raise(QWidget *w) { w->raise(); }
 void widget_update(QWidget *w) { w->update(); }
+void widget_set_focus(QWidget *w) { w->setFocus(); }
 void widget_activate_window(QWidget *w) { w->activateWindow(); }
 void widget_close(QWidget *w) { w->close(); }
 bool widget_is_visible(QWidget *w) { return w->isVisible(); }

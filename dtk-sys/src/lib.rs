@@ -66,6 +66,7 @@ pub mod ffi {
         unsafe fn widget_set_fixed_size(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_raise(w: *mut QWidget);
         unsafe fn widget_update(w: *mut QWidget);
+        unsafe fn widget_set_focus(w: *mut QWidget);
         unsafe fn widget_activate_window(w: *mut QWidget);
         unsafe fn widget_close(w: *mut QWidget);
         unsafe fn widget_is_visible(w: *mut QWidget) -> bool;

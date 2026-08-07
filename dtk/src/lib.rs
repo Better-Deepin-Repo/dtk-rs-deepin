@@ -57,6 +57,10 @@ macro_rules! widget_wrapper {
             pub fn update(&self) {
                 unsafe { ffi::widget_update(self.ptr.cast()) }
             }
+            /// grab keyboard focus
+            pub fn set_focus(&self) {
+                unsafe { ffi::widget_set_focus(self.ptr.cast()) }
+            }
             pub fn activate_window(&self) {
                 unsafe { ffi::widget_activate_window(self.ptr.cast()) }
             }
@@ -164,6 +168,13 @@ impl QWidget {
     /// schedule a repaint
     pub fn update(&self) {
         unsafe { ffi::widget_update(self.ptr) }
+    }
+    /// grab keyboard focus
+    pub fn set_focus(&self) {
+        unsafe { ffi::widget_set_focus(self.ptr) }
+    }
+    pub fn resize(&self, w: i32, h: i32) {
+        unsafe { ffi::widget_resize(self.ptr, w, h) }
     }
     /// deferred delete (next event-loop turn)
     pub fn delete_later(&self) {
