@@ -325,31 +325,6 @@ void tabbar_install_style(QWidget *tb) { tb->setStyle(new DtkTabLabelStyle); }
 // "needed" true forever. Hiding the QToolButtons re-runs DTK's eventFilter, which
 // hides its mirror buttons and zeroes the spacers. Qt re-shows them on the next
 // layoutTabs if scrolling is really needed, so this is safe to call any time.
-#include <execinfo.h>
-class BtnVisTracer : public QObject {
-public:
-    using QObject::QObject;
-    bool eventFilter(QObject *w, QEvent *e) override {
-        if (e->type() == QEvent::Show || e->type() == QEvent::Hide || e->type() == QEvent::ShowToParent || e->type() == QEvent::HideToParent) {
-            qInfo("tracer: %s event=%d", qPrintable(w->objectName()), (int)e->type());
-            if (e->type() == QEvent::Show && w->objectName() == QLatin1String("leftButton")) {
-                void *frames[24];
-                int n = backtrace(frames, 24);
-                char **syms = backtrace_symbols(frames, n);
-                for (int i = 0; i < n; ++i) qInfo("  bt[%d] %s", i, syms ? syms[i] : "?");
-                free(syms);
-            }
-        }
-        return QObject::eventFilter(w, e);
-    }
-};
-void tabbar_trace_buttons(QWidget *tb) {
-    for (const char *name : {"leftButton", "rightButton", "ScrollLeftButton", "ScrollRightButton", "AddButton"}) {
-        if (auto *b = tb->findChild<QWidget *>(QLatin1String(name))) {
-            b->installEventFilter(new BtnVisTracer(b));
-        }
-    }
-}
 void tabbar_unlatch_scroll_buttons(QWidget *tb) {
     // DTK mirrors Qt's scroll buttons via its eventFilter. During startup layout
     // transients the filter can miss a Hide, leaving DTK's mirror visible while
@@ -371,15 +346,6 @@ void tabbar_unlatch_scroll_buttons(QWidget *tb) {
             qt->show(); // -> DTK filter shows its mirror (already visible; no-op)
             qt->hide(); // -> DTK filter hides its mirror and refreshSpacers zeroes it
         }
-    }
-}
-void tabbar_debug_dump(QWidget *tb) {
-    qInfo("tabbar self pos=%d,%d size=%dx%d", tb->x(), tb->y(), tb->width(), tb->height());
-    const auto kids = tb->findChildren<QWidget *>();
-    for (auto *k : kids) {
-        qInfo("  child %s (%s) vis=%d pos=%d,%d size=%dx%d",
-              k->objectName().isEmpty() ? k->metaObject()->className() : qPrintable(k->objectName()),
-              k->metaObject()->className(), k->isVisible(), k->x(), k->y(), k->width(), k->height());
     }
 }
 void tabbar_flush_layout(QWidget *tb) {

@@ -73,8 +73,6 @@ pub mod ffi {
         unsafe fn widget_set_parent(child: *mut QWidget, parent: *mut QWidget);
         unsafe fn tabbar_install_style(tb: *mut QWidget);
         unsafe fn tabbar_unlatch_scroll_buttons(tb: *mut QWidget);
-        unsafe fn tabbar_debug_dump(tb: *mut QWidget);
-        unsafe fn tabbar_trace_buttons(tb: *mut QWidget);
         unsafe fn tabbar_flush_layout(tb: *mut QWidget);
         unsafe fn scrollbar_new(parent: *mut QWidget) -> *mut QWidget;
         unsafe fn scrollbar_set_range(sb: *mut QWidget, minimum: i32, maximum: i32);

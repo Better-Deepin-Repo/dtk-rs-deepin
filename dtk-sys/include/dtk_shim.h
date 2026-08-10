@@ -118,8 +118,6 @@ void widget_set_parent(QWidget *child, QWidget *parent);
 // deepin-terminal-style tab label drawing (centered, elided before the close button)
 void tabbar_install_style(QWidget *tb);
 void tabbar_unlatch_scroll_buttons(QWidget *tb);
-void tabbar_debug_dump(QWidget *tb);
-void tabbar_trace_buttons(QWidget *tb);
 void tabbar_flush_layout(QWidget *tb);
 // vertical scrollbar (DScrollBar = QScrollBar); widget handles carry it
 QWidget *scrollbar_new(QWidget *parent);
