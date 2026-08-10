@@ -198,6 +198,10 @@ impl QWidget {
     pub fn move_to(&self, x: i32, y: i32) {
         unsafe { ffi::widget_move(self.ptr, x, y) }
     }
+    /// deepin-terminal-style tab labels: centered, elided clear of the close button
+    pub fn install_tab_label_style(&self) {
+        unsafe { ffi::tabbar_install_style(self.ptr) }
+    }
     /// reparent (widget keeps geometry; shown with the new parent)
     pub fn set_parent(&self, parent: &QWidget) {
         unsafe { ffi::widget_set_parent(self.ptr, parent.ptr) }

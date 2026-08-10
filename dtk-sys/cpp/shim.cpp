@@ -6,7 +6,10 @@
 #include <QGuiApplication>
 #include <QInputMethod>
 #include <QClipboard>
+#include <QProxyStyle>
 #include <QScrollBar>
+#include <QStyleOptionTab>
+#include <QTextOption>
 #include <QShortcut>
 #include <QKeySequence>
 #include <QKeyEvent>
@@ -117,6 +120,34 @@ QStringList to_qstringlist(rust::Vec<rust::String> v) {
 }
 
 // ---- DtkPaintWidget: user-drawn widget; paint + all input events forward to Rust ----
+// Tab label drawing like deepin-terminal's TermTabStyle: centered text, elided to
+// width-30 so the label never slides under the close button (no fade shadow).
+class DtkTabLabelStyle : public QProxyStyle {
+public:
+    using QProxyStyle::QProxyStyle;
+    void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter,
+                     const QWidget *widget) const override {
+        if (element == CE_TabBarTabLabel) {
+            if (const auto *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
+                QTextOption textOption;
+                textOption.setAlignment(Qt::AlignCenter);
+                QFont f = QApplication::font();
+                painter->setFont(f);
+                // selected tab sits on the highlight color: use its contrasting text color
+                const bool selected = tab->state & State_Selected;
+                painter->setPen(tab->palette.color(selected ? QPalette::HighlightedText
+                                                            : QPalette::WindowText));
+                QFontMetrics fm(f);
+                const QString elided = fm.elidedText(tab->text, Qt::ElideRight,
+                                                     tab->rect.width() - 30, Qt::TextShowMnemonic);
+                painter->drawText(tab->rect, elided, textOption);
+                return;
+            }
+        }
+        QProxyStyle::drawControl(element, option, painter, widget);
+    }
+};
+
 class DtkPaintWidget : public QWidget {
 public:
     DtkPaintWidget(size_t cb_id, QWidget *parent) : QWidget(parent), m_cb_id(cb_id) {
@@ -253,6 +284,7 @@ void widget_raise(QWidget *w) { w->raise(); }
 void widget_update(QWidget *w) { w->update(); }
 void widget_set_focus(QWidget *w) { w->setFocus(); }
 void widget_move(QWidget *w, int x, int y) { w->move(x, y); }
+void tabbar_install_style(QWidget *tb) { tb->setStyle(new DtkTabLabelStyle); }
 void widget_set_parent(QWidget *child, QWidget *parent) { child->setParent(parent); }
 QWidget *scrollbar_new(QWidget *parent) { return new QScrollBar(Qt::Vertical, parent); }
 void scrollbar_set_range(QWidget *sb, int minimum, int maximum) {

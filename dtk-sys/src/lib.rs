@@ -69,6 +69,7 @@ pub mod ffi {
         unsafe fn widget_set_focus(w: *mut QWidget);
         unsafe fn widget_move(w: *mut QWidget, x: i32, y: i32);
         unsafe fn widget_set_parent(child: *mut QWidget, parent: *mut QWidget);
+        unsafe fn tabbar_install_style(tb: *mut QWidget);
         unsafe fn scrollbar_new(parent: *mut QWidget) -> *mut QWidget;
         unsafe fn scrollbar_set_range(sb: *mut QWidget, minimum: i32, maximum: i32);
         unsafe fn scrollbar_maximum(sb: *mut QWidget) -> i32;
