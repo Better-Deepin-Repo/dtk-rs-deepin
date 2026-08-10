@@ -234,6 +234,13 @@ impl QWidget {
     pub fn flush_layout(&self) {
         unsafe { ffi::tabbar_flush_layout(self.ptr) }
     }
+    /// unlatch QTabBar's scroll buttons: once shown, their own width keeps the
+    /// "scroll needed" condition true forever. Hiding re-runs DTK's mirror logic
+    /// (buttons hidden, spacers zeroed); Qt re-shows them on the next layout if
+    /// scrolling is genuinely needed, so this is safe to call any time.
+    pub fn unlatch_scroll_buttons(&self) {
+        unsafe { ffi::tabbar_unlatch_scroll_buttons(self.ptr) }
+    }
     /// reparent (widget keeps geometry; shown with the new parent)
     pub fn set_parent(&self, parent: &QWidget) {
         unsafe { ffi::widget_set_parent(self.ptr, parent.ptr) }

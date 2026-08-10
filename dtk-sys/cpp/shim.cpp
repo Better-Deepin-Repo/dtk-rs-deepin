@@ -300,6 +300,17 @@ void tabbar_install_style(QWidget *tb) { tb->setStyle(new DtkTabLabelStyle); }
 // lazily; after add/remove/setTabText a paint can land on the stale geometry
 // (tabs AlignHCenter'd in an over-wide cell = blank space both sides, 1 frame).
 // Flush every layout up the parent chain synchronously right after a mutation.
+// Qt's scroll decision latches: once the scroll buttons show, their width keeps
+// "needed" true forever. Hiding the QToolButtons re-runs DTK's eventFilter, which
+// hides its mirror buttons and zeroes the spacers. Qt re-shows them on the next
+// layoutTabs if scrolling is really needed, so this is safe to call any time.
+void tabbar_unlatch_scroll_buttons(QWidget *tb) {
+    for (const char *name : {"ScrollLeftButton", "ScrollRightButton"}) {
+        if (auto *b = tb->findChild<QToolButton *>(QLatin1String(name))) {
+            b->hide();
+        }
+    }
+}
 void tabbar_flush_layout(QWidget *tb) {
     for (QWidget *w = tb; w; w = w->parentWidget()) {
         if (QLayout *lay = w->layout()) {
