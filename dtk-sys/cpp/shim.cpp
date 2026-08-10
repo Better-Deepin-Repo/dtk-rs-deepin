@@ -310,6 +310,14 @@ void tabbar_unlatch_scroll_buttons(QWidget *tb) {
             b->hide();
         }
     }
+    // If the buttons were already hidden, hide() above emits nothing and DTK's
+    // spacers stay stale. Toggling the add button forces DTK's eventFilter to
+    // re-run refreshSpacers with the current (hidden) scroll state.
+    if (auto *add = tb->findChild<QWidget *>(QLatin1String("AddButton"))) {
+        const bool was = add->isVisible();
+        add->hide();
+        add->setVisible(was);
+    }
 }
 void tabbar_flush_layout(QWidget *tb) {
     for (QWidget *w = tb; w; w = w->parentWidget()) {
