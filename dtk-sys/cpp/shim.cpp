@@ -6,6 +6,7 @@
 #include <QGuiApplication>
 #include <QInputMethod>
 #include <QClipboard>
+#include <QScrollBar>
 #include <QShortcut>
 #include <QKeySequence>
 #include <QKeyEvent>
@@ -251,6 +252,15 @@ void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixed
 void widget_raise(QWidget *w) { w->raise(); }
 void widget_update(QWidget *w) { w->update(); }
 void widget_set_focus(QWidget *w) { w->setFocus(); }
+void widget_move(QWidget *w, int x, int y) { w->move(x, y); }
+QWidget *scrollbar_new(QWidget *parent) { return new QScrollBar(Qt::Vertical, parent); }
+void scrollbar_set_range(QWidget *sb, int minimum, int maximum) {
+    static_cast<QScrollBar *>(sb)->setRange(minimum, maximum);
+}
+int scrollbar_maximum(QWidget *sb) { return static_cast<QScrollBar *>(sb)->maximum(); }
+void scrollbar_set_value(QWidget *sb, int v) { static_cast<QScrollBar *>(sb)->setValue(v); }
+int scrollbar_value(QWidget *sb) { return static_cast<QScrollBar *>(sb)->value(); }
+void scrollbar_set_page_step(QWidget *sb, int v) { static_cast<QScrollBar *>(sb)->setPageStep(v); }
 void paint_widget_set_ime_rect(QWidget *w, int x, int y, int width, int height) {
     if (auto *pw = dynamic_cast<DtkPaintWidget *>(w)) {
         pw->m_imeRect = QRect(x, y, width, height);

@@ -38,6 +38,9 @@ macro_rules! widget_wrapper {
             pub fn resize(&self, w: i32, h: i32) {
                 unsafe { ffi::widget_resize(self.ptr.cast(), w, h) }
             }
+            pub fn move_to(&self, x: i32, y: i32) {
+                unsafe { ffi::widget_move(self.ptr.cast(), x, y) }
+            }
             pub fn set_enabled(&self, on: bool) {
                 unsafe { ffi::widget_set_enabled(self.ptr.cast(), on) }
             }
@@ -145,7 +148,8 @@ macro_rules! object_wrapper {
     };
 }
 
-/// generic QWidget handle (base-class view only)
+/// generic QWidget handle (base-class view only); Copy: non-owning view, Qt owns the widget
+#[derive(Clone, Copy)]
 pub struct QWidget {
     pub(crate) ptr: *mut ffi::QWidget,
     _not_send: PhantomData<*mut ()>,
@@ -183,6 +187,9 @@ impl QWidget {
     }
     pub fn resize(&self, w: i32, h: i32) {
         unsafe { ffi::widget_resize(self.ptr, w, h) }
+    }
+    pub fn move_to(&self, x: i32, y: i32) {
+        unsafe { ffi::widget_move(self.ptr, x, y) }
     }
     /// deferred delete (next event-loop turn)
     pub fn delete_later(&self) {
@@ -324,6 +331,40 @@ impl PaintWidget {
     /// IME candidate window anchor: cursor rect in widget coords (call when it moves)
     pub fn set_ime_cursor_rect(&self, x: i32, y: i32, w: i32, h: i32) {
         unsafe { ffi::paint_widget_set_ime_rect(self.ptr, x, y, w, h) }
+    }
+}
+
+/// vertical scrollbar (DScrollBar = QScrollBar in DTK6); child of a widget
+#[derive(Clone, Copy)]
+pub struct ScrollBar {
+    w: QWidget,
+}
+
+impl ScrollBar {
+    pub fn new(parent: &QWidget) -> Self {
+        Self { w: QWidget::from_raw(unsafe { ffi::scrollbar_new(parent.ptr) }) }
+    }
+    pub fn as_widget(&self) -> QWidget {
+        QWidget::from_raw(self.w.ptr)
+    }
+    pub fn set_range(&self, min: i32, max: i32) {
+        unsafe { ffi::scrollbar_set_range(self.w.ptr, min, max) }
+    }
+    pub fn maximum(&self) -> i32 {
+        unsafe { ffi::scrollbar_maximum(self.w.ptr) }
+    }
+    pub fn set_value(&self, v: i32) {
+        unsafe { ffi::scrollbar_set_value(self.w.ptr, v) }
+    }
+    pub fn value(&self) -> i32 {
+        unsafe { ffi::scrollbar_value(self.w.ptr) }
+    }
+    pub fn set_page_step(&self, v: i32) {
+        unsafe { ffi::scrollbar_set_page_step(self.w.ptr, v) }
+    }
+    /// valueChanged(int); 0 on failure
+    pub fn on_value_changed(&self, f: impl FnMut(i32) + 'static) -> usize {
+        self.w.connect_signal_i32("valueChanged(int)", f)
     }
 }
 

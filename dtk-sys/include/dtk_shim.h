@@ -111,6 +111,14 @@ void widget_raise(QWidget *w);
 // schedule a repaint (thread-safe-ish: call from GUI thread)
 void widget_update(QWidget *w);
 void widget_set_focus(QWidget *w);
+void widget_move(QWidget *w, int x, int y);
+// vertical scrollbar (DScrollBar = QScrollBar); widget handles carry it
+QWidget *scrollbar_new(QWidget *parent);
+void scrollbar_set_range(QWidget *sb, int minimum, int maximum);
+int scrollbar_maximum(QWidget *sb);
+void scrollbar_set_value(QWidget *sb, int v);
+int scrollbar_value(QWidget *sb);
+void scrollbar_set_page_step(QWidget *sb, int v);
 // IME candidate window anchor rect (widget coords)
 void paint_widget_set_ime_rect(QWidget *w, int x, int y, int width, int height);
 // set the DMainWindow titlebar icon (no-op for other widgets)
