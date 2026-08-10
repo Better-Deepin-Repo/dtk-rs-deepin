@@ -722,6 +722,12 @@ impl QRect {
     pub fn height(&self) -> i32 {
         unsafe { ffi::rect_height(self.ptr) }
     }
+    pub fn x(&self) -> i32 {
+        unsafe { ffi::rect_x(self.ptr) }
+    }
+    pub fn y(&self) -> i32 {
+        unsafe { ffi::rect_y(self.ptr) }
+    }
 }
 
 impl QSize {
