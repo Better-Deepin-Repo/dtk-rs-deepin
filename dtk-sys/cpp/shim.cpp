@@ -8,6 +8,20 @@
 #include <QInputMethod>
 #include <QClipboard>
 #include <QProxyStyle>
+#include <DGuiApplicationHelper>
+#include <DPalette>
+
+// The distro's DFontSizeManager forwarding header is broken (it only includes
+// dstyleoption.h); declare the two symbols we use directly — they live in
+// libdtk6widget (verified mangled names match this declaration).
+namespace Dtk { namespace Widget {
+class DFontSizeManager {
+public:
+    enum SizeType { T1, T2, T3, T4, T5, T6, T7, T8, T9, T10 };
+    static DFontSizeManager *instance();
+    int fontPixelSize(SizeType type) const;
+};
+}}
 #include <QScrollBar>
 #include <QStyleOptionTab>
 #include <QToolButton>
@@ -133,13 +147,19 @@ public:
             if (const auto *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
                 QTextOption textOption;
                 textOption.setAlignment(Qt::AlignCenter);
-                QFont f = QApplication::font();
-                painter->setFont(f);
-                // selected tab sits on the highlight color: use its contrasting text color
+                // mirrors deepin-terminal's TermTabStyle exactly: app font at
+                // DFontSizeManager::T6 pixel size, Medium weight, palette
+                // HighlightedText (selected) / TextTitle (normal)
+                QFont textFont = QApplication::font();
+                textFont.setPixelSize(Dtk::Widget::DFontSizeManager::instance()->fontPixelSize(Dtk::Widget::DFontSizeManager::T6));
+                textFont.setWeight(QFont::Medium);
+                painter->setFont(textFont);
                 const bool selected = tab->state & State_Selected;
-                painter->setPen(tab->palette.color(selected ? QPalette::HighlightedText
-                                                            : QPalette::WindowText));
-                QFontMetrics fm(f);
+                const Dtk::Gui::DPalette pa = Dtk::Gui::DGuiApplicationHelper::instance()->standardPalette(
+                    Dtk::Gui::DGuiApplicationHelper::instance()->themeType());
+                painter->setPen(selected ? pa.color(QPalette::HighlightedText)
+                                         : pa.color(Dtk::Gui::DPalette::TextTitle));
+                const QFontMetrics fm(textFont);
                 const QString elided = fm.elidedText(tab->text, Qt::ElideRight,
                                                      tab->rect.width() - 30, Qt::TextShowMnemonic);
                 painter->drawText(tab->rect, elided, textOption);
