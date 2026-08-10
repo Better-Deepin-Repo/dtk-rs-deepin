@@ -296,6 +296,18 @@ void widget_update(QWidget *w) { w->update(); }
 void widget_set_focus(QWidget *w) { w->setFocus(); }
 void widget_move(QWidget *w, int x, int y) { w->move(x, y); }
 void tabbar_install_style(QWidget *tb) { tb->setStyle(new DtkTabLabelStyle); }
+// DTabBar's internal QBoxLayout (and the titlebar container above it) relayouts
+// lazily; after add/remove/setTabText a paint can land on the stale geometry
+// (tabs AlignHCenter'd in an over-wide cell = blank space both sides, 1 frame).
+// Flush every layout up the parent chain synchronously right after a mutation.
+void tabbar_flush_layout(QWidget *tb) {
+    for (QWidget *w = tb; w; w = w->parentWidget()) {
+        if (QLayout *lay = w->layout()) {
+            lay->invalidate();
+            lay->activate();
+        }
+    }
+}
 void widget_set_parent(QWidget *child, QWidget *parent) { child->setParent(parent); }
 QWidget *scrollbar_new(QWidget *parent) { return new QScrollBar(Qt::Vertical, parent); }
 void scrollbar_set_range(QWidget *sb, int minimum, int maximum) {

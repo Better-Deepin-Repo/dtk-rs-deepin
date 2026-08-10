@@ -214,6 +214,12 @@ impl QWidget {
     pub fn install_tab_label_style(&self) {
         unsafe { ffi::tabbar_install_style(self.ptr) }
     }
+    /// force the tab bar's internal layout (and ancestors) to relayout now, not
+    /// on the next event pass; call after add/remove/set_tab_text to avoid a
+    /// 1-frame misaligned paint
+    pub fn flush_layout(&self) {
+        unsafe { ffi::tabbar_flush_layout(self.ptr) }
+    }
     /// reparent (widget keeps geometry; shown with the new parent)
     pub fn set_parent(&self, parent: &QWidget) {
         unsafe { ffi::widget_set_parent(self.ptr, parent.ptr) }
