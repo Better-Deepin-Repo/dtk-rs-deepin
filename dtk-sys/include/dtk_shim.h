@@ -124,6 +124,8 @@ int scrollbar_value(QWidget *sb);
 void scrollbar_set_page_step(QWidget *sb, int v);
 // IME candidate window anchor rect (widget coords)
 void paint_widget_set_ime_rect(QWidget *w, int x, int y, int width, int height);
+// deepin-terminal style: tab bar as the titlebar's custom widget (zero-margin, vcentered)
+void main_window_titlebar_set_tabbar(QWidget *w, QWidget *tabbar);
 // add a widget into the DMainWindow titlebar (left-aligned); no-op otherwise
 void main_window_titlebar_add_widget(QWidget *w, QWidget *child);
 // set the DMainWindow titlebar icon (no-op for other widgets)

@@ -4,6 +4,7 @@
 
 #include <QCoreApplication>
 #include <QGuiApplication>
+#include <QHBoxLayout>
 #include <QInputMethod>
 #include <QClipboard>
 #include <QProxyStyle>
@@ -307,6 +308,19 @@ void paint_widget_set_ime_rect(QWidget *w, int x, int y, int width, int height) 
         pw->m_imeRect = QRect(x, y, width, height);
         QGuiApplication::inputMethod()->update(Qt::ImCursorRectangle);
     }
+}
+void main_window_titlebar_set_tabbar(QWidget *w, QWidget *tabbar) {
+    auto *mw = qobject_cast<DMainWindow *>(w);
+    if (!mw || !mw->titlebar()) {
+        return;
+    }
+    // mirrors deepin-terminal's TitleBar: zero-margin hbox, vertically centered
+    auto *container = new QWidget;
+    auto *lay = new QHBoxLayout(container);
+    lay->setContentsMargins(0, 0, 0, 0);
+    lay->setSpacing(0);
+    lay->addWidget(tabbar, 0, Qt::AlignVCenter);
+    mw->titlebar()->setCustomWidget(container, false);
 }
 void main_window_titlebar_add_widget(QWidget *w, QWidget *child) {
     if (auto *mw = qobject_cast<DMainWindow *>(w)) {

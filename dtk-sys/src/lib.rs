@@ -77,6 +77,7 @@ pub mod ffi {
         unsafe fn scrollbar_value(sb: *mut QWidget) -> i32;
         unsafe fn scrollbar_set_page_step(sb: *mut QWidget, v: i32);
         unsafe fn paint_widget_set_ime_rect(w: *mut QWidget, x: i32, y: i32, width: i32, height: i32);
+        unsafe fn main_window_titlebar_set_tabbar(w: *mut QWidget, tabbar: *mut QWidget);
         unsafe fn main_window_titlebar_add_widget(w: *mut QWidget, child: *mut QWidget);
         unsafe fn widget_set_titlebar_icon(w: *mut QWidget, icon: *mut QIcon);
         unsafe fn app_popup_active() -> bool;

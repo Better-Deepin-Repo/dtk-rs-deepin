@@ -180,6 +180,11 @@ impl QWidget {
     pub fn set_focus(&self) {
         unsafe { ffi::widget_set_focus(self.ptr) }
     }
+    /// deepin-terminal style: install the tab bar as titlebar custom widget
+    /// (zero-margin layout, vertically centered)
+    pub fn titlebar_set_tabbar(&self, tabbar: &QWidget) {
+        unsafe { ffi::main_window_titlebar_set_tabbar(self.ptr, tabbar.ptr) }
+    }
     /// add a widget into the titlebar, left-aligned (DMainWindow only)
     pub fn titlebar_add_widget(&self, child: &QWidget) {
         unsafe { ffi::main_window_titlebar_add_widget(self.ptr, child.ptr) }
