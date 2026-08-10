@@ -306,14 +306,22 @@ void tabbar_install_style(QWidget *tb) { tb->setStyle(new DtkTabLabelStyle); }
 // hides its mirror buttons and zeroes the spacers. Qt re-shows them on the next
 // layoutTabs if scrolling is really needed, so this is safe to call any time.
 void tabbar_unlatch_scroll_buttons(QWidget *tb) {
-    for (const char *name : {"ScrollLeftButton", "ScrollRightButton"}) {
-        if (auto *b = tb->findChild<QToolButton *>(QLatin1String(name))) {
-            b->hide();
+    // DTK's mirror scroll buttons can get stuck visible while Qt's are hidden
+    // (missed Hide event at startup), leaving their spacers sized. Sync DTK's
+    // mirrors to Qt's real state; if scrolling is genuinely needed Qt shows its
+    // buttons on the next layout and DTK's eventFilter re-shows the mirrors.
+    const struct {
+        const char *qtBtn;
+        const char *dtkBtn;
+    } pairs[] = {{"ScrollLeftButton", "leftButton"}, {"ScrollRightButton", "rightButton"}};
+    for (const auto &p : pairs) {
+        auto *qt = tb->findChild<QToolButton *>(QLatin1String(p.qtBtn));
+        auto *dtk = tb->findChild<QWidget *>(QLatin1String(p.dtkBtn));
+        if (qt && dtk && dtk->isVisible() != qt->isVisible()) {
+            dtk->setVisible(qt->isVisible());
         }
     }
-    // If the buttons were already hidden, hide() above emits nothing and DTK's
-    // spacers stay stale. Toggling the add button forces DTK's eventFilter to
-    // re-run refreshSpacers with the current (hidden) scroll state.
+    // force DTK's eventFilter to re-run refreshSpacers with the synced state
     if (auto *add = tb->findChild<QWidget *>(QLatin1String("AddButton"))) {
         const bool was = add->isVisible();
         add->hide();
