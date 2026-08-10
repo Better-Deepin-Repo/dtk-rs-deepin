@@ -1442,6 +1442,7 @@ impl PaintDelegate {
 
 // ---- QSocketNotifier ----
 
+#[derive(Clone, Copy)]
 pub struct QSocketNotifier {
     ptr: *mut ffi::QSocketNotifier,
     _not_send: PhantomData<*mut ()>,
