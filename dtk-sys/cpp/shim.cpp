@@ -323,55 +323,25 @@ void tabbar_trace_buttons(QWidget *tb) {
     }
 }
 void tabbar_unlatch_scroll_buttons(QWidget *tb) {
-    // DTK mirrors Qt's scroll buttons via its eventFilter. At startup a transient
-    // scroll-needed state can leave DTK's mirror button in a state where its
-    // layout spacers stay sized (5+5px before the first tab) even though Qt's
-    // scroll button is hidden. Direct visibility pokes do not stick (Qt re-shows
-    // the mirror through its own latched state), so zero the stale spacers
-    // directly. DTK's refreshSpacers re-sizes them whenever the scroll buttons
-    // genuinely show/hide later, so real overflow scrolling self-heals.
-    auto *qtL = tb->findChild<QToolButton *>(QLatin1String("ScrollLeftButton"));
-    auto *qtR = tb->findChild<QToolButton *>(QLatin1String("ScrollRightButton"));
-    auto *dtkL = tb->findChild<QWidget *>(QLatin1String("leftButton"));
-    auto *dtkR = tb->findChild<QWidget *>(QLatin1String("rightButton"));
-    auto *lay = tb->layout();
-    if (!qtL || !qtR || !dtkL || !dtkR || !lay) {
-        return;
-    }
-    const bool leftStuck = !qtL->isVisible() && dtkL->isVisible();
-    const bool rightStuck = !qtR->isVisible() && dtkR->isVisible();
-    if (!leftStuck && !rightStuck) {
-        return; // consistent state: nothing stale to clear
-    }
-    const auto adjacentTo = [lay](int i, QWidget *w) {
-        for (int j = i - 1; j >= 0; --j) {
-            if (lay->itemAt(j)->widget()) {
-                return lay->itemAt(j)->widget() == w;
-            }
-            if (!dynamic_cast<QSpacerItem *>(lay->itemAt(j))) {
-                break;
-            }
-        }
-        for (int j = i + 1; j < lay->count(); ++j) {
-            if (lay->itemAt(j)->widget()) {
-                return lay->itemAt(j)->widget() == w;
-            }
-            if (!dynamic_cast<QSpacerItem *>(lay->itemAt(j))) {
-                break;
-            }
-        }
-        return false;
-    };
-    for (int i = 0; i < lay->count(); ++i) {
-        auto *spacer = dynamic_cast<QSpacerItem *>(lay->itemAt(i));
-        if (!spacer) {
-            continue;
-        }
-        if ((leftStuck && adjacentTo(i, dtkL)) || (rightStuck && adjacentTo(i, dtkR))) {
-            spacer->changeSize(0, 0);
+    // DTK mirrors Qt's scroll buttons via its eventFilter. During startup layout
+    // transients the filter can miss a Hide, leaving DTK's mirror visible while
+    // Qt's button is hidden; the mirror's layout spacers then stay sized (a gap
+    // before the first tab). Directly hiding the mirror does not stick, so drive
+    // Qt's button through one show/hide cycle: DTK's own filter then hides the
+    // mirror and zeroes the spacers. Only act on a real mismatch, so genuine
+    // overflow scrolling is never touched.
+    const struct {
+        const char *qtBtn;
+        const char *dtkBtn;
+    } pairs[] = {{"ScrollLeftButton", "leftButton"}, {"ScrollRightButton", "rightButton"}};
+    for (const auto &p : pairs) {
+        auto *qt = tb->findChild<QToolButton *>(QLatin1String(p.qtBtn));
+        auto *dtk = tb->findChild<QWidget *>(QLatin1String(p.dtkBtn));
+        if (qt && dtk && dtk->isVisible() != qt->isVisible()) {
+            qt->show(); // -> DTK filter shows its mirror (already visible; no-op)
+            qt->hide(); // -> DTK filter hides its mirror and refreshSpacers zeroes it
         }
     }
-    lay->invalidate();
 }
 void tabbar_debug_dump(QWidget *tb) {
     qInfo("tabbar self pos=%d,%d size=%dx%d", tb->x(), tb->y(), tb->width(), tb->height());
@@ -393,6 +363,7 @@ void tabbar_flush_layout(QWidget *tb) {
     for (QWidget *child : descendants) {
         child->updateGeometry();
     }
+    tabbar_unlatch_scroll_buttons(tb);
     for (QWidget *w = tb; w; w = w->parentWidget()) {
         if (QLayout *lay = w->layout()) {
             lay->invalidate();
