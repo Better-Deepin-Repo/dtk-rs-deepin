@@ -1455,6 +1455,10 @@ impl QSocketNotifier {
             _not_send: PhantomData,
         }
     }
+    /// stop firing (e.g. watched fd hit EOF and stays "readable" forever)
+    pub fn set_enabled(&self, on: bool) {
+        unsafe { ffi::socket_notifier_set_enabled(self.ptr, on) }
+    }
     pub fn on_activated(&self, f: impl FnMut() + 'static) -> usize {
         let id = dtk_sys::register_cb0(f);
         if unsafe { ffi::relay_connect0(self.ptr.cast(), "activated(QSocketDescriptor)", id) } {

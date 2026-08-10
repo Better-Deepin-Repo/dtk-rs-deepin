@@ -295,6 +295,7 @@ void ddci_icon_delete(DDciIcon *i);
 
 // ---- QSocketNotifier ----
 QSocketNotifier *socket_notifier_new(int32_t fd); // Read type; activated goes through the relay
+void socket_notifier_set_enabled(QSocketNotifier *n, bool on);
 
 // ---- generic paint delegate ----
 QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent);

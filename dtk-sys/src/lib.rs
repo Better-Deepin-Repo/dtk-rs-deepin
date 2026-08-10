@@ -288,6 +288,7 @@ pub mod ffi {
 
         // QSocketNotifier
         unsafe fn socket_notifier_new(fd: i32) -> *mut QSocketNotifier;
+        unsafe fn socket_notifier_set_enabled(n: *mut QSocketNotifier, on: bool);
 
         // generic paint delegate
         unsafe fn rust_delegate_new(

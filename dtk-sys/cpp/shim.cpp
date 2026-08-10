@@ -638,6 +638,7 @@ void icon_delete(QIcon *icon) { delete icon; }
 QSocketNotifier *socket_notifier_new(int32_t fd) {
     return new QSocketNotifier(fd, QSocketNotifier::Read);
 }
+void socket_notifier_set_enabled(QSocketNotifier *n, bool on) { n->setEnabled(on); }
 
 // ---- generic paint delegate ----
 QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent) {
