@@ -67,6 +67,7 @@ pub mod ffi {
         unsafe fn widget_raise(w: *mut QWidget);
         unsafe fn widget_update(w: *mut QWidget);
         unsafe fn widget_set_focus(w: *mut QWidget);
+        unsafe fn paint_widget_set_ime_rect(w: *mut QWidget, x: i32, y: i32, width: i32, height: i32);
         unsafe fn widget_set_titlebar_icon(w: *mut QWidget, icon: *mut QIcon);
         unsafe fn app_popup_active() -> bool;
         unsafe fn app_palette_window_rgb() -> u32;

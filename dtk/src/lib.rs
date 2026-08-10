@@ -177,6 +177,10 @@ impl QWidget {
     pub fn set_titlebar_icon(&self, icon: &QIcon) {
         unsafe { ffi::widget_set_titlebar_icon(self.ptr, icon.ptr) }
     }
+    /// IME candidate window anchor: cursor rect in widget coords (PaintWidget only)
+    pub fn set_ime_cursor_rect(&self, x: i32, y: i32, w: i32, h: i32) {
+        unsafe { ffi::paint_widget_set_ime_rect(self.ptr, x, y, w, h) }
+    }
     pub fn resize(&self, w: i32, h: i32) {
         unsafe { ffi::widget_resize(self.ptr, w, h) }
     }
@@ -316,6 +320,10 @@ impl PaintWidget {
     /// test/helper: synchronously deliver a key-press (bypasses the OS event source)
     pub fn inject_key(&self, key: i32, mods: i32, text: &str) {
         unsafe { ffi::paint_widget_inject_key(self.ptr, key, mods, text) }
+    }
+    /// IME candidate window anchor: cursor rect in widget coords (call when it moves)
+    pub fn set_ime_cursor_rect(&self, x: i32, y: i32, w: i32, h: i32) {
+        unsafe { ffi::paint_widget_set_ime_rect(self.ptr, x, y, w, h) }
     }
 }
 

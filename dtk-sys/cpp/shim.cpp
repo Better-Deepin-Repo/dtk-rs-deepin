@@ -4,6 +4,7 @@
 
 #include <QCoreApplication>
 #include <QGuiApplication>
+#include <QInputMethod>
 #include <QClipboard>
 #include <QShortcut>
 #include <QKeySequence>
@@ -123,6 +124,9 @@ public:
         setMouseTracking(true);
     }
 
+    // IME candidate window anchors here (set from Rust each frame)
+    QRect m_imeRect;
+
     // Tab/Backtab are eaten by the focus framework before keyPressEvent; intercept here
     bool event(QEvent *e) override {
         if (e->type() == QEvent::KeyPress) {
@@ -162,8 +166,16 @@ protected:
                       to_rust_string(e->preeditString()));
         e->accept();
     }
-    QVariant inputMethodQuery(Qt::InputMethodQuery) const override {
-        return {}; // ponytail: no micro-focus reporting; IME candidate window position untracked
+    QVariant inputMethodQuery(Qt::InputMethodQuery q) const override {
+        switch (q) {
+        case Qt::ImCursorRectangle:
+        case Qt::ImAnchorRectangle:
+            return m_imeRect;
+        case Qt::ImFont:
+            return font();
+        default:
+            return {};
+        }
     }
     void resizeEvent(QResizeEvent *e) override {
         dtk_cb_pw_resize(m_cb_id, e->size().width(), e->size().height());
@@ -239,6 +251,12 @@ void widget_set_fixed_size(QWidget *w, int32_t w_px, int32_t h_px) { w->setFixed
 void widget_raise(QWidget *w) { w->raise(); }
 void widget_update(QWidget *w) { w->update(); }
 void widget_set_focus(QWidget *w) { w->setFocus(); }
+void paint_widget_set_ime_rect(QWidget *w, int x, int y, int width, int height) {
+    if (auto *pw = dynamic_cast<DtkPaintWidget *>(w)) {
+        pw->m_imeRect = QRect(x, y, width, height);
+        QGuiApplication::inputMethod()->update(Qt::ImCursorRectangle);
+    }
+}
 void widget_set_titlebar_icon(QWidget *w, QIcon *icon) {
     if (auto *mw = qobject_cast<DMainWindow *>(w)) {
         if (auto *tb = mw->titlebar()) {
