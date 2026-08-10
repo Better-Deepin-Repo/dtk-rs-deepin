@@ -112,6 +112,7 @@ void widget_raise(QWidget *w);
 void widget_update(QWidget *w);
 void widget_set_focus(QWidget *w);
 void widget_move(QWidget *w, int x, int y);
+void widget_set_parent(QWidget *child, QWidget *parent);
 // vertical scrollbar (DScrollBar = QScrollBar); widget handles carry it
 QWidget *scrollbar_new(QWidget *parent);
 void scrollbar_set_range(QWidget *sb, int minimum, int maximum);
@@ -121,6 +122,8 @@ int scrollbar_value(QWidget *sb);
 void scrollbar_set_page_step(QWidget *sb, int v);
 // IME candidate window anchor rect (widget coords)
 void paint_widget_set_ime_rect(QWidget *w, int x, int y, int width, int height);
+// add a widget into the DMainWindow titlebar (left-aligned); no-op otherwise
+void main_window_titlebar_add_widget(QWidget *w, QWidget *child);
 // set the DMainWindow titlebar icon (no-op for other widgets)
 void widget_set_titlebar_icon(QWidget *w, QIcon *icon);
 // true while a modal dialog or popup (menu) is active — don't yank focus back then

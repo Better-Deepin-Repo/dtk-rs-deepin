@@ -98,7 +98,8 @@ macro_rules! widget_wrapper {
             /// leak the Rust handle; Qt parent-child still owns the object.
             /// kills `std::mem::forget` boilerplate for top-level widgets.
             pub fn leak(self) {
-                std::mem::forget(self);
+                // ManuallyDrop (not forget): handles are Copy, forget would be a no-op warning
+                let _ = std::mem::ManuallyDrop::new(self);
             }
         }
     };
@@ -106,6 +107,8 @@ macro_rules! widget_wrapper {
 
 macro_rules! object_wrapper {
     ($name:ident, $ffi:ty) => {
+        /// non-owning handle: Qt parent-child owns the object, Copy is just another view
+        #[derive(Clone, Copy)]
         pub struct $name {
             pub(crate) ptr: *mut $ffi,
             _not_send: PhantomData<*mut ()>,
@@ -177,6 +180,10 @@ impl QWidget {
     pub fn set_focus(&self) {
         unsafe { ffi::widget_set_focus(self.ptr) }
     }
+    /// add a widget into the titlebar, left-aligned (DMainWindow only)
+    pub fn titlebar_add_widget(&self, child: &QWidget) {
+        unsafe { ffi::main_window_titlebar_add_widget(self.ptr, child.ptr) }
+    }
     /// set the titlebar icon (DMainWindow only; no-op otherwise)
     pub fn set_titlebar_icon(&self, icon: &QIcon) {
         unsafe { ffi::widget_set_titlebar_icon(self.ptr, icon.ptr) }
@@ -190,6 +197,10 @@ impl QWidget {
     }
     pub fn move_to(&self, x: i32, y: i32) {
         unsafe { ffi::widget_move(self.ptr, x, y) }
+    }
+    /// reparent (widget keeps geometry; shown with the new parent)
+    pub fn set_parent(&self, parent: &QWidget) {
+        unsafe { ffi::widget_set_parent(self.ptr, parent.ptr) }
     }
     /// deferred delete (next event-loop turn)
     pub fn delete_later(&self) {
@@ -1082,7 +1093,8 @@ macro_rules! layout_wrapper {
             }
             /// leak the Rust handle; Qt parent-child still owns the layout
             pub fn leak(self) {
-                std::mem::forget(self);
+                // ManuallyDrop (not forget): handles are Copy, forget would be a no-op warning
+                let _ = std::mem::ManuallyDrop::new(self);
             }
         }
     };
@@ -1419,7 +1431,8 @@ macro_rules! impl_leak {
         $(impl $name {
             /// leak the Rust handle; Qt parent-child still owns the object
             pub fn leak(self) {
-                std::mem::forget(self);
+                // ManuallyDrop (not forget): handles are Copy, forget would be a no-op warning
+                let _ = std::mem::ManuallyDrop::new(self);
             }
         })*
     };

@@ -253,6 +253,7 @@ void widget_raise(QWidget *w) { w->raise(); }
 void widget_update(QWidget *w) { w->update(); }
 void widget_set_focus(QWidget *w) { w->setFocus(); }
 void widget_move(QWidget *w, int x, int y) { w->move(x, y); }
+void widget_set_parent(QWidget *child, QWidget *parent) { child->setParent(parent); }
 QWidget *scrollbar_new(QWidget *parent) { return new QScrollBar(Qt::Vertical, parent); }
 void scrollbar_set_range(QWidget *sb, int minimum, int maximum) {
     static_cast<QScrollBar *>(sb)->setRange(minimum, maximum);
@@ -265,6 +266,13 @@ void paint_widget_set_ime_rect(QWidget *w, int x, int y, int width, int height) 
     if (auto *pw = dynamic_cast<DtkPaintWidget *>(w)) {
         pw->m_imeRect = QRect(x, y, width, height);
         QGuiApplication::inputMethod()->update(Qt::ImCursorRectangle);
+    }
+}
+void main_window_titlebar_add_widget(QWidget *w, QWidget *child) {
+    if (auto *mw = qobject_cast<DMainWindow *>(w)) {
+        if (auto *tb = mw->titlebar()) {
+            tb->addWidget(child, Qt::AlignLeft);
+        }
     }
 }
 void widget_set_titlebar_icon(QWidget *w, QIcon *icon) {
