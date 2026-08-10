@@ -365,7 +365,9 @@ void tabbar_unlatch_scroll_buttons(QWidget *tb) {
     for (const auto &p : pairs) {
         auto *qt = tb->findChild<QToolButton *>(QLatin1String(p.qtBtn));
         auto *dtk = tb->findChild<QWidget *>(QLatin1String(p.dtkBtn));
-        if (qt && dtk && dtk->isVisible() != qt->isVisible()) {
+        // only repair the actually-observed stuck state (mirror on, Qt off);
+        // never touch a genuinely-visible scroll button
+        if (qt && dtk && dtk->isVisible() && !qt->isVisible()) {
             qt->show(); // -> DTK filter shows its mirror (already visible; no-op)
             qt->hide(); // -> DTK filter hides its mirror and refreshSpacers zeroes it
         }
