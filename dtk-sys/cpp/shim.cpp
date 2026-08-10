@@ -371,12 +371,18 @@ void tabbar_flush_layout(QWidget *tb) {
     for (QWidget *child : descendants) {
         child->updateGeometry();
     }
-    tabbar_unlatch_scroll_buttons(tb);
     for (QWidget *w = tb; w; w = w->parentWidget()) {
         if (QLayout *lay = w->layout()) {
             lay->invalidate();
             lay->activate();
         }
+    }
+    // resync last: once the layouts above have settled, Qt's scroll buttons hold
+    // their final state; cycling now cannot be undone by a later activation
+    tabbar_unlatch_scroll_buttons(tb);
+    if (QLayout *lay = tb->layout()) {
+        lay->invalidate();
+        lay->activate();
     }
 }
 void widget_set_parent(QWidget *child, QWidget *parent) { child->setParent(parent); }
