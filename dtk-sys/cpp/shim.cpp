@@ -383,9 +383,16 @@ void tabbar_debug_dump(QWidget *tb) {
     }
 }
 void tabbar_flush_layout(QWidget *tb) {
-    // clearing latched scroll-button spacers belongs to every explicit relayout:
-    // the stuck state is (re)created by Qt during early layout passes
-    tabbar_unlatch_scroll_buttons(tb);
+    // DTK's setTabMinimumSize/MaximumSize only flags layoutDirty; the widget
+    // sizeHint caches stay stale, so the inner tab strip keeps its old (smaller)
+    // width and Qt's scroll-button state latches on. Refresh geometry hints up
+    // front so the relayout below works with current sizes and Qt unlatches its
+    // scroll buttons through the normal resize path.
+    tb->updateGeometry();
+    const auto descendants = tb->findChildren<QWidget *>();
+    for (QWidget *child : descendants) {
+        child->updateGeometry();
+    }
     for (QWidget *w = tb; w; w = w->parentWidget()) {
         if (QLayout *lay = w->layout()) {
             lay->invalidate();
