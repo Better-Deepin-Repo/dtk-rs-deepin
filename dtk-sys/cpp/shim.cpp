@@ -383,6 +383,9 @@ void tabbar_debug_dump(QWidget *tb) {
     }
 }
 void tabbar_flush_layout(QWidget *tb) {
+    // clearing latched scroll-button spacers belongs to every explicit relayout:
+    // the stuck state is (re)created by Qt during early layout passes
+    tabbar_unlatch_scroll_buttons(tb);
     for (QWidget *w = tb; w; w = w->parentWidget()) {
         if (QLayout *lay = w->layout()) {
             lay->invalidate();
