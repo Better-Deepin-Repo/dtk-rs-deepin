@@ -194,6 +194,13 @@ impl QWidget {
     pub fn set_focus(&self) {
         unsafe { ffi::widget_set_focus(self.ptr) }
     }
+    /// qt::cursor::* shape; stays until unset_cursor
+    pub fn set_cursor(&self, shape: i32) {
+        unsafe { ffi::widget_set_cursor(self.ptr, shape) }
+    }
+    pub fn unset_cursor(&self) {
+        unsafe { ffi::widget_unset_cursor(self.ptr) }
+    }
     /// deepin-terminal style: install the tab bar as titlebar custom widget
     /// (zero-margin layout, vertically centered)
     pub fn titlebar_set_tabbar(&self, tabbar: &QWidget) {
