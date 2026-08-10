@@ -103,6 +103,8 @@ bool application_has_arg(rust::Str arg);
 // ---- QWidget common (applies to all widgets) ----
 void widget_show(QWidget *w);
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px);
+int32_t widget_width(QWidget *w);
+int32_t widget_height(QWidget *w);
 void widget_set_enabled(QWidget *w, bool on);
 void widget_set_window_title(QWidget *w, rust::Str title);
 void widget_set_window_icon(QWidget *w, QIcon *icon);

@@ -285,6 +285,8 @@ bool application_has_arg(rust::Str arg) {
 // ---- QWidget common ----
 void widget_show(QWidget *w) { w->show(); }
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px) { w->resize(w_px, h_px); }
+int32_t widget_width(QWidget *w) { return w->width(); }
+int32_t widget_height(QWidget *w) { return w->height(); }
 void widget_set_enabled(QWidget *w, bool on) { w->setEnabled(on); }
 void widget_set_window_title(QWidget *w, rust::Str title) { w->setWindowTitle(from_rust_str(title)); }
 void widget_set_window_icon(QWidget *w, QIcon *icon) { w->setWindowIcon(*icon); }

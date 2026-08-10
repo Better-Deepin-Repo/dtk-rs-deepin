@@ -60,6 +60,8 @@ pub mod ffi {
         // QWidget common
         unsafe fn widget_show(w: *mut QWidget);
         unsafe fn widget_resize(w: *mut QWidget, w_px: i32, h_px: i32);
+        unsafe fn widget_width(w: *mut QWidget) -> i32;
+        unsafe fn widget_height(w: *mut QWidget) -> i32;
         unsafe fn widget_set_enabled(w: *mut QWidget, on: bool);
         unsafe fn widget_set_window_title(w: *mut QWidget, title: &str);
         unsafe fn widget_set_window_icon(w: *mut QWidget, icon: *mut QIcon);

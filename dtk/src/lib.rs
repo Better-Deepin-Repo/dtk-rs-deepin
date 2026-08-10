@@ -38,6 +38,13 @@ macro_rules! widget_wrapper {
             pub fn resize(&self, w: i32, h: i32) {
                 unsafe { ffi::widget_resize(self.ptr.cast(), w, h) }
             }
+            /// widget size in pixels (window: includes the DTK titlebar)
+            pub fn width(&self) -> i32 {
+                unsafe { ffi::widget_width(self.ptr.cast()) }
+            }
+            pub fn height(&self) -> i32 {
+                unsafe { ffi::widget_height(self.ptr.cast()) }
+            }
             pub fn move_to(&self, x: i32, y: i32) {
                 unsafe { ffi::widget_move(self.ptr.cast(), x, y) }
             }
