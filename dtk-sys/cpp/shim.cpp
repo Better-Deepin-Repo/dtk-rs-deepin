@@ -553,6 +553,7 @@ void color_delete(QColor *c) { delete c; }
 QFont *font_new() { return new QFont; }
 void font_set_point_size(QFont *f, int32_t size) { f->setPointSize(size); }
 void font_set_bold(QFont *f, bool bold) { f->setBold(bold); }
+void font_set_italic(QFont *f, bool italic) { f->setItalic(italic); }
 
 int32_t fontmetrics_height(QFont *f) { return QFontMetrics(*f).height(); }
 int32_t fontmetrics_ascent(QFont *f) { return QFontMetrics(*f).ascent(); }
@@ -616,6 +617,9 @@ QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent) {
 }
 
 // ---- QPainter primitives ----
+void painter_draw_line(QPainter *p, int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+    p->drawLine(x1, y1, x2, y2);
+}
 void painter_draw_text_at(QPainter *p, int32_t x, int32_t y, rust::Str text) {
     p->drawText(x, y, from_rust_str(text));
 }

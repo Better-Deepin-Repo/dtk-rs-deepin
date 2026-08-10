@@ -248,6 +248,7 @@ pub mod ffi {
         unsafe fn font_new() -> *mut QFont;
         unsafe fn font_set_point_size(f: *mut QFont, size: i32);
         unsafe fn font_set_bold(f: *mut QFont, bold: bool);
+        unsafe fn font_set_italic(f: *mut QFont, italic: bool);
         unsafe fn fontmetrics_height(f: *mut QFont) -> i32;
         unsafe fn fontmetrics_ascent(f: *mut QFont) -> i32;
         unsafe fn fontmetrics_max_width(f: *mut QFont) -> i32;
@@ -289,6 +290,7 @@ pub mod ffi {
 
         // QPainter primitives
         unsafe fn painter_draw_text_at(p: *mut QPainter, x: i32, y: i32, text: &str);
+        unsafe fn painter_draw_line(p: *mut QPainter, x1: i32, y1: i32, x2: i32, y2: i32);
         unsafe fn painter_save(p: *mut QPainter);
         unsafe fn painter_restore(p: *mut QPainter);
         unsafe fn painter_set_pen_color(p: *mut QPainter, color: *mut QColor);

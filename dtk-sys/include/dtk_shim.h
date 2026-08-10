@@ -253,6 +253,7 @@ void color_delete(QColor *c);
 QFont *font_new();
 void font_set_point_size(QFont *f, int32_t size);
 void font_set_bold(QFont *f, bool bold);
+void font_set_italic(QFont *f, bool italic);
 // QFontMetrics for grid sizing (terminal cell geometry)
 int32_t fontmetrics_height(QFont *f);
 int32_t fontmetrics_ascent(QFont *f);
@@ -296,6 +297,7 @@ QStyledItemDelegate *rust_delegate_new(size_t paint_cb_id, QObject *parent);
 // ---- QPainter primitives ----
 // draw text at baseline origin (x, y) — for cell-grid rendering
 void painter_draw_text_at(QPainter *p, int32_t x, int32_t y, rust::Str text);
+void painter_draw_line(QPainter *p, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 void painter_save(QPainter *p);
 void painter_restore(QPainter *p);
 void painter_set_pen_color(QPainter *p, QColor *color);

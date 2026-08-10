@@ -620,6 +620,10 @@ impl QFont {
     pub fn set_bold(&self, bold: bool) {
         unsafe { ffi::font_set_bold(self.ptr, bold) }
     }
+    /// italic on/off
+    pub fn set_italic(&self, italic: bool) {
+        unsafe { ffi::font_set_italic(self.ptr, italic) }
+    }
     /// generic monospace family (terminals, code)
     pub fn set_monospace(&self) {
         unsafe { ffi::font_set_monospace(self.ptr) }
@@ -1319,6 +1323,9 @@ pub struct Painter {
 
 impl Painter {
     /// draw text with the baseline at (x, y) — for cell-grid rendering
+    pub fn draw_line(&self, x1: i32, y1: i32, x2: i32, y2: i32) {
+        unsafe { ffi::painter_draw_line(self.ptr, x1, y1, x2, y2) }
+    }
     pub fn draw_text_at(&self, x: i32, y: i32, text: &str) {
         unsafe { ffi::painter_draw_text_at(self.ptr, x, y, text) }
     }
