@@ -241,6 +241,10 @@ impl QWidget {
     pub fn unlatch_scroll_buttons(&self) {
         unsafe { ffi::tabbar_unlatch_scroll_buttons(self.ptr) }
     }
+    /// debug: print the tab bar's internal widget tree geometry to stderr
+    pub fn debug_dump(&self) {
+        unsafe { ffi::tabbar_debug_dump(self.ptr) }
+    }
     /// reparent (widget keeps geometry; shown with the new parent)
     pub fn set_parent(&self, parent: &QWidget) {
         unsafe { ffi::widget_set_parent(self.ptr, parent.ptr) }

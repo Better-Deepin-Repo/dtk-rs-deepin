@@ -10,6 +10,7 @@
 #include <QProxyStyle>
 #include <QScrollBar>
 #include <QStyleOptionTab>
+#include <QToolButton>
 #include <QTextOption>
 #include <QShortcut>
 #include <QKeySequence>
@@ -317,6 +318,15 @@ void tabbar_unlatch_scroll_buttons(QWidget *tb) {
         const bool was = add->isVisible();
         add->hide();
         add->setVisible(was);
+    }
+}
+void tabbar_debug_dump(QWidget *tb) {
+    qInfo("tabbar self pos=%d,%d size=%dx%d", tb->x(), tb->y(), tb->width(), tb->height());
+    const auto kids = tb->findChildren<QWidget *>();
+    for (auto *k : kids) {
+        qInfo("  child %s (%s) vis=%d pos=%d,%d size=%dx%d",
+              k->objectName().isEmpty() ? k->metaObject()->className() : qPrintable(k->objectName()),
+              k->metaObject()->className(), k->isVisible(), k->x(), k->y(), k->width(), k->height());
     }
 }
 void tabbar_flush_layout(QWidget *tb) {
