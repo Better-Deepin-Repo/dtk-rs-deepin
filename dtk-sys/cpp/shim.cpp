@@ -305,12 +305,20 @@ void tabbar_install_style(QWidget *tb) { tb->setStyle(new DtkTabLabelStyle); }
 // "needed" true forever. Hiding the QToolButtons re-runs DTK's eventFilter, which
 // hides its mirror buttons and zeroes the spacers. Qt re-shows them on the next
 // layoutTabs if scrolling is really needed, so this is safe to call any time.
+#include <execinfo.h>
 class BtnVisTracer : public QObject {
 public:
     using QObject::QObject;
     bool eventFilter(QObject *w, QEvent *e) override {
         if (e->type() == QEvent::Show || e->type() == QEvent::Hide || e->type() == QEvent::ShowToParent || e->type() == QEvent::HideToParent) {
             qInfo("tracer: %s event=%d", qPrintable(w->objectName()), (int)e->type());
+            if (e->type() == QEvent::Show && w->objectName() == QLatin1String("leftButton")) {
+                void *frames[24];
+                int n = backtrace(frames, 24);
+                char **syms = backtrace_symbols(frames, n);
+                for (int i = 0; i < n; ++i) qInfo("  bt[%d] %s", i, syms ? syms[i] : "?");
+                free(syms);
+            }
         }
         return QObject::eventFilter(w, e);
     }
