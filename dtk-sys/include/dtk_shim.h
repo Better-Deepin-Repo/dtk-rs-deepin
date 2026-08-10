@@ -257,6 +257,8 @@ void font_set_bold(QFont *f, bool bold);
 int32_t fontmetrics_height(QFont *f);
 int32_t fontmetrics_ascent(QFont *f);
 int32_t fontmetrics_max_width(QFont *f);
+int32_t fontmetrics_advance(QFont *f, rust::Str text);
+void font_force_integer_metrics(QFont *f);
 // generic monospace family (fontconfig "monospace" alias)
 void font_set_monospace(QFont *f);
 void font_set_family(QFont *f, rust::Str name);

@@ -549,6 +549,12 @@ void font_set_bold(QFont *f, bool bold) { f->setBold(bold); }
 int32_t fontmetrics_height(QFont *f) { return QFontMetrics(*f).height(); }
 int32_t fontmetrics_ascent(QFont *f) { return QFontMetrics(*f).ascent(); }
 int32_t fontmetrics_max_width(QFont *f) { return QFontMetrics(*f).horizontalAdvance(QLatin1Char('M')); }
+int32_t fontmetrics_advance(QFont *f, rust::Str text) { return QFontMetrics(*f).horizontalAdvance(from_rust_str(text)); }
+void font_force_integer_metrics(QFont *f) {
+    // Qt6 removed QFont::ForceIntegerMetrics; full hinting snaps advances to
+    // integer pixels, which is what a cell grid needs
+    f->setHintingPreference(QFont::PreferFullHinting);
+}
 
 void font_set_monospace(QFont *f) {
     f->setStyleHint(QFont::TypeWriter);

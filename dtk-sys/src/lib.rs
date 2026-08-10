@@ -251,6 +251,8 @@ pub mod ffi {
         unsafe fn fontmetrics_height(f: *mut QFont) -> i32;
         unsafe fn fontmetrics_ascent(f: *mut QFont) -> i32;
         unsafe fn fontmetrics_max_width(f: *mut QFont) -> i32;
+        unsafe fn fontmetrics_advance(f: *mut QFont, text: &str) -> i32;
+        unsafe fn font_force_integer_metrics(f: *mut QFont);
         unsafe fn font_set_monospace(f: *mut QFont);
         unsafe fn font_set_family(f: *mut QFont, name: &str);
         unsafe fn font_delete(f: *mut QFont);

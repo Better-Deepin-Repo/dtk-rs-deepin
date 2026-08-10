@@ -628,6 +628,15 @@ impl QFont {
     pub fn set_family(&self, name: &str) {
         unsafe { ffi::font_set_family(self.ptr, name) }
     }
+    /// QFont::ForceIntegerMetrics: terminals need integer per-cell advances,
+    /// otherwise shaped runs drift off the cell grid (fractional 9.85 vs cell 10)
+    pub fn force_integer_metrics(&self) {
+        unsafe { ffi::font_force_integer_metrics(self.ptr) }
+    }
+    /// shaped advance of a text run (kerning/ligatures included)
+    pub fn advance(&self, text: &str) -> i32 {
+        unsafe { ffi::fontmetrics_advance(self.ptr, text) }
+    }
     /// cell geometry for grid rendering: (max char width, line height, ascent)
     pub fn metrics(&self) -> (i32, i32, i32) {
         unsafe {
