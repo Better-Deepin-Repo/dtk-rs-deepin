@@ -245,6 +245,10 @@ impl QWidget {
     pub fn debug_dump(&self) {
         unsafe { ffi::tabbar_debug_dump(self.ptr) }
     }
+    /// debug: trace Show/Hide events of the tab bar's internal buttons
+    pub fn trace_buttons(&self) {
+        unsafe { ffi::tabbar_trace_buttons(self.ptr) }
+    }
     /// reparent (widget keeps geometry; shown with the new parent)
     pub fn set_parent(&self, parent: &QWidget) {
         unsafe { ffi::widget_set_parent(self.ptr, parent.ptr) }
