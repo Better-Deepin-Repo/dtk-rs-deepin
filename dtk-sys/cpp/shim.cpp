@@ -632,6 +632,8 @@ QPoint *point_new(int32_t x, int32_t y) { return new QPoint(x, y); }
 void point_delete(QPoint *p) { delete p; }
 QRect *rect_new(int32_t x, int32_t y, int32_t w, int32_t h) { return new QRect(x, y, w, h); }
 void rect_delete(QRect *r) { delete r; }
+int32_t rect_width(QRect *r) { return r->width(); }
+int32_t rect_height(QRect *r) { return r->height(); }
 void icon_delete(QIcon *icon) { delete icon; }
 
 // ---- QSocketNotifier ----

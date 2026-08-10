@@ -282,6 +282,8 @@ QPoint *point_new(int32_t x, int32_t y);
 void point_delete(QPoint *p);
 QRect *rect_new(int32_t x, int32_t y, int32_t w, int32_t h);
 void rect_delete(QRect *r);
+int32_t rect_width(QRect *r);
+int32_t rect_height(QRect *r);
 void icon_delete(QIcon *icon);
 
 // ---- QMargins ----

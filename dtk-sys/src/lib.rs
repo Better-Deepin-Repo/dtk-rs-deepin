@@ -284,6 +284,8 @@ pub mod ffi {
         unsafe fn point_delete(p: *mut QPoint);
         unsafe fn rect_new(x: i32, y: i32, w: i32, h: i32) -> *mut QRect;
         unsafe fn rect_delete(r: *mut QRect);
+        unsafe fn rect_width(r: *mut QRect) -> i32;
+        unsafe fn rect_height(r: *mut QRect) -> i32;
         unsafe fn icon_delete(icon: *mut QIcon);
 
         // QSocketNotifier

@@ -716,6 +716,12 @@ impl QRect {
     pub fn new(x: i32, y: i32, w: i32, h: i32) -> Self {
         Self::from_raw(unsafe { ffi::rect_new(x, y, w, h) })
     }
+    pub fn width(&self) -> i32 {
+        unsafe { ffi::rect_width(self.ptr) }
+    }
+    pub fn height(&self) -> i32 {
+        unsafe { ffi::rect_height(self.ptr) }
+    }
 }
 
 impl QSize {
