@@ -786,7 +786,7 @@ pub mod qt {
     /// Qt::CursorShape subset
     pub mod cursor {
         pub const ARROW: i32 = 0;
-        pub const IBEAM: i32 = 5;
+        pub const IBEAM: i32 = 4;
         pub const POINTING_HAND: i32 = 13;
     }
     /// Qt::Key (letters/digits are ASCII); common subset for terminal input
