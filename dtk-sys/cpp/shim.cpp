@@ -317,8 +317,10 @@ void tabbar_unlatch_scroll_buttons(QWidget *tb) {
     for (const auto &p : pairs) {
         auto *qt = tb->findChild<QToolButton *>(QLatin1String(p.qtBtn));
         auto *dtk = tb->findChild<QWidget *>(QLatin1String(p.dtkBtn));
+        qInfo("unlatch: qt(%s)=%p vis=%d dtk(%s)=%p vis=%d", p.qtBtn, (void*)qt, qt?qt->isVisible():-1, p.dtkBtn, (void*)dtk, dtk?dtk->isVisible():-1);
         if (qt && dtk && dtk->isVisible() != qt->isVisible()) {
             dtk->setVisible(qt->isVisible());
+            qInfo("unlatch: synced %s -> vis=%d", p.dtkBtn, dtk->isVisible());
         }
     }
     // force DTK's eventFilter to re-run refreshSpacers with the synced state
