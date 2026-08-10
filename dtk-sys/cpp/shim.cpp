@@ -735,4 +735,8 @@ bool relay_connect_bool(QObject *sender, rust::Str signal, size_t cb_id) {
 
 void relay_disconnect(size_t cb_id) { DtkRelay::disconnectId(cb_id); }
 
+void widget_set_cursor(QWidget *w, int32_t shape) {
+    w->setCursor(static_cast<Qt::CursorShape>(shape));
+}
+void widget_unset_cursor(QWidget *w) { w->unsetCursor(); }
 } // namespace dtkrs

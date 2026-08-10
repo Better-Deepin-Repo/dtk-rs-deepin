@@ -87,6 +87,13 @@ macro_rules! widget_wrapper {
             pub fn set_font(&self, font: &QFont) {
                 unsafe { ffi::widget_set_font(self.ptr.cast(), font.ptr) }
             }
+            /// qt::cursor::* shape; stays until unset_cursor
+            pub fn set_cursor(&self, shape: i32) {
+                unsafe { ffi::widget_set_cursor(self.ptr.cast(), shape) }
+            }
+            pub fn unset_cursor(&self) {
+                unsafe { ffi::widget_unset_cursor(self.ptr.cast()) }
+            }
             /// heap copy of the current palette
             pub fn palette(&self) -> QPalette {
                 QPalette::from_raw(unsafe { ffi::widget_palette(self.ptr.cast()) })
@@ -768,6 +775,12 @@ pub mod qt {
         pub const RELEASE: i32 = 1;
         pub const MOVE: i32 = 2;
         pub const DOUBLE_CLICK: i32 = 3;
+    }
+    /// Qt::CursorShape subset
+    pub mod cursor {
+        pub const ARROW: i32 = 0;
+        pub const IBEAM: i32 = 5;
+        pub const POINTING_HAND: i32 = 13;
     }
     /// Qt::Key (letters/digits are ASCII); common subset for terminal input
     pub mod key {

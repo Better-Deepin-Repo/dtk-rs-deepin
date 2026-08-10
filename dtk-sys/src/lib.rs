@@ -97,6 +97,9 @@ pub mod ffi {
         unsafe fn progressbar_set_range(w: *mut QWidget, minimum: i32, maximum: i32);
         unsafe fn progressbar_value(w: *mut QWidget) -> i32;
         unsafe fn widget_set_font(w: *mut QWidget, font: *mut QFont);
+        /// Qt::CursorShape (qt::cursor::*)
+        unsafe fn widget_set_cursor(w: *mut QWidget, shape: i32);
+        unsafe fn widget_unset_cursor(w: *mut QWidget);
         unsafe fn widget_palette(w: *mut QWidget) -> *mut QPalette;
         unsafe fn widget_set_palette(w: *mut QWidget, pal: *mut QPalette);
         unsafe fn object_delete_later(o: *mut QObject);

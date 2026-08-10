@@ -346,4 +346,6 @@ bool relay_connect_bool(QObject *sender, rust::Str signal, size_t cb_id);
 // disconnect + deleteLater the relay for cb_id (no-op if unknown)
 void relay_disconnect(size_t cb_id);
 
+void widget_set_cursor(QWidget *w, int32_t shape);
+void widget_unset_cursor(QWidget *w);
 } // namespace dtkrs
