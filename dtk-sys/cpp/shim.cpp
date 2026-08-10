@@ -323,10 +323,13 @@ void tabbar_trace_buttons(QWidget *tb) {
     }
 }
 void tabbar_unlatch_scroll_buttons(QWidget *tb) {
-    // DTK's mirror scroll buttons can get stuck visible while Qt's are hidden
-    // (missed Hide event at startup), leaving their spacers sized. Sync DTK's
-    // mirrors to Qt's real state; if scrolling is genuinely needed Qt shows its
-    // buttons on the next layout and DTK's eventFilter re-shows the mirrors.
+    // DTK mirrors Qt's scroll buttons via its eventFilter. At startup a transient
+    // scroll-needed state can leave DTK's mirror visible while Qt's button is
+    // hidden again (missed Hide), which keeps the mirror's layout spacers sized
+    // (a 10px gap before the first tab). setVisible() directly on the mirror does
+    // not stick, so resync through DTK's own path: force Qt's button through one
+    // show/hide cycle; DTK's filter then hides the mirror and zeroes the spacers.
+    // Only act when the two disagree, so genuine overflow scrolling is untouched.
     const struct {
         const char *qtBtn;
         const char *dtkBtn;
@@ -334,17 +337,10 @@ void tabbar_unlatch_scroll_buttons(QWidget *tb) {
     for (const auto &p : pairs) {
         auto *qt = tb->findChild<QToolButton *>(QLatin1String(p.qtBtn));
         auto *dtk = tb->findChild<QWidget *>(QLatin1String(p.dtkBtn));
-        qInfo("unlatch: qt(%s)=%p vis=%d dtk(%s)=%p vis=%d", p.qtBtn, (void*)qt, qt?qt->isVisible():-1, p.dtkBtn, (void*)dtk, dtk?dtk->isVisible():-1);
         if (qt && dtk && dtk->isVisible() != qt->isVisible()) {
-            dtk->setVisible(qt->isVisible());
-            qInfo("unlatch: synced %s -> vis=%d", p.dtkBtn, dtk->isVisible());
+            qt->show(); // -> DTK shows its mirror (already visible; harmless)
+            qt->hide(); // -> DTK hides its mirror and refreshSpacers zeroes the gap
         }
-    }
-    // force DTK's eventFilter to re-run refreshSpacers with the synced state
-    if (auto *add = tb->findChild<QWidget *>(QLatin1String("AddButton"))) {
-        const bool was = add->isVisible();
-        add->hide();
-        add->setVisible(was);
     }
 }
 void tabbar_debug_dump(QWidget *tb) {
