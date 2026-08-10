@@ -217,7 +217,15 @@ protected:
 
 private:
     void forward_mouse(QMouseEvent *e, int32_t kind) {
-        dtk_cb_pw_mouse(m_cb_id, kind, static_cast<int32_t>(e->button()),
+        // during a drag button() is NoButton; buttons() carries the held one
+        auto btn = e->button();
+        if (btn == Qt::NoButton && kind == 2) {
+            btn = e->buttons() & Qt::LeftButton   ? Qt::LeftButton
+                : e->buttons() & Qt::MiddleButton ? Qt::MiddleButton
+                : e->buttons() & Qt::RightButton  ? Qt::RightButton
+                                                  : Qt::NoButton;
+        }
+        dtk_cb_pw_mouse(m_cb_id, kind, static_cast<int32_t>(btn),
                         static_cast<int32_t>(e->pos().x()), static_cast<int32_t>(e->pos().y()),
                         static_cast<int32_t>(e->modifiers()));
     }
