@@ -41,6 +41,7 @@ pub mod ffi {
         type DSuggestButton;
         type DPushButton;
         type QMessageBox;
+        type QMenu;
 
         // DApplication
         // args: '|'-separated real argv (incl. argv[0]); application_name set separately
@@ -59,6 +60,7 @@ pub mod ffi {
 
         // QWidget common
         unsafe fn widget_show(w: *mut QWidget);
+        unsafe fn widget_hide(w: *mut QWidget);
         unsafe fn widget_resize(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_width(w: *mut QWidget) -> i32;
         unsafe fn widget_height(w: *mut QWidget) -> i32;
@@ -360,10 +362,18 @@ pub mod ffi {
         unsafe fn timer_stop(t: *mut QTimer);
         unsafe fn timer_single_shot(msec: i32, cb_id: usize);
 
+        // QMenu (DMenu typedef in DTK6); actions fire cb_id on triggered
+        unsafe fn menu_new(parent: *mut QWidget) -> *mut QMenu;
+        unsafe fn menu_add_action_cb(m: *mut QMenu, text: &str, cb_id: usize);
+        unsafe fn menu_add_separator(m: *mut QMenu);
+        /// popup at (x, y) in ref widget coords; menu self-deletes on close (WA_DeleteOnClose)
+        unsafe fn menu_popup(m: *mut QMenu, ref_: *mut QWidget, x: i32, y: i32);
+
         // signals; connect fns return false on failure (caller must roll back registration)
         unsafe fn relay_connect0(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
         unsafe fn relay_connect_i32(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
         unsafe fn relay_connect_bool(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
+        unsafe fn relay_connect_i32_i32(sender: *mut QObject, signal: &str, cb_id: usize) -> bool;
         /// disconnect + schedule deletion of the relay for cb_id (no-op if unknown)
         unsafe fn relay_disconnect(cb_id: usize);
 
@@ -379,6 +389,7 @@ pub mod ffi {
         fn dtk_cb0(id: usize);
         fn dtk_cb_i32(id: usize, v: i32);
         fn dtk_cb_bool(id: usize, v: bool);
+        fn dtk_cb_i32_i32(id: usize, a: i32, b: i32);
         fn dtk_cb_guard(id: usize) -> bool;
         // DtkPaintWidget event callbacks
         unsafe fn dtk_cb_pw_paint(id: usize, painter: *mut QPainter, w: i32, h: i32);
@@ -447,6 +458,7 @@ pub enum PwEvent {
 enum Cb {
     C0(Box<dyn FnMut()>),
     I32(Box<dyn FnMut(i32)>),
+    I32I32(Box<dyn FnMut(i32, i32)>),
     Bool(Box<dyn FnMut(bool)>),
     Guard(Box<dyn FnMut() -> bool>),
     Paint(Box<dyn FnMut(*mut ffi::QPainter, *mut ffi::QModelIndex, i32, i32, i32, i32, i32)>),
@@ -481,6 +493,12 @@ pub fn register_cb_i32(f: impl FnMut(i32) + 'static) -> usize {
 pub fn register_cb_bool(f: impl FnMut(bool) + 'static) -> usize {
     let id = next_id();
     CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::Bool(Box::new(f))));
+    id
+}
+
+pub fn register_cb_i32_i32(f: impl FnMut(i32, i32) + 'static) -> usize {
+    let id = next_id();
+    CALLBACKS.with(|c| c.borrow_mut().insert(id, Cb::I32I32(Box::new(f))));
     id
 }
 
@@ -607,6 +625,16 @@ fn dtk_cb_bool(id: usize, v: bool) {
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
     if let Some(Cb::Bool(f)) = &mut cb {
         if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(v))).is_err() {
+            eprintln!("dtk-rs: callback {id} panicked, swallowed at FFI boundary");
+        }
+        finish_dispatch(id, cb.take().unwrap());
+    }
+}
+
+fn dtk_cb_i32_i32(id: usize, a: i32, b: i32) {
+    let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
+    if let Some(Cb::I32I32(f)) = &mut cb {
+        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(a, b))).is_err() {
             eprintln!("dtk-rs: callback {id} panicked, swallowed at FFI boundary");
         }
         finish_dispatch(id, cb.take().unwrap());

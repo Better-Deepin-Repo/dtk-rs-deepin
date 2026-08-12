@@ -17,6 +17,7 @@ public:
     static bool connect0(QObject *sender, const char *signal, size_t cb_id);
     static bool connectI32(QObject *sender, const char *signal, size_t cb_id);
     static bool connectBool(QObject *sender, const char *signal, size_t cb_id);
+    static bool connectI32I32(QObject *sender, const char *signal, size_t cb_id);
     /// disconnect + deleteLater the relay for cb_id (no-op if unknown)
     static void disconnectId(size_t cb_id);
 
@@ -24,6 +25,7 @@ public Q_SLOTS:
     void fire0();
     void fireI32(int v);
     void fireBool(bool b);
+    void fireI32I32(int a, int b);
 
 private:
     size_t m_cb_id;

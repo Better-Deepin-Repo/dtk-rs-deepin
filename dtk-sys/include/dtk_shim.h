@@ -39,6 +39,7 @@
 #include <QEvent>
 #include <QCloseEvent>
 #include <QShowEvent>
+#include <QMenu>
 
 #include <DApplication>
 #include <DMainWindow>
@@ -74,6 +75,7 @@ using ::QModelIndex;
 using ::QSocketNotifier;
 using ::QEvent;
 using ::QStyledItemDelegate;
+using ::QMenu;
 
 using DApplication = Dtk::Widget::DApplication;
 using DMainWindow = Dtk::Widget::DMainWindow;
@@ -82,6 +84,12 @@ using DLabel = Dtk::Widget::DLabel;
 using DSuggestButton = Dtk::Widget::DSuggestButton;
 using DPushButton = Dtk::Widget::DPushButton;
 using QMessageBox = ::QMessageBox;
+
+// ---- QMenu (DMenu = QMenu typedef in DTK6) ----
+QMenu *menu_new(QWidget *parent);
+void menu_add_action_cb(QMenu *m, rust::Str text, size_t cb_id); // cb fires on triggered
+void menu_add_separator(QMenu *m);
+void menu_popup(QMenu *m, QWidget *ref, int32_t x, int32_t y); // x,y in ref coords; WA_DeleteOnClose
 
 // ---- QString <-> rust string ----
 rust::String to_rust_string(const QString &s);
@@ -102,6 +110,7 @@ bool application_has_arg(rust::Str arg);
 
 // ---- QWidget common (applies to all widgets) ----
 void widget_show(QWidget *w);
+void widget_hide(QWidget *w);
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px);
 int32_t widget_width(QWidget *w);
 int32_t widget_height(QWidget *w);
@@ -349,6 +358,7 @@ bool relay_connect0(QObject *sender, rust::Str signal, size_t cb_id);
 // common signals with args
 bool relay_connect_i32(QObject *sender, rust::Str signal, size_t cb_id);
 bool relay_connect_bool(QObject *sender, rust::Str signal, size_t cb_id);
+bool relay_connect_i32_i32(QObject *sender, rust::Str signal, size_t cb_id);
 // disconnect + deleteLater the relay for cb_id (no-op if unknown)
 void relay_disconnect(size_t cb_id);
 

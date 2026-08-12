@@ -39,6 +39,10 @@ bool DtkRelay::connectBool(QObject *sender, const char *signal, size_t cb_id) {
     return connect_impl(sender, signal, cb_id, SLOT(fireBool(bool)));
 }
 
+bool DtkRelay::connectI32I32(QObject *sender, const char *signal, size_t cb_id) {
+    return connect_impl(sender, signal, cb_id, SLOT(fireI32I32(int, int)));
+}
+
 void DtkRelay::disconnectId(size_t cb_id) {
     if (auto *relay = g_relays.take(cb_id)) {
         relay->disconnect();
@@ -50,5 +54,8 @@ void DtkRelay::disconnectId(size_t cb_id) {
 void DtkRelay::fire0() { dtk_cb0(m_cb_id); }
 void DtkRelay::fireI32(int v) { dtk_cb_i32(m_cb_id, static_cast<int32_t>(v)); }
 void DtkRelay::fireBool(bool b) { dtk_cb_bool(m_cb_id, b); }
+void DtkRelay::fireI32I32(int a, int b) {
+    dtk_cb_i32_i32(m_cb_id, static_cast<int32_t>(a), static_cast<int32_t>(b));
+}
 
 } // namespace dtkrs

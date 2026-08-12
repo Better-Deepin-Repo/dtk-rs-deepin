@@ -35,6 +35,9 @@ macro_rules! widget_wrapper {
             pub fn show(&self) {
                 unsafe { ffi::widget_show(self.ptr.cast()) }
             }
+            pub fn hide(&self) {
+                unsafe { ffi::widget_hide(self.ptr.cast()) }
+            }
             pub fn resize(&self, w: i32, h: i32) {
                 unsafe { ffi::widget_resize(self.ptr.cast(), w, h) }
             }
@@ -153,6 +156,11 @@ macro_rules! object_wrapper {
             }
         }
         impl SignalBool for $name {
+            fn qobject_ptr(&self) -> *mut ffi::QObject {
+                self.as_qobject()
+            }
+        }
+        impl SignalI32I32 for $name {
             fn qobject_ptr(&self) -> *mut ffi::QObject {
                 self.as_qobject()
             }
@@ -441,6 +449,34 @@ impl Clipboard {
     }
 }
 
+/// popup menu (DMenu = QMenu typedef in DTK6); actions take plain callbacks
+#[derive(Clone, Copy)]
+pub struct DMenu {
+    ptr: *mut ffi::QMenu,
+    _not_send: PhantomData<*mut ()>,
+}
+
+impl DMenu {
+    pub fn new(parent: &QWidget) -> Self {
+        Self {
+            ptr: unsafe { ffi::menu_new(parent.ptr) },
+            _not_send: PhantomData,
+        }
+    }
+    /// append an action; f fires on trigger (menu lives until closed; WA_DeleteOnClose on popup)
+    pub fn add_action(&self, text: &str, f: impl FnMut() + 'static) {
+        let id = dtk_sys::register_cb0(f);
+        unsafe { ffi::menu_add_action_cb(self.ptr, text, id) }
+    }
+    pub fn add_separator(&self) {
+        unsafe { ffi::menu_add_separator(self.ptr) }
+    }
+    /// popup at (x, y) in ref widget coords; the menu self-deletes on close
+    pub fn popup(&self, ref_: &QWidget, x: i32, y: i32) {
+        unsafe { ffi::menu_popup(self.ptr, ref_.ptr, x, y) }
+    }
+}
+
 /// connect an arg-less signal on any widget (e.g. clicked, timeout)
 pub trait Signal0 {
     fn qobject_ptr(&self) -> *mut ffi::QObject;
@@ -479,6 +515,25 @@ pub trait SignalBool {
     fn connect_signal_bool(&self, signal: &str, f: impl FnMut(bool) + 'static) -> usize {
         let id = dtk_sys::register_cb_bool(f);
         if unsafe { ffi::relay_connect_bool(self.qobject_ptr(), signal, id) } {
+            id
+        } else {
+            dtk_sys::unregister_cb(id);
+            0
+        }
+    }
+}
+
+/// signal with two i32 args (e.g. tabMoved(int,int))
+pub trait SignalI32I32 {
+    fn qobject_ptr(&self) -> *mut ffi::QObject;
+    /// Returns the callback id for [`unregister_callback`]; 0 = connect failed.
+    fn connect_signal_i32_i32(
+        &self,
+        signal: &str,
+        f: impl FnMut(i32, i32) + 'static,
+    ) -> usize {
+        let id = dtk_sys::register_cb_i32_i32(f);
+        if unsafe { ffi::relay_connect_i32_i32(self.qobject_ptr(), signal, id) } {
             id
         } else {
             dtk_sys::unregister_cb(id);

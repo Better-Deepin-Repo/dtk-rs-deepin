@@ -303,8 +303,21 @@ bool application_has_arg(rust::Str arg) {
     return QCoreApplication::arguments().contains(from_rust_str(arg));
 }
 
+// ---- QMenu ----
+QMenu *menu_new(QWidget *parent) { return new QMenu(parent); }
+void menu_add_action_cb(QMenu *m, rust::Str text, size_t cb_id) {
+    QAction *a = m->addAction(from_rust_str(text));
+    QObject::connect(a, &QAction::triggered, m, [cb_id] { dtk_cb0(cb_id); });
+}
+void menu_add_separator(QMenu *m) { m->addSeparator(); }
+void menu_popup(QMenu *m, QWidget *ref, int32_t x, int32_t y) {
+    m->setAttribute(Qt::WA_DeleteOnClose);
+    m->popup(ref->mapToGlobal(QPoint(x, y)));
+}
+
 // ---- QWidget common ----
 void widget_show(QWidget *w) { w->show(); }
+void widget_hide(QWidget *w) { w->hide(); }
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px) { w->resize(w_px, h_px); }
 int32_t widget_width(QWidget *w) { return w->width(); }
 int32_t widget_height(QWidget *w) { return w->height(); }
@@ -801,6 +814,10 @@ bool relay_connect_i32(QObject *sender, rust::Str signal, size_t cb_id) {
 
 bool relay_connect_bool(QObject *sender, rust::Str signal, size_t cb_id) {
     return DtkRelay::connectBool(sender, std::string(signal).c_str(), cb_id);
+}
+
+bool relay_connect_i32_i32(QObject *sender, rust::Str signal, size_t cb_id) {
+    return DtkRelay::connectI32I32(sender, std::string(signal).c_str(), cb_id);
 }
 
 void relay_disconnect(size_t cb_id) { DtkRelay::disconnectId(cb_id); }
