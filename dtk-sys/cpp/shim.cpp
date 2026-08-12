@@ -436,6 +436,13 @@ uint32_t app_palette_window_rgb() {
     const QColor c = QApplication::palette().color(QPalette::Window);
     return static_cast<uint32_t>((c.red() << 16) | (c.green() << 8) | c.blue());
 }
+// DPalette::Highlight from the application palette (theme accent color);
+// deepin-terminal's split divider is exactly this (termpage.cpp setSplitStyle)
+uint32_t app_palette_highlight_rgb() {
+    const auto pa = Dtk::Gui::DGuiApplicationHelper::instance()->applicationPalette();
+    const QColor c = pa.color(Dtk::Gui::DPalette::Highlight);
+    return static_cast<uint32_t>((c.red() << 16) | (c.green() << 8) | c.blue());
+}
 void widget_activate_window(QWidget *w) { w->activateWindow(); }
 void widget_close(QWidget *w) { w->close(); }
 bool widget_is_visible(QWidget *w) { return w->isVisible(); }

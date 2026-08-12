@@ -417,7 +417,9 @@ pub struct ScrollBar {
 
 impl ScrollBar {
     pub fn new(parent: &QWidget) -> Self {
-        Self { w: QWidget::from_raw(unsafe { ffi::scrollbar_new(parent.ptr) }) }
+        Self {
+            w: QWidget::from_raw(unsafe { ffi::scrollbar_new(parent.ptr) }),
+        }
     }
     pub fn as_widget(&self) -> QWidget {
         QWidget::from_raw(self.w.ptr)
@@ -540,11 +542,7 @@ pub trait SignalBool {
 pub trait SignalI32I32 {
     fn qobject_ptr(&self) -> *mut ffi::QObject;
     /// Returns the callback id for [`unregister_callback`]; 0 = connect failed.
-    fn connect_signal_i32_i32(
-        &self,
-        signal: &str,
-        f: impl FnMut(i32, i32) + 'static,
-    ) -> usize {
+    fn connect_signal_i32_i32(&self, signal: &str, f: impl FnMut(i32, i32) + 'static) -> usize {
         let id = dtk_sys::register_cb_i32_i32(f);
         if unsafe { ffi::relay_connect_i32_i32(self.qobject_ptr(), signal, id) } {
             id
@@ -615,6 +613,11 @@ impl DApplication {
     /// QPalette::Window as (r, g, b) — use to detect light vs dark DTK theme
     pub fn palette_window_rgb() -> (u8, u8, u8) {
         let rgb = unsafe { ffi::app_palette_window_rgb() };
+        ((rgb >> 16) as u8, (rgb >> 8) as u8, rgb as u8)
+    }
+    /// DPalette::Highlight as (r, g, b) — theme accent color
+    pub fn palette_highlight_rgb() -> (u8, u8, u8) {
+        let rgb = unsafe { ffi::app_palette_highlight_rgb() };
         ((rgb >> 16) as u8, (rgb >> 8) as u8, rgb as u8)
     }
 }

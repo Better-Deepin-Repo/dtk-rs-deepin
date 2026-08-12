@@ -148,6 +148,7 @@ void widget_set_titlebar_icon(QWidget *w, QIcon *icon);
 bool app_popup_active();
 // QPalette::Window as 0xRRGGBB (theme detection)
 uint32_t app_palette_window_rgb();
+uint32_t app_palette_highlight_rgb();
 void widget_activate_window(QWidget *w);
 void widget_close(QWidget *w);
 bool widget_is_visible(QWidget *w);
