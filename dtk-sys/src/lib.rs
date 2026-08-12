@@ -573,13 +573,36 @@ fn dtk_cb_i32(id: usize, v: i32) {
     }
 }
 
+thread_local! {
+    // per-id queue while a paint-widget dispatch is in flight: the callback
+    // slot is checked out for the whole dispatch, so a reentrant event (a
+    // split keybinding resizing its own pane) would find nothing and be
+    // silently dropped — the lost Resize left the PTY winsize stale. Queue
+    // reentrant events instead; the outermost dispatch drains them in order.
+    static PW_QUEUED: RefCell<HashMap<usize, std::collections::VecDeque<PwEvent>>> =
+        RefCell::new(HashMap::new());
+}
+
 fn dispatch_pw(id: usize, ev: PwEvent) {
+    if PW_QUEUED.with(|q| q.borrow().contains_key(&id)) {
+        PW_QUEUED.with(|q| q.borrow_mut().get_mut(&id).unwrap().push_back(ev));
+        return;
+    }
+    PW_QUEUED.with(|q| q.borrow_mut().insert(id, Default::default()));
     let mut cb = CALLBACKS.with(|c| c.borrow_mut().remove(&id));
-    if let Some(Cb::Pw(f)) = &mut cb {
-        if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(ev))).is_err() {
-            eprintln!("dtk-rs: paint-widget callback {id} panicked, swallowed at FFI boundary");
+    let mut next = Some(ev);
+    while let Some(ev) = next.take().or_else(|| {
+        PW_QUEUED.with(|q| q.borrow_mut().get_mut(&id).and_then(|q| q.pop_front()))
+    }) {
+        if let Some(Cb::Pw(f)) = &mut cb {
+            if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(ev))).is_err() {
+                eprintln!("dtk-rs: paint-widget callback {id} panicked, swallowed at FFI boundary");
+            }
         }
-        finish_dispatch(id, cb.take().unwrap());
+    }
+    PW_QUEUED.with(|q| q.borrow_mut().remove(&id));
+    if let Some(cb) = cb {
+        finish_dispatch(id, cb);
     }
 }
 
@@ -686,5 +709,33 @@ unsafe fn dtk_cb_paint(
             eprintln!("dtk-rs: paint callback {id} panicked, swallowed at FFI boundary");
         }
         finish_dispatch(id, cb.take().unwrap());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::rc::Rc;
+
+    #[test]
+    fn reentrant_pw_events_are_queued_not_dropped() {
+        // a handler that re-triggers an event on its own widget (e.g. a split
+        // keybinding resizing its own pane) must not lose the nested event
+        let log = Rc::new(RefCell::new(Vec::new()));
+        let id_slot = Rc::new(RefCell::new(0usize));
+        let (l2, id2) = (log.clone(), id_slot.clone());
+        let id = register_cb_pw(move |ev| {
+            if let PwEvent::Resize { w, .. } = ev {
+                let reenter = l2.borrow().is_empty();
+                l2.borrow_mut().push(w);
+                if reenter {
+                    dispatch_pw(*id2.borrow(), PwEvent::Resize { w: 2, h: 2 });
+                }
+            }
+        });
+        *id_slot.borrow_mut() = id;
+        dispatch_pw(id, PwEvent::Resize { w: 1, h: 1 });
+        assert_eq!(*log.borrow(), vec![1, 2]);
+        unregister_cb(id);
     }
 }
