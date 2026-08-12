@@ -870,6 +870,8 @@ pub mod qt {
     pub mod cursor {
         pub const ARROW: i32 = 0;
         pub const IBEAM: i32 = 4;
+        pub const SIZE_VER: i32 = 5; // vertical bar (drag top/bottom)
+        pub const SIZE_HOR: i32 = 6; // horizontal bar (drag left/right)
         pub const POINTING_HAND: i32 = 13;
     }
     /// Qt::Key (letters/digits are ASCII); common subset for terminal input
