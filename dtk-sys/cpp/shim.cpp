@@ -317,6 +317,7 @@ void menu_popup(QMenu *m, QWidget *ref, int32_t x, int32_t y) {
 
 // ---- QWidget common ----
 void widget_show(QWidget *w) { w->show(); }
+void widget_set_mouse_tracking(QWidget *w, bool on) { w->setMouseTracking(on); }
 void widget_hide(QWidget *w) { w->hide(); }
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px) { w->resize(w_px, h_px); }
 int32_t widget_width(QWidget *w) { return w->width(); }

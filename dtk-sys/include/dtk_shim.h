@@ -110,6 +110,7 @@ bool application_has_arg(rust::Str arg);
 
 // ---- QWidget common (applies to all widgets) ----
 void widget_show(QWidget *w);
+void widget_set_mouse_tracking(QWidget *w, bool on);
 void widget_hide(QWidget *w);
 void widget_resize(QWidget *w, int32_t w_px, int32_t h_px);
 int32_t widget_width(QWidget *w);

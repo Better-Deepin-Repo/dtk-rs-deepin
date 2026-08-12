@@ -194,6 +194,10 @@ impl QWidget {
     pub fn show(&self) {
         unsafe { ffi::widget_show(self.ptr) }
     }
+    /// deliver mouse moves without a button held (they propagate to the parent)
+    pub fn set_mouse_tracking(&self, on: bool) {
+        unsafe { ffi::widget_set_mouse_tracking(self.ptr, on) }
+    }
     pub fn hide(&self) {
         unsafe { ffi::widget_hide(self.ptr) }
     }

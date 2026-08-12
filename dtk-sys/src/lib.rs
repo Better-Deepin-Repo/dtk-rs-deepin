@@ -60,6 +60,7 @@ pub mod ffi {
 
         // QWidget common
         unsafe fn widget_show(w: *mut QWidget);
+        unsafe fn widget_set_mouse_tracking(w: *mut QWidget, on: bool);
         unsafe fn widget_hide(w: *mut QWidget);
         unsafe fn widget_resize(w: *mut QWidget, w_px: i32, h_px: i32);
         unsafe fn widget_width(w: *mut QWidget) -> i32;
