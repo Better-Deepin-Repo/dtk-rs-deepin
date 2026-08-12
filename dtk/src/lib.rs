@@ -194,6 +194,15 @@ impl QWidget {
     pub fn show(&self) {
         unsafe { ffi::widget_show(self.ptr) }
     }
+    pub fn hide(&self) {
+        unsafe { ffi::widget_hide(self.ptr) }
+    }
+    pub fn width(&self) -> i32 {
+        unsafe { ffi::widget_width(self.ptr) }
+    }
+    pub fn height(&self) -> i32 {
+        unsafe { ffi::widget_height(self.ptr) }
+    }
     /// schedule a repaint
     pub fn update(&self) {
         unsafe { ffi::widget_update(self.ptr) }
