@@ -329,6 +329,8 @@ void painter_draw_pixmap(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h
 void painter_draw_icon(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QIcon *icon);
 void painter_fill_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, QColor *color);
 void painter_set_clip_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h);
+void painter_translate(QPainter *p, double x, double y);
+void painter_scale(QPainter *p, double sx, double sy);
 rust::String painter_elided_text(QPainter *p, rust::Str text, int32_t mode, int32_t width); // Qt::TextElideMode
 
 // ---- QModelIndex data access ----

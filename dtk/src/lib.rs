@@ -1487,6 +1487,14 @@ impl Painter {
     pub fn set_clip_rect(&self, x: i32, y: i32, w: i32, h: i32) {
         unsafe { ffi::painter_set_clip_rect(self.ptr, x, y, w, h) }
     }
+    /// move the painter origin — compose with `scale` to draw scaled content
+    pub fn translate(&self, x: f64, y: f64) {
+        unsafe { ffi::painter_translate(self.ptr, x, y) }
+    }
+    /// scale the coordinate system about the current origin (uniform for glyphs)
+    pub fn scale(&self, sx: f64, sy: f64) {
+        unsafe { ffi::painter_scale(self.ptr, sx, sy) }
+    }
     /// elide text to width using the painter's current font; use qt::elide::* for mode
     pub fn elided_text(&self, text: &str, mode: i32, width: i32) -> String {
         unsafe { ffi::painter_elided_text(self.ptr, text, mode, width) }

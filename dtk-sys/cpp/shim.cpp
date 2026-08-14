@@ -763,6 +763,8 @@ void painter_fill_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h, 
 void painter_set_clip_rect(QPainter *p, int32_t x, int32_t y, int32_t w, int32_t h) {
     p->setClipRect(x, y, w, h);
 }
+void painter_translate(QPainter *p, double x, double y) { p->translate(x, y); }
+void painter_scale(QPainter *p, double sx, double sy) { p->scale(sx, sy); }
 rust::String painter_elided_text(QPainter *p, rust::Str text, int32_t mode, int32_t width) {
     return to_rust_string(
         p->fontMetrics().elidedText(from_rust_str(text), static_cast<Qt::TextElideMode>(mode), width));

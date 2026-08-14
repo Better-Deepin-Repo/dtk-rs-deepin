@@ -352,6 +352,8 @@ pub mod ffi {
             color: *mut QColor,
         );
         unsafe fn painter_set_clip_rect(p: *mut QPainter, x: i32, y: i32, w: i32, h: i32);
+        unsafe fn painter_translate(p: *mut QPainter, x: f64, y: f64);
+        unsafe fn painter_scale(p: *mut QPainter, sx: f64, sy: f64);
         unsafe fn painter_elided_text(
             p: *mut QPainter,
             text: &str,
