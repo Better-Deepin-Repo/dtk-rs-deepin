@@ -1,0 +1,15 @@
+Test-Command: QT_QPA_PLATFORM=offscreen
+ /usr/share/dh-rust/bin/cargo-auto-test dtk-sys 0.1.0 --all-targets
+Depends:
+ dh-rust,
+ @,
+Restrictions:
+ allow-stderr,
+
+Test-Command: QT_QPA_PLATFORM=offscreen
+ /usr/share/dh-rust/bin/cargo-auto-test dtk 0.1.0 --all-targets
+Depends:
+ dh-rust,
+ @,
+Restrictions:
+ allow-stderr,

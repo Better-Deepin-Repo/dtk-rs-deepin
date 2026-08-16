@@ -1,0 +1,45 @@
+Description: link the static shim before its shared library dependencies
+ Debian enables --as-needed, so Qt6 and DTK6 shared libraries emitted before
+ dtkshim can be discarded before the linker encounters references from the
+ static archive.  Probe once without Cargo metadata to collect include paths,
+ compile the shim, then probe again to emit the shared library directives.
+Author: LFRon <ronforever@outlook.com>
+Forwarded: no
+Last-Update: 2026-08-16
+---
+--- a/dtk-sys/build.rs
++++ b/dtk-sys/build.rs
+@@ -31,7 +31,7 @@ fn main() {
+         .flag_if_supported("-fPIC"); // Qt6 requires PIC
+ 
+     // locate Qt6 + DTK6 via pkg-config; include paths go to cxx_build, link info is emitted by the pkg-config crate
+-    for pkg in [
++    const NATIVE_PACKAGES: [&str; 6] = [
+         "Qt6Widgets",
+         "Qt6Gui",
+         "Qt6Core",
+@@ -39,7 +39,9 @@ fn main() {
+         "dtk6gui",
+         "dtk6core",
+-    ] {
++    ];
++    for pkg in NATIVE_PACKAGES {
+         let lib = pkg_config::Config::new()
++            .cargo_metadata(false)
+             .probe(pkg)
+             .unwrap_or_else(|e| panic!("pkg-config {pkg}: {e}"));
+         for inc in &lib.include_paths {
+@@ -52,6 +54,13 @@ fn main() {
+ 
+     build.compile("dtkshim");
+ 
++    // Emit shared libraries after the static shim so --as-needed retains them.
++    for pkg in NATIVE_PACKAGES {
++        pkg_config::Config::new()
++            .probe(pkg)
++            .unwrap_or_else(|e| panic!("pkg-config {pkg}: {e}"));
++    }
++
+     println!("cargo:rerun-if-changed=src/lib.rs");
+     println!("cargo:rerun-if-changed=src/gen_ffi.rs");
+     println!("cargo:rerun-if-changed=cpp/shim.cpp");

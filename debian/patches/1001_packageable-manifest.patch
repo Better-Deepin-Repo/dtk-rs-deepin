@@ -1,0 +1,16 @@
+Description: add a version to the local dtk-sys dependency
+ Cargo refuses to create a distributable dtk crate while a path dependency has
+ no version requirement.  Retain the path for workspace development and add
+ the matching version used by the packaged registry crate.
+Author: LFRon <ronforever@outlook.com>
+Forwarded: no
+Last-Update: 2026-08-16
+---
+--- a/dtk/Cargo.toml
++++ b/dtk/Cargo.toml
+@@ -5,4 +5,4 @@ edition = "2024"
+ license = "MIT"
+ 
+ [dependencies]
+-dtk-sys = { path = "../dtk-sys" }
++dtk-sys = { version = "0.1.0", path = "../dtk-sys" }

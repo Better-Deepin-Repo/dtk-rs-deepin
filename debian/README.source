@@ -1,0 +1,33 @@
+dtk-rs workspace packaging
+==========================
+
+This source package builds two Rust source packages from one Cargo workspace:
+librust-dtk-sys-dev contains the low-level cxx bridge and C++ shim, while
+librust-dtk-dev contains the safe wrapper crate and depends on the former.
+
+Cargo requires a version for a path dependency before it can create a crate
+archive.  1001_packageable-manifest.patch adds that version without changing
+workspace development, where the path continues to take precedence.
+
+Under Debian's --as-needed linker flags, the generated static shim must appear
+before the Qt6 and DTK6 shared libraries which resolve its symbols.
+1002_link-static-shim-first.patch delays pkg-config's link metadata until after
+cxx-build has emitted the dtkshim link directive.
+
+dtk-sys embeds a generated static library named dtkshim into downstream Rust
+binaries.  2001_dh-cargo-built-using.patch identifies the corresponding MIT
+licensed source directory for dh-rust.  This lets application packages produce
+correct Built-Using metadata instead of failing during dh_auto_install.
+
+The native DTK6, Qt6, pkg-config and moc dependencies are runtime dependencies
+of librust-dtk-sys-dev because that package ships source code whose build.rs is
+executed while compiling each downstream application.
+
+Rust dependencies are consumed from /usr/share/cargo/registry.  Do not add a
+vendored Cargo registry to this source package; missing crates should be
+packaged independently.
+
+dtk-sys uses Rust edition 2024.  cxx and cxx-build 1.0.192 are the oldest
+versions validated for this package; the older 1.0.87 code generator emits
+extern blocks which Rust 2024 rejects.  Both the source and binary dependency
+fields therefore enforce the validated lower bound.

@@ -1,0 +1,6 @@
+Version: 5
+
+Source: https://github.com/st0nie/dtk-rs.git
+Matching-Pattern: HEAD
+Mode: git
+Git-Pretty: 0.1.0+git%cd.%h

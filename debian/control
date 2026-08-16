@@ -1,0 +1,72 @@
+Source: rust-dtk
+Section: rust
+Priority: optional
+Maintainer: LFRon <ronforever@outlook.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-sequence-rust,
+ libdtk6core-dev,
+ libdtk6gui-dev,
+ libdtk6widget-dev,
+ librust-cxx-1+default-dev (>= 1.0.192-~~),
+ librust-cxx-build-1+default-dev (>= 1.0.192-~~),
+ librust-pkg-config-0.3+default-dev,
+ pkgconf,
+ qt6-base-dev,
+ qt6-base-dev-tools,
+Standards-Version: 4.7.4
+Rules-Requires-Root: no
+Homepage: https://github.com/st0nie/dtk-rs
+Vcs-Git: https://github.com/Better-Deepin-Repo/dtk-rs-deepin.git
+Vcs-Browser: https://github.com/Better-Deepin-Repo/dtk-rs-deepin
+
+Package: librust-dtk-dev
+Architecture: any
+Multi-Arch: same
+Depends:
+ librust-dtk-sys-0.1+default-dev (= ${binary:Version}),
+ ${misc:Depends},
+Provides:
+ librust-dtk+default-dev (= ${binary:Version}),
+ librust-dtk-0+default-dev (= ${binary:Version}),
+ librust-dtk-0-dev (= ${binary:Version}),
+ librust-dtk-0.1+default-dev (= ${binary:Version}),
+ librust-dtk-0.1-dev (= ${binary:Version}),
+ librust-dtk-0.1.0+default-dev (= ${binary:Version}),
+ librust-dtk-0.1.0-dev (= ${binary:Version}),
+Description: safe Rust bindings for DTK6 widgets
+ This crate provides non-owning, safe Rust wrappers for DTK6 and Qt6 widget
+ types.  It includes generated wrappers for DTK controls as well as helpers
+ for signals, event callbacks, custom painting, layouts and value types.
+ .
+ This package contains the Rust source for the dtk crate, for use with cargo.
+
+Package: librust-dtk-sys-dev
+Architecture: any
+Multi-Arch: same
+Depends:
+ libdtk6core-dev,
+ libdtk6gui-dev,
+ libdtk6widget-dev,
+ librust-cxx-1+default-dev (>= 1.0.192-~~),
+ librust-cxx-build-1+default-dev (>= 1.0.192-~~),
+ librust-pkg-config-0.3+default-dev,
+ pkgconf,
+ qt6-base-dev,
+ qt6-base-dev-tools,
+ ${misc:Depends},
+Provides:
+ librust-dtk-sys+default-dev (= ${binary:Version}),
+ librust-dtk-sys-0+default-dev (= ${binary:Version}),
+ librust-dtk-sys-0-dev (= ${binary:Version}),
+ librust-dtk-sys-0.1+default-dev (= ${binary:Version}),
+ librust-dtk-sys-0.1-dev (= ${binary:Version}),
+ librust-dtk-sys-0.1.0+default-dev (= ${binary:Version}),
+ librust-dtk-sys-0.1.0-dev (= ${binary:Version}),
+Description: low-level Rust FFI bindings for DTK6 widgets
+ This crate provides the cxx bridge and C++ shim used to call DTK6 and Qt6
+ widget APIs from Rust.  Its build script discovers the native libraries with
+ pkg-config, generates cxx bridge code and runs the Qt6 meta-object compiler.
+ .
+ This package contains the Rust and C++ source for the dtk-sys crate, for use
+ with cargo.

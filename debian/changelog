@@ -1,0 +1,6 @@
+rust-dtk (0.1.0+git20260814.5d0b57e-1) unstable; urgency=medium
+
+  * Initial Debian release.
+  * Package the dtk and dtk-sys crates with dh-rust.
+
+ -- LFRon <ronforever@outlook.com>  Sun, 16 Aug 2026 10:39:15 +0800

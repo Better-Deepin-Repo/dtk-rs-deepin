@@ -1,0 +1,22 @@
+Description: report the embedded dtkshim source to dh-rust
+ dtk-sys compiles its C++ shim as a static library which is embedded in every
+ downstream Rust binary.  Record the source directory and its source
+ distribution requirement so dh-rust can generate Built-Using metadata.
+Author: LFRon <ronforever@outlook.com>
+Forwarded: not-needed
+Last-Update: 2026-08-16
+---
+--- a/dtk-sys/build.rs
++++ b/dtk-sys/build.rs
+@@ -61,6 +61,11 @@
+             .unwrap_or_else(|e| panic!("pkg-config {pkg}: {e}"));
+     }
+ 
++    println!(
++        "dh-cargo:deb-built-using=dtkshim=0={}",
++        std::env::var("CARGO_MANIFEST_DIR").unwrap()
++    );
++
+     println!("cargo:rerun-if-changed=src/lib.rs");
+     println!("cargo:rerun-if-changed=src/gen_ffi.rs");
+     println!("cargo:rerun-if-changed=cpp/shim.cpp");

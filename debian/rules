@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+export CARGO_NET_OFFLINE = true
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export QT_QPA_PLATFORM = offscreen
+
+%:
+	dh $@
+
+override_dh_auto_test:
+	dh_auto_test --buildsystem=rust -- --workspace --all-targets
